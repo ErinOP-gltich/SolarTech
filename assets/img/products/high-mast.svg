@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 1100" fill="none" stroke="#cfe9ff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" font-family="ui-monospace, Menlo, monospace" font-size="20">
+  <!-- solar array -->
+  <g>
+    <path d="M110 120 L410 120 L380 30 L140 30 Z"/>
+    <path d="M190 30 L175 120 M240 30 L237 120 M290 30 L297 120 M340 30 L355 120"/>
+    <path d="M125 75 L395 75"/>
+    <path d="M260 120 L260 150"/>
+  </g>
+  <!-- lantern carriage with six flood heads -->
+  <ellipse cx="260" cy="190" rx="120" ry="22"/>
+  <g>
+    <path d="M140 190 l-40 18 l10 30 l44 -16 z"/>
+    <path d="M190 208 l-14 34 l30 8 l12 -36 z"/>
+    <path d="M330 208 l14 34 l-30 8 l-12 -36 z"/>
+    <path d="M380 190 l40 18 l-10 30 l-44 -16 z"/>
+    <path d="M200 168 l-10 -22 l26 -6 l8 22 z"/>
+    <path d="M320 168 l10 -22 l-26 -6 l-8 22 z"/>
+  </g>
+  <path d="M260 150 L260 168"/>
+  <!-- tapered mast -->
+  <path d="M250 212 L238 1040 M270 212 L282 1040"/>
+  <path d="M244 600 L276 600" stroke-dasharray="4 6"/>
+  <!-- battery & controller box -->
+  <rect x="282" y="820" width="70" height="90" rx="6"/>
+  <path d="M296 840 h42 M296 856 h42"/>
+  <!-- base -->
+  <path d="M200 1040 L320 1040 L320 1058 L200 1058 Z"/>
+  <path d="M180 1074 L340 1074" stroke-dasharray="8 8"/>
+  <!-- dimension -->
+  <g stroke-width="2">
+    <path d="M460 190 L460 1040"/>
+    <path d="M448 190 L472 190 M448 1040 L472 1040"/>
+    <path d="M452 206 L460 190 L468 206 M452 1024 L460 1040 L468 1024"/>
+  </g>
+  <g fill="#cfe9ff" stroke="none">
+    <text x="440" y="620" transform="rotate(-90 440 620)" text-anchor="middle">12 m</text>
+    <text x="362" y="872">BATTERY</text>
+    <text x="362" y="896">+ MPPT</text>
+    <text x="40" y="70">SOLAR</text>
+    <text x="40" y="94">ARRAY</text>
+    <text x="20" y="246">FLOOD</text>
+    <text x="20" y="270">HEADS</text>
+  </g>
+</svg>
