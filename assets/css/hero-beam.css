@@ -1,0 +1,149 @@
+/* =====================================================================
+   GREEN SUN — "LIVE BEAM" HERO
+   A solar street light hangs into the hero; its beam follows the pointer
+   across a dark highway and warms the headline it passes over.
+   Built on the gs.css tokens. Scene colours: --hb-unlit (headline in the
+   dark) and --hb-lit (headline in the beam).
+   ===================================================================== */
+
+.hb {
+  --hb-unlit: #A6A2B1;           /* moonlit headline: ≥ 6.9:1 on the void, ≥ 3:1 on anything the beam can put behind it */
+  --hb-lit: #FFF3D6;             /* the same letters inside the light */
+  --hb-pad: calc(var(--nav-h) + var(--s5));
+  background: var(--void);
+}
+
+/* stage: static street + live canvas (created by hero-beam.js) */
+.hb-stage { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.hb-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* without canvas (no JS, or 2D canvas unavailable): the same idea, painted in CSS */
+.hb-fallback {
+  position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(22% 7% at 58% 71%, rgba(255, 226, 170, .34), rgba(255, 170, 90, .1) 60%, transparent 100%),
+    conic-gradient(from 197deg at 73% 31%, transparent 0deg, rgba(255, 230, 190, .07) 7deg, rgba(255, 230, 190, .13) 15deg, rgba(255, 230, 190, .07) 23deg, transparent 30deg),
+    radial-gradient(3% 2% at 73% 30%, rgba(255, 246, 226, .9), rgba(255, 200, 120, .25) 60%, transparent 100%),
+    linear-gradient(180deg, #050507 0%, #0b0b10 15%, #08080b 16%, #050507 100%);
+  transition: opacity 1.2s var(--ease);
+}
+.hb.hb-on .hb-fallback { opacity: 0; }
+
+/* vignette: the foot reads on near-black, the edges fall off like a lens */
+.hb::after {
+  background:
+    linear-gradient(0deg, rgba(5, 5, 7, .94) 0%, rgba(5, 5, 7, .7) 8%, rgba(5, 5, 7, 0) 24%),
+    radial-gradient(140% 100% at 64% 36%, rgba(5, 5, 7, 0) 52%, rgba(5, 5, 7, .55) 100%);
+}
+
+/* ---------- layout ---------- */
+.hb .hero-top { padding-top: calc(var(--nav-h) + var(--s7)); align-items: center; }
+.hb .hero-mid { align-self: end; padding-bottom: var(--s6); }
+
+.hb-meta { position: absolute; right: var(--gutter); top: 50%; z-index: 1; display: grid; justify-items: end; gap: var(--s2); text-align: right; pointer-events: none; }
+.hb-meta .coords { padding: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; } /* no glass over a canvas that changes every frame */
+.hb-meta .label { color: var(--muted); text-shadow: 0 0 2px rgba(5, 5, 7, .95), 0 0 6px rgba(5, 5, 7, .8); }
+.hb-aim { display: inline-flex; align-items: center; gap: var(--s2); color: var(--text-2) !important; }
+.hb-aim i { position: relative; width: 14px; height: 14px; border-radius: 50%; border: 1px solid currentColor; }
+.hb-aim i::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 8px var(--sun); }
+.hb-aim .t-touch { display: none; }
+@media (hover: none) { .hb-aim .t-touch { display: inline; } .hb-aim .t-mouse { display: none; } }
+
+/* ---------- the headline: in the dark, and in the beam ---------- */
+.hb-title {
+  font-size: clamp(40px, 8.1vw, 124px);
+  color: var(--hb-unlit);
+  text-shadow: 0 0 2px rgba(5, 5, 7, .7), 0 0 18px rgba(5, 5, 7, .75), 0 0 48px rgba(5, 5, 7, .55);
+}
+.hb-title .ln { display: block; overflow: hidden; padding: .02em 0 .07em; margin: -.02em 0 -.07em; }
+.hb-title.is-in .ln { overflow: visible; } /* the intro mask is done: let the lit glow breathe past the line box */
+.hb-title .ln > span { display: inline-block; white-space: nowrap; }
+.hb-title .it { --hb-indent: 1.45em; padding-left: var(--hb-indent); }
+/* background-clip text + text-shadow paints the shadow over the gradient; give this line a filter halo instead */
+.hb-title .grad { text-shadow: none; filter: drop-shadow(0 0 14px rgba(5, 5, 7, .8)); }
+
+.hb-lit { position: relative; }
+.hb-lit::after {
+  /* where the beam is, relative to this word (variables come from hero-beam.js) */
+  /* the box reaches 1em past the letters so the mask also covers their glow; an indented line keeps its indent */
+  --x: calc((var(--hb-ax, -9999) - var(--hb-ox, 0)) * 1px + 1em);
+  --y: calc((var(--hb-ay, -9999) - var(--hb-oy, 0)) * 1px + 1em);
+  --k: var(--hb-k, 0);
+  content: attr(data-lit);
+  position: absolute; left: -1em; top: -1em; padding: 1em; padding-left: calc(var(--hb-indent, 0em) + 1em);
+  white-space: nowrap; pointer-events: none;
+  color: var(--hb-lit); -webkit-text-fill-color: var(--hb-lit);
+  background: none; filter: none;
+  text-shadow: 0 0 .1em rgba(255, 214, 140, .75), 0 0 .38em rgba(255, 150, 40, .42), 0 0 .8em rgba(255, 110, 0, .22);
+  -webkit-mask-image:
+    conic-gradient(from calc(var(--hb-a0, 0) * 1deg) at var(--x) var(--y), rgb(0 0 0 / 0) 0deg, rgb(0 0 0 / var(--k)) calc(var(--hb-as, 6) * 1deg), rgb(0 0 0 / var(--k)) calc((var(--hb-aw, 20) - var(--hb-as, 6)) * 1deg), rgb(0 0 0 / 0) calc(var(--hb-aw, 20) * 1deg)),
+    radial-gradient(circle at var(--x) var(--y), #000 calc(var(--hb-r, 0) * .7px), rgb(0 0 0 / 0) calc(var(--hb-r, 0) * 1.12px));
+  -webkit-mask-composite: source-in;
+  mask-image:
+    conic-gradient(from calc(var(--hb-a0, 0) * 1deg) at var(--x) var(--y), rgb(0 0 0 / 0) 0deg, rgb(0 0 0 / var(--k)) calc(var(--hb-as, 6) * 1deg), rgb(0 0 0 / var(--k)) calc((var(--hb-aw, 20) - var(--hb-as, 6)) * 1deg), rgb(0 0 0 / 0) calc(var(--hb-aw, 20) * 1deg)),
+    radial-gradient(circle at var(--x) var(--y), #000 calc(var(--hb-r, 0) * .7px), rgb(0 0 0 / 0) calc(var(--hb-r, 0) * 1.12px));
+  mask-composite: intersect;
+}
+html:not(.js) .hb-lit::after { content: none; }
+
+/* lede + CTAs */
+.hb .hero-row { margin-top: var(--s6); }
+.hb .lede { text-shadow: 0 0 2px rgba(5, 5, 7, .9), 0 0 12px rgba(5, 5, 7, .85), 0 0 32px rgba(5, 5, 7, .7); }
+
+/* ---------- the ticker the client loved: faster, brighter ---------- */
+.hb .hero-foot { position: relative; z-index: 1; border-top-color: rgba(243, 239, 230, .14); }
+.hb .ticker .ticker-track { animation-duration: 8s; gap: var(--s7); }
+.hb .ticker { font-size: 12px; color: var(--text-2); }
+.hb .ticker-track span::before { content: '✺'; color: var(--sun); text-shadow: 0 0 10px rgba(255, 196, 0, .6); }
+
+/* ---------- tablet landscape / small laptop ---------- */
+@media (max-width: 1180px) and (min-aspect-ratio: 4/5) {
+  .hb-title { font-size: clamp(40px, 8.6vw, 112px); }
+  .hb-meta { top: 52%; }
+}
+
+/* ---------- portrait: the lamp owns the top third, words stack underneath ---------- */
+@media (max-aspect-ratio: 4/5) {
+  .hb { grid-template-rows: 1fr auto auto; }
+  .hb .hero-mid { order: 1; align-self: end; padding-top: 32svh; padding-bottom: var(--s4); }
+  .hb .hero-top { order: 2; padding-top: 0; padding-bottom: var(--s4); }
+  .hb .hero-foot { order: 3; }
+  .hb-title { font-size: min(10.4vw, 64px); }
+  .hb-title .it { --hb-indent: .9em; }
+  .hb .hero-row { grid-template-columns: 1fr; gap: var(--s5); margin-top: var(--s5); }
+  .hb .lede { font-size: 16px; }
+  .hb-meta { top: auto; bottom: auto; right: var(--gutter); top: calc(var(--nav-h) + 22px); }
+  .hb-meta .coords { display: none; }
+  .hb::after {
+    background:
+      linear-gradient(0deg, rgba(5, 5, 7, .95) 0%, rgba(5, 5, 7, .78) 22%, rgba(5, 5, 7, .2) 46%, rgba(5, 5, 7, 0) 58%),
+      radial-gradient(160% 90% at 60% 26%, rgba(5, 5, 7, 0) 50%, rgba(5, 5, 7, .5) 100%);
+  }
+}
+@media (max-width: 760px) {
+  .hb .hero-ctas { display: grid; grid-template-columns: 1fr; gap: var(--s3); }
+  .hb .hero-ctas .btn { width: 100%; }
+  .hb .live { font-size: 13px; }
+}
+@media (max-width: 760px) and (max-aspect-ratio: 4/5) {
+  .hb .hero-ctas { gap: var(--s2); }
+  .hb .hero-ctas .btn { --h: 50px; }
+  .hb .hero-row { gap: var(--s4); margin-top: var(--s4); }
+}
+@media (max-width: 380px), (max-height: 760px) and (max-aspect-ratio: 4/5) {
+  .hb .lede { font-size: 15px; line-height: 1.5; }
+  .hb .hero-mid { padding-top: 29svh; }
+  .hb .live { min-height: 0; padding: 6px 12px 6px 6px; font-size: 12.5px; }
+}
+
+/* short landscape screens */
+@media (max-height: 560px) and (orientation: landscape) {
+  .hb .hero-top { padding-top: calc(var(--nav-h) + var(--s5)); }
+  .hb-title { font-size: clamp(32px, 11vh, 72px); }
+  .hb-meta { display: none; }
+}
+
+.motion-paused .hb .ticker-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .hb-fallback { transition: none; }
+}

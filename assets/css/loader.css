@@ -1,53 +1,59 @@
 /* ==========================================================================
-   Green Sun Technologies — preloader "IGNITION"
+   Green Sun Technologies — preloader "LIGHTS ON"
    assets/css/loader.css  ·  pairs with assets/js/loader.js
+
+   One solar street light, drawn in hairlines. Its panel charges cell by cell
+   (real progress), the LED head flickers on, and the light cone opens the
+   page: the page appears inside the light.
 
    Markup: the #gsl snippet, first child of <body>.
    Shown only when <html class="js"> (set inline in <head>), so visitors
-   without JavaScript never see it. Every visual state starts hidden, so the
-   first paint (before loader.js runs) is just the void.
+   without JavaScript never see it. Every animated state starts hidden, so the
+   first paint (before loader.js runs) is just the dark.
+
+   Layers (inside .gsl-stage):
+     .gsl-curtain  the dark scene; loader.js cuts the light cone out of it (mask)
+     .gsl-beam     warm light over the page inside the cone (unmasked)
+     .gsl-glow     the lit LED lens + halo (unmasked)
+   Drawing units: the SVG viewBox is 0 0 520 340 and 1 unit = var(--u) px.
+   The LED lens centre is (424.14, 168.07), 92.89 units long, tilted -8.75deg;
+   the beam axis is 171.25deg (CSS conic angle). loader.js uses the same values.
    ========================================================================== */
 
 /* Scroll lock while loading; the reserved gutter avoids a layout shift when
    the scrollbar comes back. Browsers paint that gutter with the root
-   background, so match it to the loader's (grain-lifted) edge tone. */
-html.is-loading { overflow: hidden; scrollbar-gutter: stable; background-color: #0A0A0C; }
+   background, so match it to the loader's edge tone. */
+html.is-loading { overflow: hidden; scrollbar-gutter: stable; background-color: #0C0C0F; }
 
 .gsl { display: none; }
 
 html.js .gsl {
   --void: #050507;
-  --ink: #0B0B10;
-  --ink-2: #12121A;
-  --line: rgba(243, 239, 230, .10);
-  --line-2: rgba(243, 239, 230, .18);
+  --line: rgba(243, 239, 230, .34);
+  --line-2: rgba(243, 239, 230, .13);
   --text: #F3EFE6;
   --muted: #8E8B98;
-  --flare: #FF3B1F;
-  --orange: #FF7A00;
-  --sun: #FFC400;
-  --hot: #FFF1B8;
   --volt: #C6FF3D;
-  --plasma: linear-gradient(100deg, #FF3B1F 0%, #FF7A00 30%, #FFC400 65%, #FFF1B8 100%);
   --ease: cubic-bezier(.16, 1, .3, 1);
   --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --display: 'Archivo', 'Arial Narrow', 'Roboto Condensed', Impact, sans-serif;
   --pad: clamp(16px, 2.2vw, 32px);
-  --s: min(48vh, 64vw, 460px);   /* sun mark size */
-  --cy: 50%;                     /* sun centre (vertical) */
-  --p: 0;                        /* progress 0..1 (set by loader.js) */
+
+  /* the drawing: px per unit, and where its 0,0 sits (percentages of the screen) */
+  --u: min(.108vh, .072vw, 1.2px);
+  --lx: calc(44% - 100 * var(--u));     /* pole at 44% of the width */
+  --ly: calc(21% - 24 * var(--u));      /* panel top at ~21% of the height */
+  --fs: clamp(46px, 7.4vh, 88px);       /* readout numeral */
 
   display: block;
   position: fixed;
   top: 0; right: 0; bottom: 0; left: 0;
   z-index: 2147483000;
   overflow: hidden;
-  background: var(--void);
   color: var(--text);
   font: 400 12px/1.4 var(--mono);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
   -webkit-user-select: none;
   user-select: none;
   touch-action: none;
@@ -66,311 +72,180 @@ html.js .gsl {
   overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
 }
 
-/* ---------- stage + atmosphere ------------------------------------------ */
-.gsl-stage {
-  position: absolute; inset: 0;
-  /* film grain (a tiny tile) over a soft vignette, all in one layer */
+.gsl-stage, .gsl-curtain, .gsl-beam { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
+
+/* ---------- the dark ------------------------------------------------------ */
+.gsl-curtain {
+  overflow: hidden;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse 120% 90% at 50% var(--cy), #0E0C13 0%, var(--void) 62%);
+    radial-gradient(ellipse 70% 55% at 62% -8%, rgba(70, 64, 112, .16), transparent 70%),   /* last of the dusk */
+    radial-gradient(ellipse 120% 95% at 50% 40%, #09090D 0%, var(--void) 70%);
+}
+/* film grain over everything (a tiny tile); on top, so drawn shapes never punch holes in it */
+.gsl-curtain::after {
+  content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* reticle hairlines through the sun's centre, stopping at the dial */
-.gsl-x { position: absolute; inset: 0; }
-.gsl-x i {
-  position: absolute; display: block; background: var(--line);
-  --gap: calc(var(--s) * .76);
+/* ---------- the street light ----------------------------------------------- */
+.gsl-lamp {
+  position: absolute; left: var(--lx); top: var(--ly);
+  width: calc(520 * var(--u)); height: calc(340 * var(--u));
+  overflow: visible; display: block;
+  --sw: 1.5;   /* stroke width in drawing units; loader.js sets it to 1 CSS px */
 }
-.gsl-x i:nth-child(1), .gsl-x i:nth-child(2) { top: var(--cy); height: 1px; width: calc(50% - var(--gap)); }
-.gsl-x i:nth-child(1) { left: 0; transform-origin: 100% 0; transform: scaleX(0); }
-.gsl-x i:nth-child(2) { right: 0; transform-origin: 0 0; transform: scaleX(0); }
-.gsl-x i:nth-child(3), .gsl-x i:nth-child(4) { left: 50%; width: 1px; }
-.gsl-x i:nth-child(3) { top: 0; height: calc(var(--cy) - var(--gap)); transform-origin: 0 100%; transform: scaleY(0); }
-.gsl-x i:nth-child(4) { bottom: 0; height: calc(100% - var(--cy) - var(--gap)); transform-origin: 0 0; transform: scaleY(0); }
-
-/* corner crosshair ticks */
-.gsl-k { position: absolute; width: 11px; height: 11px; opacity: 0; }
-.gsl-k::before, .gsl-k::after { content: ''; position: absolute; background: var(--line-2); }
-.gsl-k::before { left: 5px; top: 0; width: 1px; height: 11px; }
-.gsl-k::after { top: 5px; left: 0; height: 1px; width: 11px; }
-.gsl-k:nth-of-type(1) { left: 6px; top: 6px; }
-.gsl-k:nth-of-type(2) { right: 6px; top: 6px; }
-.gsl-k:nth-of-type(3) { left: 6px; bottom: 6px; }
-.gsl-k:nth-of-type(4) { right: 6px; bottom: 6px; }
-
-/* anamorphic flare: a horizontal streak of light leaking from behind the sun */
-.gsl-streak {
-  position: absolute; left: -10%; width: 120%; top: var(--cy); height: 120px; margin-top: -60px;
-  opacity: 0; transform: scaleX(.2); will-change: transform, opacity; pointer-events: none;
-  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 150, 30, .28), rgba(255, 90, 20, .08) 45%, transparent 100%);
+.gsl-lamp path, .gsl-lamp circle {
+  stroke: var(--line); stroke-width: calc(var(--sw) * 1px);
+  stroke-linejoin: round;
 }
-.gsl-streak::before {
-  content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 59, 31, .35) 18%, rgba(255, 196, 0, .75) 38%, #FFF8E2 50%, rgba(255, 196, 0, .75) 62%, rgba(255, 59, 31, .35) 82%, transparent 100%);
-  box-shadow: 0 0 12px 1px rgba(255, 170, 40, .45);
+.gsl-lamp .gsl-d, .gsl-lamp .gsl-lens { fill: none; }
+/* solid parts are filled with the dark so they hide what is behind them; the fill
+   comes in with the lines, so nothing shows before the drawing does */
+.gsl-lamp .gsl-f { fill: var(--void); fill-opacity: 0; }
+.gsl-lamp .gsl-d { stroke-dasharray: 1 2; stroke-dashoffset: 1.001; }
+.gsl-lamp .gsl-lead { stroke: var(--line-2); }
+.gsl-lamp .gsl-fin, .gsl-lamp .gsl-brk { stroke: var(--line-2); }
+.gsl-lamp .gsl-pin { fill: var(--muted); stroke: none; opacity: 0; }
+/* panel cells: hairline tiles that fill with charge (fill-opacity set by loader.js) */
+.gsl-cells { opacity: 0; }
+.gsl-lamp .gsl-c { stroke: var(--line-2); fill-opacity: 0; }
+/* the LED lens, dark until the light comes on (the lit one is .gsl-glow) */
+.gsl-lamp .gsl-lens { stroke: #2C2925; stroke-width: 3.2px; stroke-linecap: round; opacity: 0; }
+
+/* the pole runs from the arm collar down off the bottom of the screen */
+.gsl-pole {
+  position: absolute; bottom: 0;
+  left: calc(var(--lx) + 95.5 * var(--u) - .5px);
+  width: calc(9 * var(--u) + 1px);
+  top: calc(var(--ly) + 214 * var(--u));
+  border: solid var(--line); border-width: 0 1px;
+  background: var(--void);
+  transform-origin: 50% 100%; transform: scaleY(0);
 }
 
-/* ---------- the sun ------------------------------------------------------ */
-.gsl-sun {
-  position: absolute; left: 50%; top: var(--cy);
-  width: var(--s); height: var(--s);
-  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
-  will-change: transform;   /* the exit scales it: keep that on the compositor */
-}
-.gsl-sun > * { position: absolute; inset: 0; width: 100%; height: 100%; }
-.gsl-sun svg { overflow: visible; display: block; }
-
+/* ---------- light: lens, halo, beam --------------------------------------- */
 .gsl-glow {
-  inset: -70%; width: auto; height: auto;
-  background: radial-gradient(closest-side, rgba(255, 140, 0, .55), rgba(255, 90, 20, .22) 38%, rgba(255, 59, 31, .07) 62%, transparent);
-  opacity: calc(.08 + var(--p) * .72);
-  transform: scale(calc(.55 + var(--p) * .45));
-  will-change: transform, opacity;
+  position: absolute;
+  left: calc(var(--lx) + 424.14 * var(--u)); top: calc(var(--ly) + 168.07 * var(--u));
+  width: calc(92.89 * var(--u)); height: calc(3.2 * var(--u));
+  margin: 0; transform: translate(-50%, -50%) rotate(-8.75deg);
+  opacity: 0; will-change: opacity; pointer-events: none;
 }
-/* volumetric light shafts behind the sun — they build with the heat */
-.gsl-shafts {
-  inset: -105%; width: auto; height: auto; border-radius: 50%; opacity: 0;
-  will-change: transform, opacity;
-  background: repeating-conic-gradient(from 2deg, rgba(255, 160, 50, 0) 0deg, rgba(255, 160, 50, .11) 3deg, rgba(255, 160, 50, 0) 7deg, rgba(255, 160, 50, 0) 12deg);
-  -webkit-mask: radial-gradient(closest-side, #000 14%, rgba(0, 0, 0, .45) 38%, transparent 92%);
-          mask: radial-gradient(closest-side, #000 14%, rgba(0, 0, 0, .45) 38%, transparent 92%);
+.gsl-glow i, .gsl-glow::before, .gsl-glow::after { content: ''; position: absolute; display: block; }
+/* the lens itself: white-hot */
+.gsl-glow i {
+  top: 0; right: 0; bottom: 0; left: 0; border-radius: 9px;
+  background: #FFFDF5;
+  box-shadow: 0 0 3px 1px #FFF1B8, 0 0 12px 3px rgba(255, 210, 110, .75), 0 0 34px 8px rgba(255, 160, 40, .35);
 }
-.gsl-flash {
-  inset: -55%; width: auto; height: auto; opacity: 0; will-change: transform, opacity;
-  background: radial-gradient(closest-side, #fff 0%, rgba(255, 248, 225, .95) 16%, rgba(255, 220, 120, .5) 34%, rgba(255, 140, 0, .16) 56%, transparent);
+/* halo: wide and low, thrown downwards */
+.gsl-glow::before {
+  left: -60%; right: -60%; top: -60%; height: calc(220 * var(--u));
+  background: radial-gradient(closest-side at 50% 18%, rgba(255, 214, 140, .30), rgba(255, 170, 60, .12) 45%, rgba(255, 122, 0, 0));
+}
+.gsl-glow::after {
+  left: -10%; right: -10%; top: -900%; bottom: -900%; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 246, 220, .55), rgba(255, 220, 150, .18) 50%, transparent);
 }
 
-/* instrument dial: 72 ticks, lit clockwise by progress */
-.gsl-dial { inset: -19%; width: auto; height: auto; border-radius: 50%; opacity: 0; }
-.gsl-dial::before, .gsl-dial::after, .gsl-dial i {
-  content: ''; position: absolute; inset: 0; border-radius: 50%;
-}
-.gsl-dial::before {
-  background: rgba(243, 239, 230, .16);
-  -webkit-mask: repeating-conic-gradient(from -.3deg, #000 0 .6deg, transparent .6deg 5deg), radial-gradient(closest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
-  -webkit-mask-composite: source-in;
-          mask: repeating-conic-gradient(from -.3deg, #000 0 .6deg, transparent .6deg 5deg), radial-gradient(closest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
-          mask-composite: intersect;
-}
-.gsl-dial::after {
-  background: conic-gradient(#FF3B1F, #FF7A00 30%, #FFC400 65%, #FFF1B8);
-  -webkit-mask: repeating-conic-gradient(from -.3deg, #000 0 .6deg, transparent .6deg 5deg), radial-gradient(closest-side, transparent calc(100% - 9px), #000 calc(100% - 9px)), conic-gradient(#000 calc(var(--t, 0) * 360deg), transparent 0);
-  -webkit-mask-composite: source-in, source-in;
-          mask: repeating-conic-gradient(from -.3deg, #000 0 .6deg, transparent .6deg 5deg), radial-gradient(closest-side, transparent calc(100% - 9px), #000 calc(100% - 9px)), conic-gradient(#000 calc(var(--t, 0) * 360deg), transparent 0);
-          mask-composite: intersect, intersect;
-}
-/* majors every 30° — one per ray */
-.gsl-dial i {
-  inset: 14px;
-  background: rgba(243, 239, 230, .22);
-  -webkit-mask: repeating-conic-gradient(from -.25deg, #000 0 .5deg, transparent .5deg 30deg), radial-gradient(closest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
-  -webkit-mask-composite: source-in;
-          mask: repeating-conic-gradient(from -.25deg, #000 0 .5deg, transparent .5deg 30deg), radial-gradient(closest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
-          mask-composite: intersect;
-}
-/* the hand: a hot bead riding the lit edge of the dial */
-.gsl-dial em { position: absolute; inset: 0; transform: rotate(calc(var(--p) * 360deg)); will-change: transform; }
-.gsl-dial em::before {
-  content: ''; position: absolute; left: 50%; top: 1px; width: 7px; height: 7px; margin-left: -3.5px; border-radius: 50%;
-  background: #FFF8DF;
-  box-shadow: 0 0 10px 2px rgba(255, 196, 0, .9), 0 0 26px 6px rgba(255, 122, 0, .45);
-}
-.gsl-dial b {
-  position: absolute; font: 500 10px/1 var(--mono); letter-spacing: .12em; color: var(--muted);
-}
-.gsl-dial b:nth-of-type(1) { left: 50%; top: -22px; transform: translateX(-50%); }
-.gsl-dial b:nth-of-type(2) { left: 100%; top: 50%; transform: translate(12px, -50%); }
-.gsl-dial b:nth-of-type(3) { left: 50%; top: 100%; transform: translate(-50%, 12px); }
-.gsl-dial b:nth-of-type(4) { right: 100%; top: 50%; transform: translate(-12px, -50%); }
+/* light falling on the page inside the cone (background + mask set by loader.js) */
+.gsl-beam { opacity: 0; pointer-events: none; }
 
-.gsl-rays { will-change: transform; }
-.gsl-rays use {
-  transform-box: fill-box; transform-origin: 50% 100%;
-  transform: scale(0); opacity: 0;
-}
-.gsl-core { opacity: 0; }
-.gsl-core > * { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* core discs sit exactly over the SVG core (r 98 of a 520 viewBox) */
-.gsl-core > i { inset: 31.154%; width: auto; height: auto; border-radius: 50%; will-change: opacity; }
-.gsl-ember { background: radial-gradient(circle farthest-side at 42% 36%, #66190A 0%, #2E0A05 55%, #150507 100%); }
-.gsl-hot { opacity: 0; background: radial-gradient(closest-side, #FFFFFF 0%, #FFFCEF 55%, #FFF1B8 86%, #FFD54A 100%); }
-.gsl-face { will-change: opacity; }
-.gsl-face--dark { opacity: 0; }
-.gsl-face path { stroke-dasharray: 1 2; stroke-dashoffset: 1.05; }
-.gsl-ring { stroke-dasharray: 1 2; stroke-dashoffset: 1; }
-
-/* ---------- sparks + fire front (canvas) ---------------------------------- */
-.gsl-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-
-/* ---------- top: wordmark, coordinates, progress hairline ---------------- */
+/* ---------- type ----------------------------------------------------------- */
 .gsl-top {
   position: absolute; left: var(--pad); right: var(--pad); top: var(--pad);
-  display: flex; justify-content: space-between; align-items: center; gap: 16px;
-  font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
   white-space: nowrap;
 }
-.gsl-top > span { display: flex; align-items: center; gap: 10px; overflow: hidden; padding: 2px 0; }
-.gsl-top > span > * { display: inline-block; transform: translateY(110%); }
-.gsl-top .gsl-mute { color: var(--muted); }
-.gsl-dot {
-  width: 6px; height: 6px; border-radius: 1px; background: var(--volt);
-  box-shadow: 0 0 10px rgba(198, 255, 61, .55);
+.gsl-top > span { display: block; overflow: hidden; padding: 2px 0; }
+.gsl-brand { display: grid !important; line-height: 1; }
+.gsl-brand b {
+  font: 900 14px/1 var(--display); font-stretch: 125%; font-variation-settings: 'wdth' 125;
+  letter-spacing: -.01em; text-transform: uppercase; color: var(--text);
 }
+.gsl-brand small {
+  margin-top: 5px; font: 500 8.5px/1 var(--mono); letter-spacing: .42em; text-transform: uppercase; color: var(--muted);
+}
+.gsl-geo { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); padding-top: 3px !important; }
+.gsl-brand > *, .gsl-geo { opacity: 0; transform: translateY(8px); }
 
-.gsl-bar {
-  position: absolute; left: 0; right: 0; top: calc(var(--pad) + 26px); height: 1px;
-  background: var(--line); transform-origin: 0 50%; transform: scaleX(0);
-}
-.gsl-bar i {
-  position: absolute; inset: 0; display: block;
-  background: var(--plasma);
-  clip-path: inset(0 calc(100% - var(--p) * 100%) 0 0);
-}
-.gsl-bar b {
-  position: absolute; left: 0; top: -2px; width: 5px; height: 5px; margin-left: -3px;
-  border-radius: 50%; background: #FFF8DF; opacity: 0;
-  box-shadow: 0 0 8px 2px rgba(255, 196, 0, .9), 0 0 26px 6px rgba(255, 122, 0, .5), 0 0 60px 10px rgba(255, 59, 31, .25);
-}
-
-/* ---------- bottom-left: state-of-charge counter ------------------------- */
-.gsl-count {
-  position: absolute; left: var(--pad); bottom: var(--pad);
-  --fs: clamp(96px, min(25vh, 19vw), 280px);
-}
-.gsl-meta {
-  display: flex; gap: 14px; align-items: center; margin: 0 0 calc(var(--fs) * .07);
-  font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+/* readout: a callout from the panel (the leader line ends 104 units left of the drawing) */
+.gsl-read {
+  position: absolute;
+  right: calc(100% - var(--lx) + 104 * var(--u));
+  top: calc(var(--ly) + 79 * var(--u));
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+  transform: translateY(-50%);
   opacity: 0;
 }
-.gsl-meta b { color: var(--text); font-weight: 500; }
-.gsl-meta i { width: 22px; height: 1px; background: var(--line-2); }
+.gsl-lbl { font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
 .gsl-num {
   display: flex; align-items: flex-start;
-  font-family: var(--display); font-weight: 900; font-stretch: 62%;
-  font-variation-settings: 'wdth' 62; font-size: var(--fs); line-height: .78;
-  height: .78em; overflow: hidden;
+  font-family: var(--display); font-weight: 800; font-stretch: 62%; font-variation-settings: 'wdth' 62;
+  font-size: var(--fs); line-height: .8; letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums; color: var(--text);
 }
-.gsl-num > b { font-weight: inherit; display: block; width: .45em; text-align: center; visibility: hidden; }
-.gsl-col { display: block; position: relative; width: .45em; height: .78em; overflow: hidden; transform: translateY(102%); }
-.gsl-strip {
-  display: block; will-change: transform;
-  background: linear-gradient(90deg, #FF3B1F 0%, #FF7A00 30%, #FFC400 65%, #FFF1B8 100%);
-  background-size: 1.35em 100%;
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent; color: transparent;
-}
-.gsl-col:nth-child(2) .gsl-strip { background-position: -.45em 0; }
-.gsl-col:nth-child(3) .gsl-strip { background-position: -.9em 0; }
-.gsl-strip span { display: block; height: .78em; line-height: .78em; text-align: center; }
-.gsl-pct {
-  font: 500 calc(var(--fs) * .12)/1 var(--mono); color: var(--hot);
-  margin: .1em 0 0 .12em; letter-spacing: 0; opacity: 0;
-}
+.gsl-num b { font-weight: inherit; }
+.gsl-num small { font: 500 calc(var(--fs) * .2)/1 var(--mono); color: var(--muted); margin: .06em 0 0 .1em; }
 
-/* ---------- bottom-right: boot log ---------------------------------------- */
-.gsl-log {
-  position: absolute; right: var(--pad); bottom: var(--pad);
-  width: min(408px, calc(100% - 2 * var(--pad)));
-  font: 400 11.5px/1 var(--mono); letter-spacing: .02em;
+.gsl-status {
+  position: absolute; left: var(--pad); bottom: var(--pad); margin: 0;
+  display: flex; align-items: center; gap: 10px;
+  font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+  white-space: nowrap; opacity: 0;
 }
-.gsl-log-h {
-  display: flex; justify-content: space-between; align-items: center;
-  padding-bottom: 10px; margin-bottom: 10px;
-  border-bottom: 1px solid var(--line);
-  font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
-  opacity: 0;
-}
-.gsl-log-h b { font-weight: 500; color: var(--text); }
-.gsl-log ol { list-style: none; margin: 0; padding: 0; }
-.gsl-log li {
-  --d: 0;
-  display: flex; align-items: baseline; white-space: nowrap;
-  height: 21px; line-height: 21px; opacity: 0;
-}
-.gsl-log li::before { content: '>'; order: 0; margin-right: 1ch; color: var(--orange); }
-.gsl-log li span { order: 1; position: relative; }
-.gsl-log li::after {
-  content: '..........................................................................';
-  order: 2; flex: 1 1 0; min-width: 2ch; overflow: hidden; margin: 0 1ch;
-  color: var(--muted); opacity: .55;
-  clip-path: inset(0 calc(100% - var(--d) * 100%) 0 0);
-}
-.gsl-log li em {
-  order: 3; font-style: normal; font-weight: 500; letter-spacing: .08em;
-  color: var(--volt); visibility: hidden; padding: 0 3px; margin-right: -3px; border-radius: 1px;
-}
-.gsl-log li.is-on { opacity: 1; }
-.gsl-log li.is-typing span::after {
-  content: ''; position: absolute; right: -.75em; top: 50%; width: .62em; height: 1.1em;
-  transform: translateY(-50%); background: var(--sun);
-}
-.gsl-log li.is-ok em { visibility: visible; animation: gsl-ok .55s steps(1, end); }
-@keyframes gsl-ok {
-  0% { background: var(--volt); color: var(--void); }
-  30% { background: transparent; color: var(--volt); }
-  45% { background: var(--volt); color: var(--void); }
-  60%, 100% { background: transparent; color: var(--volt); }
-}
+.gsl-status i { width: 6px; height: 6px; border-radius: 1px; background: #3A3A44; transition: background .2s, box-shadow .2s; }
+.gsl-status em { font-style: normal; opacity: .6; }
+.gsl-on { color: rgba(243, 239, 230, .28); transition: color .2s; }
 
-/* ---------- choreography -------------------------------------------------- */
-.gsl--go .gsl-x i { transition: transform 1.4s var(--ease) .15s; transform: none; }
-.gsl--go .gsl-k { transition: opacity .8s var(--ease) .2s; opacity: 1; }
-.gsl--go .gsl-bar { transition: transform 1.1s var(--ease) .05s; transform: scaleX(1); }
-.gsl--go .gsl-bar b { transition: opacity .4s .3s; opacity: 1; }
-.gsl--go .gsl-dial { transition: opacity 1.2s var(--ease) .1s, transform 1.6s var(--ease) .1s; opacity: 1; transform: rotate(0); }
-.gsl--go .gsl-core { opacity: 1; }
-.gsl-dial { transform: rotate(-60deg); }
+/* ---------- choreography (full run) --------------------------------------- */
+.gsl--go .gsl-pole { transition: transform .9s var(--ease); transform: none; }
+.gsl--go .gsl-cells { transition: opacity .5s var(--ease) .15s; opacity: .74; }
+.gsl--go .gsl-f { transition: fill-opacity .5s .45s; fill-opacity: 1; }
+.gsl--go .gsl-pin { transition: opacity .4s .75s; opacity: 1; }
+.gsl--go .gsl-lens { transition: opacity .4s .6s; opacity: 1; }
+.gsl--type .gsl-brand > *, .gsl--type .gsl-geo { transition: opacity .7s var(--ease), transform .9s var(--ease); opacity: 1; transform: none; }
+.gsl--type .gsl-brand small { transition-delay: .06s; }
+.gsl--type .gsl-geo { transition-delay: .1s; }
+.gsl--type .gsl-read { transition: opacity .7s var(--ease) .15s; opacity: 1; }
+.gsl--type .gsl-status { transition: opacity .7s var(--ease) .25s; opacity: 1; }
 
-.gsl--type .gsl-top > span > * { transition: transform .9s var(--ease); transform: none; }
-.gsl--type .gsl-top > span:last-child > * { transition-delay: .08s; }
-.gsl--type .gsl-meta,
-.gsl--type .gsl-log-h,
-.gsl--type .gsl-pct { transition: opacity .8s var(--ease) .1s; opacity: 1; }
-.gsl--type .gsl-col { transition: transform .9s var(--ease); transform: none; }
-.gsl--type .gsl-col:nth-child(2) { transition-delay: .06s; }
-.gsl--type .gsl-col:nth-child(3) { transition-delay: .12s; }
+/* lights on: dusk — the panel stops charging, the battery feeds the lamp */
+.gsl--on .gsl-cells { transition: opacity .5s var(--ease); opacity: .3; }
+.gsl--on .gsl-status i { background: var(--volt); box-shadow: 0 0 10px rgba(198, 255, 61, .55); }
+.gsl--on .gsl-on { color: var(--volt); }
 
-/* exit: interface slides away while the core ignites */
-.gsl--exit { pointer-events: none; cursor: auto; }
-.gsl--exit .gsl-top > span > * { transition: transform .5s cubic-bezier(.7, 0, .84, 0); transform: translateY(-110%); }
-.gsl--exit .gsl-col { transition: transform .5s cubic-bezier(.6, 0, .4, 1); transform: translateY(104%); }
-.gsl--exit .gsl-col:nth-child(2) { transition-delay: .04s; }
-.gsl--exit .gsl-col:nth-child(3) { transition-delay: .08s; }
-.gsl--exit .gsl-meta, .gsl--exit .gsl-pct, .gsl--exit .gsl-log-h, .gsl--exit .gsl-k, .gsl--exit .gsl-bar b {
-  transition: opacity .3s; opacity: 0;
+/* the reveal: the interface steps back, the light takes over */
+.gsl--reveal { pointer-events: none; cursor: auto; }
+.gsl--reveal .gsl-top, .gsl--reveal .gsl-read, .gsl--reveal .gsl-status,
+.gsl--reveal .gsl-lead, .gsl--reveal .gsl-pin { transition: opacity .3s; opacity: 0 !important; }
+
+/* repeat visit in the same session: the lamp (already charged), flick, reveal */
+.gsl--short .gsl-top, .gsl--short .gsl-read, .gsl--short .gsl-status, .gsl--short .gsl-lead, .gsl--short .gsl-pin { display: none; }
+.gsl--short .gsl-pole { transform: none; }
+.gsl--short .gsl-d { stroke-dashoffset: 0; }
+.gsl--short .gsl-lens { opacity: 1; }
+.gsl--short .gsl-cells { opacity: .5; }
+.gsl--short .gsl-c, .gsl--short .gsl-f { fill-opacity: 1; }
+
+/* reduced motion: a still frame (the light already on), then a plain fade */
+.gsl--reduced .gsl-pole { transform: none; }
+.gsl--reduced .gsl-d { stroke-dashoffset: 0; }
+.gsl--reduced .gsl-pin, .gsl--reduced .gsl-lens,
+.gsl--reduced .gsl-status, .gsl--reduced .gsl-glow { opacity: 1; }
+.gsl--reduced .gsl-brand > *, .gsl--reduced .gsl-geo { opacity: 1; transform: none; }
+.gsl--reduced .gsl-c, .gsl--reduced .gsl-f { fill-opacity: 1; }
+.gsl--reduced .gsl-cells { opacity: .3; }
+.gsl--reduced .gsl-read, .gsl--reduced .gsl-lead, .gsl--reduced .gsl-pin { display: none; }
+.gsl--reduced .gsl-status i { background: var(--volt); }
+.gsl--reduced .gsl-on { color: var(--volt); }
+.gsl--reduced .gsl-beam {   /* a still cone of light */
+  --bx: calc(var(--lx) + 424.14 * var(--u)); --by: calc(var(--ly) + 168.07 * var(--u));
+  opacity: .8;
+  background: radial-gradient(circle at var(--bx) var(--by), rgba(255, 240, 200, .42), rgba(255, 200, 100, .16) 14%, rgba(255, 150, 40, .06) 42%, rgba(255, 122, 0, 0) 75%);
+  -webkit-mask: conic-gradient(from 141.25deg at var(--bx) var(--by), transparent, #000 6deg 54deg, transparent 60deg);
+          mask: conic-gradient(from 141.25deg at var(--bx) var(--by), transparent, #000 6deg 54deg, transparent 60deg);
 }
-.gsl--exit .gsl-log li { transition: transform .5s cubic-bezier(.7, 0, .84, 0), opacity .4s; transform: translateY(14px); opacity: 0; }
-.gsl--exit .gsl-log li:nth-child(4) { transition-delay: .03s; }
-.gsl--exit .gsl-log li:nth-child(3) { transition-delay: .06s; }
-.gsl--exit .gsl-log li:nth-child(2) { transition-delay: .09s; }
-.gsl--exit .gsl-log li:nth-child(1) { transition-delay: .12s; }
-.gsl--exit .gsl-bar i { transition: opacity .5s .1s; opacity: 0; }
-.gsl--exit .gsl-dial, .gsl--exit .gsl-x { transition: opacity .2s; opacity: 0; }
-
-/* repeat visit in the same session: just the mark + hairline */
-.gsl--short .gsl-top, .gsl--short .gsl-count, .gsl--short .gsl-log,
-.gsl--short .gsl-x, .gsl--short .gsl-k, .gsl--short .gsl-dial b, .gsl--short .gsl-streak, .gsl--short .gsl-shafts { display: none; }
-.gsl--short .gsl-sun { --s: min(30vh, 46vw, 300px); }
-.gsl--short .gsl-bar { top: 0; transform: none; }
-.gsl--short .gsl-core, .gsl--short .gsl-dial, .gsl--short .gsl-face--dark { opacity: 1; transform: none; }
-.gsl--short .gsl-rays use { transform: none; opacity: 1; }
-.gsl--short .gsl-face path, .gsl--short .gsl-ring { stroke-dashoffset: 0; }
-.gsl--short .gsl-ember, .gsl--short .gsl-face:not(.gsl-face--dark) { opacity: 0; }
-
-/* reduced motion: a still frame, then a plain fade */
-.gsl--reduced .gsl-count, .gsl--reduced .gsl-bar, .gsl--reduced .gsl-fx, .gsl--reduced .gsl-streak, .gsl--reduced .gsl-shafts,
-.gsl--reduced .gsl-dial::after, .gsl--reduced .gsl-dial em { display: none; }
-.gsl--reduced .gsl-bar, .gsl--reduced .gsl-dial { transform: none; }
-.gsl--reduced .gsl-x i { transform: none; }
-.gsl--reduced .gsl-k, .gsl--reduced .gsl-dial, .gsl--reduced .gsl-core, .gsl--reduced .gsl-face--dark,
-.gsl--reduced .gsl-meta, .gsl--reduced .gsl-log-h, .gsl--reduced .gsl-log li { opacity: 1; }
-.gsl--reduced .gsl-top > span > * { transform: none; }
-.gsl--reduced .gsl-rays use { transform: none; opacity: 1; }
-.gsl--reduced .gsl-face path, .gsl--reduced .gsl-ring { stroke-dashoffset: 0; }
-.gsl--reduced .gsl-ember, .gsl--reduced .gsl-face:not(.gsl-face--dark) { opacity: 0; }
-.gsl--reduced .gsl-log li em { visibility: visible; }
-.gsl--reduced .gsl-log li::after { clip-path: none; }
-.gsl--reduced .gsl-glow { opacity: .7; transform: none; }
 .gsl--reduced.gsl--out { transition: opacity .35s linear; opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -378,46 +253,32 @@ html.js .gsl {
   html.js .gsl.gsl--out { transition: opacity .35s linear !important; }
 }
 
-/* ---------- small screens ------------------------------------------------- */
-@media (max-width: 720px) {
-  html.js .gsl { --cy: 41%; --s: min(40vh, 64vw, 440px); --fs-m: min(31vw, 17vh); }
-  .gsl-city { display: none !important; }
-  .gsl-count { --fs: var(--fs-m); }
-  .gsl-log {   /* stacks above the counter */
-    left: var(--pad); right: var(--pad); width: auto;
-    bottom: calc(var(--pad) + var(--fs-m) * .85 + 36px);
-    font-size: 10.5px;
+/* ---------- phones and portrait screens -------------------------------------
+   The drawing takes the width; readout and status sit bottom-right, clear of the pole. */
+@media (max-width: 720px), (max-aspect-ratio: 4/5) {
+  html.js .gsl {
+    --u: min(calc((100vw - 56px) / 520), .1vh, 1.05px);
+    --lx: calc(50% - 265 * var(--u));
+    --ly: calc(25% - 24 * var(--u));
+    --fs: clamp(44px, 7vh, 72px);
   }
-  .gsl-log li { height: 18px; line-height: 18px; }
-  .gsl-log-h { padding-bottom: 8px; margin-bottom: 6px; }
-  .gsl-dial b { display: none; }
-  .gsl-x i:nth-child(4) { display: none; }   /* the lower reticle would run through the log and counter */
+  .gsl-lamp .gsl-lead, .gsl-lamp .gsl-pin { display: none; }
+  .gsl-read { right: var(--pad); top: auto; bottom: calc(var(--pad) + 32px); transform: none; }
+  .gsl-status { left: auto; right: var(--pad); }
 }
-@media (max-width: 720px) and (max-height: 700px) {
-  html.js .gsl { --cy: 36%; --s: min(36vh, 58vw); }
-  .gsl-log-h { display: none; }
-}
-/* narrow phones (320–400px): both top labels must fit on one line */
 @media (max-width: 400px) {
-  .gsl-top { font-size: 10px; letter-spacing: .07em; gap: 10px; }
-  .gsl-top > span { gap: 7px; }
+  .gsl-geo .gsl-city { display: none; }
+  .gsl-status { font-size: 10px; letter-spacing: .1em; gap: 8px; }
+  .gsl-geo { font-size: 10px; letter-spacing: .08em; }
 }
-/* squarer desktops/tablets (4:3, 3:2): a smaller mark keeps the dial clear of the boot log */
-@media (min-width: 721px) and (max-aspect-ratio: 3/2) {
-  html.js .gsl { --s: min(42vh, 60vw, 460px); }
-}
-/* landscape phones / short windows: counter left, log right, mark between them */
-@media (max-height: 520px) and (min-aspect-ratio: 3/2) {
-  html.js .gsl { --cy: 54%; --s: min(44vh, 30vw); }
-  .gsl-dial b { display: none; }
-  .gsl-count { --fs: min(25vh, 15vw); }
-  .gsl-log {
-    left: auto; right: var(--pad); bottom: var(--pad);
-    width: max(205px, min(330px, calc(50% - var(--s) * .72 - 2 * var(--pad))));
-    font-size: 10px;
+/* landscape phones / short windows */
+@media (max-height: 520px) and (min-aspect-ratio: 4/3) {
+  html.js .gsl {
+    --u: min(.13vh, .06vw);
+    --lx: calc(50% - 100 * var(--u));
+    --ly: calc(24% - 24 * var(--u));
+    --fs: clamp(36px, 11vh, 56px);
   }
-  .gsl-log li { height: 16px; line-height: 16px; }
-  .gsl-log-h { display: none; }
 }
 
 @media print {

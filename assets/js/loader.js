@@ -1,12 +1,15 @@
 /*!
- * Green Sun Technologies — preloader "IGNITION"
+ * Green Sun Technologies — preloader "LIGHTS ON"
  * assets/js/loader.js  ·  pairs with assets/css/loader.css
+ *
+ * One solar street light. Its panel charges cell by cell with the page's real
+ * readiness, the LED head flickers on, and the light cone opens the page.
  *
  * Include synchronously, right after the #gsl snippet (first child of <body>):
  *   <script src="assets/js/loader.js"></script>
  *
  * Public surface
- *   window.GSLoader.done      Promise — resolves when the exit starts (page may begin its intro)
+ *   window.GSLoader.done      Promise — resolves when the exit starts (the light cone opens; page may begin its intro)
  *   window.GSLoader.revealed  Promise — resolves when the loader has been removed
  *   window.GSLoader.loaded    boolean — true once the exit has started
  *   window.GSLoader.mode      'full' | 'short' | 'reduced' | 'none'
@@ -23,10 +26,13 @@
 
   var root = doc.documentElement;
   var KEY = 'gs-ignited';
-  var HARD_EXIT = 4700;      // ms: the exit (0.9 s) begins no later than this…
+  var HARD_EXIT = 4700;      // ms: the exit (the cone, 0.9 s) begins no later than this…
   var HARD_REMOVE = 5950;    // …and the loader is gone by this, counted from navigation start
   var TOO_LATE = 6300;       // loader.js arrived this late: the CSS failsafe is about to lift the curtain anyway
-  var EXPO = 'cubic-bezier(.16,1,.3,1)';
+
+  // drawing geometry (SVG units, viewBox 0 0 520 340) — same numbers as loader.css
+  var LENS_X = 424.14, LENS_Y = 168.07;   // LED lens centre
+  var AXIS = 171.25;                      // beam axis, CSS conic angle (0 = up, clockwise)
 
   var hasPerf = !!(win.performance && performance.now);
   var now = hasPerf ? function () { return performance.now(); } : Date.now;
@@ -64,11 +70,11 @@
     gone = true;
     signal();
     if (hardTimer) clearTimeout(hardTimer);
-    api.skip = function () {};   // drop the reference to the boot closure (canvas, sprites…)
+    api.skip = function () {};   // drop the reference to the boot closure
     root.classList.remove('is-loading');
     for (var i = 0; i < cleanups.length; i++) { try { cleanups[i](); } catch (e) { /* ignore */ } }
     cleanups.length = 0;
-    // cancel every WAAPI animation (some are infinite) so the detached subtree can be collected
+    // cancel every WAAPI animation so the detached subtree can be collected
     try { if (el && el.getAnimations) el.getAnimations({ subtree: true }).forEach(function (a) { a.cancel(); }); } catch (e) { /* ignore */ }
     if (el && el.parentNode) el.parentNode.removeChild(el);
     el = null;
@@ -117,6 +123,7 @@
     var seen = false;
     try { seen = win.sessionStorage.getItem(KEY) === '1'; } catch (e) { /* ignore */ }
     var mode = api.mode = reduce ? 'reduced' : (seen ? 'short' : 'full');
+    var full = mode === 'full';
     var exitTimer = 0;
     el.classList.add('gsl--' + mode);
     if (reduce && seen) el.classList.add('gsl--short');
@@ -137,15 +144,35 @@
       return null;
     }
 
+    /* ---- elements ------------------------------------------------------- */
+    var curtain = $('.gsl-curtain'), beam = $('.gsl-beam'), glow = $('.gsl-glow');
+    var svg = $('.gsl-lamp'), numEl = $('.gsl-num b'), lbl = $('.gsl-lbl');
+    var cells = $$('.gsl-c'), NC = cells.length, cellOp = [];
+
+    // hairlines: exactly 1 CSS px at whatever size the drawing is rendered
+    function fitStroke() {
+      var w = svg && svg.getBoundingClientRect().width;
+      if (w > 0) svg.style.setProperty('--sw', (520 / w).toFixed(4));
+    }
+    fitStroke();
+    win.addEventListener('resize', fitStroke);
+    cleanups.push(function () { win.removeEventListener('resize', fitStroke); clearTimeout(exitTimer); });
+
+    /* ---- reduced motion: still frame, then a plain fade ------------------- */
+    if (mode === 'reduced') {
+      reducedRun(seen);
+      return;
+    }
+
     /* ---- readiness signals ---------------------------------------------- */
     var sig = { dom: doc.readyState !== 'loading', load: doc.readyState === 'complete', fonts: false };
     onReady(function () { sig.dom = true; });
     win.addEventListener('load', function () { sig.load = true; sig.dom = true; }, { once: true });
     var fontsDone = function () { sig.fonts = true; };
-    if (doc.fonts && doc.fonts.load) {
+    if (full && doc.fonts && doc.fonts.load) {
       Promise.all([
-        doc.fonts.load('900 100px Archivo', '0123456789'),
-        doc.fonts.load('500 12px "Geist Mono"', 'GREEN SUN')
+        doc.fonts.load('800 100px Archivo', '0123456789'),
+        doc.fonts.load('500 12px "Geist Mono"', 'CHARGING')
       ]).then(fontsDone, fontsDone);
       setTimeout(fontsDone, 900);       // never hold the type for a slow font
     } else {
@@ -170,406 +197,203 @@
       return Math.min(r, 0.9);
     }
 
-    /* ---- elements ------------------------------------------------------- */
-    var rays = $('.gsl-rays'), rayUses = $$('.gsl-rays use');
-    var sun = $('.gsl-sun'), core = $('.gsl-core'), dial = $('.gsl-dial');
-    var ember = $('.gsl-ember'), hot = $('.gsl-hot');
-    var faceLit = $('.gsl-face:not(.gsl-face--dark)'), faceDark = $('.gsl-face--dark');
-    var flash = $('.gsl-flash'), glow = $('.gsl-glow'), streak = $('.gsl-streak'), shafts = $('.gsl-shafts');
-    var fx = $('.gsl-fx');
-    var head = $('.gsl-bar b');
-    // --p is written only where it is read: setting it on the root restyled (and repainted) the
-    // whole full-screen root layer every frame
-    var pNodes = [glow, $('.gsl-dial em'), $('.gsl-bar i')].filter(Boolean);
-    var lines = $$('.gsl-log li').map(function (li) {
-      var span = li.querySelector('span');
-      return { li: li, span: span, text: span.textContent, n: -1, d: -1, state: '' };
-    });
-    var logN = $('.gsl-log-n');
-
-    /* ---- reduced motion: still frame, then a plain fade ------------------- */
-    if (mode === 'reduced') {
-      reducedRun(seen);
-      return;
-    }
-
-    /* ---- build the odometer -------------------------------------------- */
-    var strips = [];
-    $$('.gsl-num > b').forEach(function (b, i) {
-      var col = doc.createElement('span');
-      col.className = 'gsl-col';
-      var strip = doc.createElement('span');
-      strip.className = 'gsl-strip';
-      var cells = i === 0 ? 2 : 11, html = '';
-      for (var k = 0; k < cells; k++) html += '<span>' + (k % 10) + '</span>';
-      strip.innerHTML = html;
-      col.appendChild(strip);
-      b.parentNode.replaceChild(col, b);
-      strips.push({ el: strip, cells: cells, pos: -1 });
-    });
-    function setStrip(s, pos) {
-      if (Math.abs(pos - s.pos) < 0.001) return;
-      s.pos = pos;
-      s.el.style.transform = 'translate3d(0,' + (-pos / s.cells * 100).toFixed(3) + '%,0)';
-    }
-    function odometer(v) {
-      if (!strips.length) return;
-      var n = Math.floor(v + 1e-6), f = v - n;
-      var roll = smooth(0.45, 1, f);
-      setStrip(strips[2], (n % 10) + roll);
-      setStrip(strips[1], (Math.floor(n / 10) % 10) + ((n % 10) === 9 ? roll : 0));
-      setStrip(strips[0], n >= 100 ? 1 : (n === 99 ? roll : 0));
-    }
-
-    /* ---- label scramble ------------------------------------------------- */
-    var GLYPHS = 'ABCDEFGHJKLMNPRSTUVWXYZ0123456789#/°·';
-    var scr = $$('[data-scr]').map(function (node) {
-      return { node: node, text: node.textContent };
-    });
-    function scramble(t) {   // t: seconds since type-in started
-      for (var i = 0; i < scr.length; i++) {
-        var s = scr[i], out = '', len = s.text.length;
-        if (s.done) continue;
-        for (var c = 0; c < len; c++) {
-          var ch = s.text.charAt(c);
-          var at = 0.05 + (c / len) * 0.55 + i * 0.06;
-          if (t >= at || ch === ' ' || ch === '\u00a0') out += ch;
-          else if (t >= at - 0.35) out += GLYPHS.charAt((Math.random() * GLYPHS.length) | 0);
-          else out += '\u00a0';
-        }
-        s.node.textContent = out;
-        if (t > 0.05 + 0.55 + i * 0.06 + 0.02) { s.node.textContent = s.text; s.done = true; }
-      }
-    }
-
-    /* ---- boot log ------------------------------------------------------- */
-    lines.forEach(function (L) { L.span.textContent = ''; });
-    function bootLog(p) {
-      var okCount = 0;
-      for (var i = 0; i < lines.length; i++) {
-        var L = lines[i];
-        var a = 0.05 + i * 0.175, b = a + 0.15;
-        var f = clamp((p - a) / (b - a));
-        var chars = Math.round(clamp(f / 0.62) * L.text.length);
-        if (chars !== L.n) { L.n = chars; L.span.textContent = L.text.slice(0, chars); }
-        var d = Math.round(clamp((f - 0.62) / 0.3) * 100) / 100;
-        if (d !== L.d) { L.d = d; L.li.style.setProperty('--d', d); }
-        var state = f <= 0 ? '' : chars < L.text.length ? 'is-on is-typing' : f < 1 ? 'is-on' : 'is-on is-ok';
-        if (state !== L.state) { L.state = state; L.li.className = state; }
-        if (f >= 1) okCount++;
-      }
-      if (logN && logN._n !== okCount) { logN._n = okCount; logN.textContent = '0' + okCount + '/05'; }
-    }
-
-    /* ---- sparks (canvas) ------------------------------------------------ */
-    var ctx = fx && fx.getContext ? fx.getContext('2d') : null;
-    var W = 0, H = 0, DPR = Math.min(win.devicePixelRatio || 1, 1.75);
-    var parts = [];
-    var sprites = [];
-    function sprite(stops) {
-      var c = doc.createElement('canvas'); c.width = c.height = 64;
-      var g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-      for (var i = 0; i < stops.length; i++) gr.addColorStop(stops[i][0], stops[i][1]);
-      g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
-      return c;
-    }
-    if (ctx) {
-      sprites = [
-        sprite([[0, 'rgba(255,255,255,1)'], [0.18, 'rgba(255,241,184,.95)'], [0.45, 'rgba(255,196,0,.35)'], [1, 'rgba(255,122,0,0)']]),
-        sprite([[0, 'rgba(255,246,210,1)'], [0.18, 'rgba(255,196,0,.9)'], [0.5, 'rgba(255,122,0,.3)'], [1, 'rgba(255,59,31,0)']]),
-        sprite([[0, 'rgba(255,214,150,1)'], [0.2, 'rgba(255,122,0,.85)'], [0.55, 'rgba(255,59,31,.25)'], [1, 'rgba(255,59,31,0)']])
-      ];
-    }
-    function sizeCanvas() {
-      // the loader's own box, not innerWidth: a reserved scrollbar gutter (classic scrollbars)
-      // makes it narrower, and a mismatch would offset the canvas corona from the CSS hole
-      W = el.clientWidth || win.innerWidth; H = el.clientHeight || win.innerHeight;
-      if (!ctx) return;
-      fx.width = Math.round(W * DPR); fx.height = Math.round(H * DPR);
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    }
-    var C = { x: 0, y: 0, r: 0 };   // sun centre + mark radius in px
-    function measure() {
-      var r = sun.getBoundingClientRect();
-      C.x = r.left + r.width / 2; C.y = r.top + r.height / 2; C.r = r.width / 2;
-    }
-    function onResize() { sizeCanvas(); measure(); }
-    onResize();
-    win.addEventListener('resize', onResize);
-    cleanups.push(function () {
-      win.removeEventListener('resize', onResize);
-      clearTimeout(exitTimer);
-      if (spin) spin.cancel();
-      if (ctx) { fx.width = fx.height = 0; }   // hand the canvas memory back now
-      parts.length = 0; sprites = []; ctx = null; fx = null; spin = null; ring = null;
-    });
-
-    var spinDir = 1;
-    function emitEmber(spin) {
-      // flung tangentially off the spinning ray tips
-      var a = Math.random() * Math.PI * 2;
-      var rr = C.r * (0.62 + Math.random() * 0.3);
-      var x = C.x + Math.cos(a) * rr, y = C.y + Math.sin(a) * rr;
-      var tv = (60 + 260 * spin) * (0.5 + Math.random() * 0.8);
-      var ov = 20 + Math.random() * 60;
-      parts.push({
-        x: x, y: y,
-        vx: -Math.sin(a) * tv * spinDir + Math.cos(a) * ov,
-        vy: Math.cos(a) * tv * spinDir + Math.sin(a) * ov,
-        life: 0.7 + Math.random() * 1.2, age: 0,
-        size: 2 + Math.random() * 5, drag: 1.6, lift: 40 + Math.random() * 60, streak: 0.018
-      });
-    }
-    function burst() {
-      for (var i = 0; i < 170; i++) {
-        var a = Math.random() * Math.PI * 2;
-        var sp = 500 + Math.pow(Math.random(), 0.6) * 1900;
-        var rr = C.r * 0.3 * Math.random();
-        parts.push({
-          x: C.x + Math.cos(a) * rr, y: C.y + Math.sin(a) * rr,
-          vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
-          life: 0.45 + Math.random() * 0.7, age: 0,
-          size: 2.5 + Math.random() * 6, drag: 3.2, lift: 0, streak: 0.03
+    /* ---- the drawing comes in (full run only) ---------------------------- */
+    if (full) {
+      raf(function () { if (el) el.classList.add('gsl--go'); });
+      var draw = function (sel, delay, dur) {
+        $$(sel).forEach(function (n) {
+          animate(n, [{ strokeDashoffset: 1.001 }, { strokeDashoffset: 0 }], { duration: dur, delay: delay, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'both' });
         });
+      };
+      draw('.gsl-stub', 280, 260);
+      draw('.gsl-col', 420, 220);
+      draw('.gsl-arm', 460, 520);
+      draw('.gsl-head', 700, 420);
+      draw('.gsl-fin', 900, 300);
+      draw('.gsl-bat', 380, 520);
+      draw('.gsl-brk', 200, 300);
+      draw('.gsl-pv', 100, 520);
+      draw('.gsl-lead', 760, 420);
+    }
+
+    /* ---- progress: panel cells + numeral ---------------------------------- */
+    var shown = -1;
+    function paintProgress(pp) {
+      if (!full) return;
+      var f = pp * NC;
+      for (var i = 0; i < NC; i++) {
+        var o = Math.round(clamp(f - i) * 20) / 20;
+        if (o !== cellOp[i]) { cellOp[i] = o; cells[i].style.fillOpacity = o; }
       }
-    }
-    var dirty = false, ring = null;
-    function drawRing(r, b) {
-      var g = ctx.createRadialGradient(C.x, C.y, r, C.x, C.y, r + b);
-      g.addColorStop(0, '#FFFFFF');
-      g.addColorStop(0.06, '#FFF1B8');
-      g.addColorStop(0.2, '#FFC400');
-      g.addColorStop(0.42, 'rgba(255,122,0,.85)');
-      g.addColorStop(0.7, 'rgba(255,59,31,.38)');
-      g.addColorStop(1, 'rgba(255,59,31,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(C.x, C.y, r + b, 0, Math.PI * 2);
-      ctx.arc(C.x, C.y, Math.max(r - 1, 0), 0, Math.PI * 2, true);
-      ctx.fill();
-    }
-    function drawParts(dt) {
-      if (!ctx) return;
-      if (dirty) { ctx.clearRect(0, 0, W, H); dirty = false; }
-      if (ring) { drawRing(ring.r, ring.b); dirty = true; }
-      if (!parts.length) return;
-      dirty = true;
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.lineCap = 'round';
-      for (var i = parts.length - 1; i >= 0; i--) {
-        var q = parts[i];
-        q.age += dt;
-        if (q.age >= q.life) { parts.splice(i, 1); continue; }
-        var k = Math.exp(-q.drag * dt);
-        q.vx *= k; q.vy = q.vy * k - q.lift * dt;
-        q.x += q.vx * dt; q.y += q.vy * dt;
-        var life = q.age / q.life;
-        var alpha = (1 - life) * (life < 0.08 ? life / 0.08 : 1);
-        var spr = sprites[life < 0.25 ? 0 : life < 0.6 ? 1 : 2];
-        // streak
-        var sx = q.vx * q.streak, sy = q.vy * q.streak;
-        ctx.globalAlpha = alpha * 0.55;
-        ctx.strokeStyle = life < 0.4 ? '#FFD25A' : '#FF6A1A';
-        ctx.lineWidth = Math.max(0.6, q.size * 0.32);
-        ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(q.x - sx, q.y - sy); ctx.stroke();
-        // head
-        ctx.globalAlpha = alpha;
-        var s = q.size * 3;
-        ctx.drawImage(spr, q.x - s / 2, q.y - s / 2, s, s);
-      }
-      ctx.globalAlpha = 1;
-      ctx.globalCompositeOperation = 'source-over';
-    }
-
-    /* ---- spin (WAAPI: runs on the compositor even if the page is busy) ----- */
-    var spin = animate(rays, [{ transform: 'rotate(0turn)' }, { transform: 'rotate(1turn)' }],
-      { duration: 1000, iterations: Infinity });
-    var spinRate = -1;
-    function setSpin(r) {
-      if (!spin || Math.abs(r - spinRate) < Math.max(0.004, spinRate * 0.03)) return;
-      spinRate = r;
-      if (spin.updatePlaybackRate) spin.updatePlaybackRate(r); else spin.playbackRate = r;
-    }
-
-    /* ---- intro --------------------------------------------------------- */
-    var typeT = -1;   // time the type layer appeared
-    var dialT = -1;
-
-    if (mode === 'full') {
-      setSpin(0.05);
-      raf(function () { el.classList.add('gsl--go'); });
-      rayUses.forEach(function (u, i) {
-        animate(u, [
-          { transform: 'rotate(-50deg) scale(.15,0)', opacity: 0 },
-          { transform: 'rotate(-8deg) scale(1.04,1.08)', opacity: 1, offset: 0.55 },
-          { transform: 'none', opacity: 1 }
-        ], { duration: 1100, delay: 120 + (i % 6) * 75, easing: EXPO, fill: 'both' });   // opposite blades in pairs
-      });
-      animate($('.gsl-ring'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
-        { duration: 1200, delay: 60, easing: EXPO, fill: 'both' });
-      $$('.gsl-face path').forEach(function (path, i) {
-        animate(path, [{ strokeDashoffset: 1.05 }, { strokeDashoffset: 0 }],
-          { duration: 700, delay: 380 + (i % 3) * 160, easing: EXPO, fill: 'both' });
-      });
-      animate(core, [{ transform: 'scale(.86)' }, { transform: 'none' }], { duration: 1600, easing: EXPO });
-      animate(shafts, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-360deg)' }], { duration: 90000, iterations: Infinity });
-    } else {
-      setSpin(0.6);
-      hot.style.opacity = '0.25';
+      var n = Math.floor(pp * 100 + 1e-6);
+      if (n !== shown && numEl) { shown = n; numEl.textContent = n; }
     }
 
     /* ---- main loop ----------------------------------------------------- */
-    var MIN = mode === 'full' ? 1.6 : 0.2;     // seconds before progress may reach 100
+    // short run (later page views) has no readout: lamp flicks on, cone opens — ~0.7 s in all
+    var MIN = full ? 1.2 : 0.08;       // seconds before progress may reach 100
+    var FLICK = full ? 0.3 : 0.11;     // the LED flickering on
+    var DUR = full ? 0.9 : 0.42;       // the cone opening the page
+    // LED brightness keys [t, level]: two quick flickers, then on (2 flashes: under 3 per second)
+    var KEYS = full
+      ? [[0, 0], [0.03, 1], [0.075, 0.06], [0.14, 0.85], [0.18, 0.05], [0.25, 1]]
+      : [[0, 0], [0.025, 1], [0.055, 0.1], [0.095, 1]];
     var p = 0, tgt = 0, clock = 0, last = now(), held = 0;
-    var phase = 'load', exitAt = 0, X = null;
+    var phase = 'load', flickAt = 0, revealAt = 0, X = null;
 
     function loadStep(dt, wall) {
       var target;
-      if (mode === 'full') {
+      if (full) {
         var pace = inOut(clamp(clock / MIN));
         var allow = sig.load ? 1 : Math.min(0.94, Math.max(realProgress(), 0.94 * (1 - Math.exp(-clock / 1.25))));
         target = Math.min(pace, allow);
       } else {
-        var ready = sig.dom && (sig.load || clock > 0.7);
-        target = Math.min(clock / MIN, ready ? 1 : 0.85);
+        var ready = sig.dom && (sig.load || clock > 0.15);
+        target = ready && clock >= MIN ? 1 : 0;
       }
-      var forced = wall > HARD_EXIT;
+      // late page: start the flicker early enough that the cone still opens by HARD_EXIT
+      var forced = wall > HARD_EXIT - FLICK * 1000;
       if (target > tgt) tgt = target;
-      p += (tgt - p) * (1 - Math.exp(-dt * (mode === 'full' ? 9 : 30)));
+      p = full ? p + (tgt - p) * (1 - Math.exp(-dt * 9)) : tgt;
       if ((tgt >= 1 && p > 0.99) || forced) p = tgt = 1;
-      paint(p, dt);
+      paintProgress(p);
+      if (full && sig.fonts && !el.classList.contains('gsl--type')) el.classList.add('gsl--type');
       if (p >= 1 && (sig.dom || forced)) {
         held += dt;
-        if (held > (mode === 'full' ? 0.1 : 0) || forced) startExit();
+        if (held > (full ? 0.08 : 0) || forced) startFlick();
       }
     }
 
-    function paint(pp, dt) {
-      var ps = pp.toFixed(4);
-      for (var pi = 0; pi < pNodes.length; pi++) pNodes[pi].style.setProperty('--p', ps);
-      if (head) head.style.transform = 'translate3d(' + (pp * W).toFixed(1) + 'px,0,0)';
-      if (mode === 'full') {
-        ember.style.opacity = (1 - smooth(0.04, 0.6, pp)).toFixed(3);
-        hot.style.opacity = (0.55 * smooth(0.68, 1, pp)).toFixed(3);
-        var k = smooth(0.24, 0.56, pp);
-        faceDark.style.opacity = k.toFixed(3);
-        faceLit.style.opacity = (1 - k).toFixed(3);
-        shafts.style.opacity = smooth(0.2, 1, pp).toFixed(3);
-        streak.style.opacity = (0.85 * smooth(0.3, 1, pp)).toFixed(3);
-        streak.style.transform = 'scaleX(' + (0.25 + 0.75 * expoOut(pp)).toFixed(3) + ')';
-        var ticks = Math.floor(pp * 72 + 1e-6) / 72;
-        if (ticks !== dialT) { dialT = ticks; dial.style.setProperty('--t', ticks.toFixed(4)); }
-        setSpin(0.05 + 0.95 * pp * pp);
-        if (sig.fonts && typeT < 0) { typeT = clock; el.classList.add('gsl--type'); }
-        if (typeT >= 0) {
-          scramble(clock - typeT);
-          odometer(pp * 100);
-          bootLog(pp);
-        }
-        // embers thrown off the rays, more as it spins up
-        if (ctx && pp > 0.12) {
-          var rate = 6 + 70 * pp * pp;
-          var n = rate * dt + (Math.random() < (rate * dt) % 1 ? 1 : 0);
-          for (var i = 0; i < (n | 0); i++) emitEmber(pp);
-        }
-      }
-      drawParts(dt);
-    }
-
-    function startExit() {
+    function startFlick() {
       if (phase !== 'load') return;
-      phase = 'exit';
-      el.classList.add('gsl--exit');
-      measure();
+      phase = 'flick';
+      paintProgress(1);
+      if (lbl) lbl.textContent = 'Charged';
+      flickAt = now();
+    }
+
+    function level(t) {
+      for (var i = 1; i < KEYS.length; i++) {
+        if (t <= KEYS[i][0]) {
+          var a = KEYS[i - 1], b = KEYS[i];
+          return a[1] + (b[1] - a[1]) * (t - a[0]) / (b[0] - a[0]);
+        }
+      }
+      return 1;
+    }
+
+    function flickStep() {
+      if (!flickAt) return;
+      var t = (now() - flickAt) / 1000;
+      glow.style.opacity = level(t).toFixed(3);
+      if (t >= KEYS[KEYS.length - 1][0] && !X) el.classList.add('gsl--on');
+      if (t >= FLICK) startReveal();
+    }
+
+    function supports(prop, val) {
+      try { return !!(win.CSS && CSS.supports && CSS.supports(prop, val)); } catch (e) { return false; }
+    }
+
+    function startReveal() {
+      if (phase === 'reveal') return;
+      phase = 'reveal';
+      el.classList.add('gsl--on', 'gsl--reveal');
+      glow.style.opacity = '1';
+      // where the light starts: the lens centre, in loader (= viewport) pixels
+      var W = el.clientWidth || win.innerWidth, H = el.clientHeight || win.innerHeight;
+      var r = svg.getBoundingClientRect(), o = el.getBoundingClientRect();
+      var k = r.width / 520;
+      var cx = r.left - o.left + LENS_X * k, cy = r.top - o.top + LENS_Y * k;
+      var far = 0;
+      [[0, 0], [W, 0], [0, H], [W, H]].forEach(function (c) { far = Math.max(far, Math.sqrt(Math.pow(c[0] - cx, 2) + Math.pow(c[1] - cy, 2))); });
+      var conic = supports('mask-image', 'conic-gradient(#000, #000)') || supports('-webkit-mask-image', 'conic-gradient(#000, #000)');
+      X = { cx: cx, cy: cy, far: far + 60, at: cx.toFixed(1) + 'px ' + cy.toFixed(1) + 'px', mask: conic };
       signal();
       // start the visual clock on the next frame, after any 'gs:loaded' handlers have run
-      raf(function () { exitAt = now(); });
-      var maxR = Math.sqrt(Math.pow(Math.max(C.x, W - C.x), 2) + Math.pow(Math.max(C.y, H - C.y), 2));
-      var full = mode === 'full';
-      X = {
-        full: full,
-        flash: full ? 0.2 : 0.02,
-        wipe: full ? 0.7 : 0.3,
-        maxR: maxR,
-        band: full ? 0.3 : 0.12,
-        clip: supportsClipPath()
-      };
-      setSpin(full ? 1.25 : 0.9);
+      raf(function () { revealAt = now(); });
     }
 
-    function exitStep(dt) {
-      if (!exitAt) { drawParts(dt); return; }
-      var te = (now() - exitAt) / 1000;
-      var cx = C.x, cy = C.y;
-      // 1 · ignition: the core goes white-hot
-      var f = clamp(te / X.flash);
-      if (X.full) {
-        hot.style.opacity = (0.55 + 0.45 * smooth(0, 0.6, f)).toFixed(3);
-        flash.style.opacity = (smooth(0, 1, f) * (1 - smooth(X.flash + 0.15, X.flash + 0.55, te))).toFixed(3);
-        flash.style.transform = 'scale(' + (0.6 + 0.9 * expoOut(f)).toFixed(3) + ')';
-        glow.style.opacity = '1';
-        shafts.style.opacity = (1 - smooth(0.1, 0.5, te)).toFixed(3);
-        streak.style.opacity = (1 - smooth(0.25, 0.75, te)).toFixed(3);
-        streak.style.transform = 'scaleX(' + (1 + 1.2 * expoOut(f)).toFixed(3) + ') scaleY(' + (1 + 1.5 * smooth(0, 1, f)).toFixed(3) + ')';
-        if (!X.burst && te >= X.flash * 0.85) { X.burst = true; burst(); }
+    function setMask(node, v) {
+      node.style.webkitMaskImage = v;
+      node.style.maskImage = v;
+    }
+
+    // warm light falling from the lamp, cut off at the beam's front (L px from the lens)
+    var BEAM = [[0, '255,250,238,.9'], [0.03, '255,234,190,.5'], [0.12, '255,214,150,.22'], [0.36, '255,180,100,.09'], [0.8, '255,150,70,.03']];
+    function beamBg(L) {
+      var out = [];
+      for (var i = 0; i < BEAM.length; i++) {
+        var pos = BEAM[i][0] * X.far;
+        if (pos >= L) break;
+        out.push('rgba(' + BEAM[i][1] + ') ' + pos.toFixed(0) + 'px');
       }
-      // 2 · burn-through: a circular hole races out from the sun's centre
-      var u = clamp((te - X.flash) / X.wipe);
-      // a quick pop to the size of the core, then a front that keeps accelerating off-screen
-      var e = 0.12 * expoOut(Math.min(1, u * 3)) + 0.88 * Math.pow(u, 1.7);
-      var band = 30 + X.maxR * X.band;
-      var R = e * (X.maxR + band + 20);
-      var sc = 1 + (X.full ? 0.06 * smooth(0, 1, f) : 0) + 0.9 * e * e;
-      sun.style.transform = 'scale(' + sc.toFixed(4) + ')';
-      if (!X.hid && te > 0.55) { X.hid = true; shafts.style.visibility = streak.style.visibility = dial.style.visibility = 'hidden'; }
-      if (u > 0) {
-        var r = Math.max(R, 0.01);
-        if (X.clip) {
-          el.style.clipPath = 'path(evenodd,"M0 0H' + W + 'V' + H + 'H0Z M' + (cx - r).toFixed(1) + ' ' + cy.toFixed(1) +
-            'a' + r.toFixed(1) + ' ' + r.toFixed(1) + ' 0 1 0 ' + (2 * r).toFixed(1) + ' 0a' + r.toFixed(1) + ' ' + r.toFixed(1) + ' 0 1 0 ' + (-2 * r).toFixed(1) + ' 0Z")';
+      if (!out.length) out.push('rgba(' + BEAM[0][1] + ') 0px');
+      out.push('rgba(255,150,40,0) ' + (L + 24 + 0.06 * L).toFixed(0) + 'px');
+      return 'radial-gradient(circle at ' + X.at + ', ' + out.join(', ') + ')';
+    }
+    // a wedge around the beam axis, half-angle a, soft edges s; inside = opaque (or clear if !inside)
+    function wedge(a, s, inside) {
+      var from = (AXIS - a - s).toFixed(2);
+      var on = inside ? '#000' : 'transparent', off = inside ? 'transparent' : '#000';
+      return 'conic-gradient(from ' + from + 'deg at ' + X.at + ', ' + off + ' 0deg, ' + on + ' ' + s.toFixed(2) + 'deg ' + (2 * a + s).toFixed(2) + 'deg, ' + off + ' ' + (2 * a + 2 * s).toFixed(2) + 'deg)';
+    }
+
+    function revealStep() {
+      if (!revealAt) return;
+      var u = clamp((now() - revealAt) / 1000 / DUR);
+      // 1 · the beam shoots down (first ~20%), 2 · then widens until it holds the whole screen
+      var shoot = expoOut(clamp(u / 0.2));
+      var widen = inOut(clamp((u - 0.14) / 0.86));
+      var L = 8 + X.far * shoot;
+      var a = 6 + 16 * shoot + 168 * widen;          // half-angle, degrees
+      var s = 1 + a * 0.06;                          // soft edge, degrees
+      if (X.mask) {
+        if (2 * a + s >= 360) {
+          curtain.style.visibility = 'hidden';
         } else {
-          var m = 'radial-gradient(circle at ' + cx + 'px ' + cy + 'px, transparent ' + r + 'px, #000 ' + (r + 1) + 'px)';
-          el.style.webkitMaskImage = m; el.style.maskImage = m;
+          var hole = wedge(a, s, false);
+          setMask(curtain, L < X.far ? hole + ', radial-gradient(circle at ' + X.at + ', transparent ' + L.toFixed(0) + 'px, #000 ' + (L + 30).toFixed(0) + 'px)' : hole);
         }
-        ring = { r: r, b: band };
+        // the light runs a little ahead of the opening: a warm fringe on the dark
+        setMask(beam, a + 2.5 + s >= 180 ? 'none' : wedge(a + 2.5, s + 1.5, true));
+        beam.style.backgroundImage = beamBg(L);
+        beam.style.opacity = (1 - smooth(0.3, 1, u)).toFixed(3);
+        // the dark left above the lamp dissolves rather than closing like a shutter
+        curtain.style.opacity = (1 - smooth(0.45, 0.92, u)).toFixed(3);
+      } else {
+        curtain.style.opacity = (1 - smooth(0.1, 0.9, u)).toFixed(3);   // no masks: a plain cross-fade
       }
-      drawParts(dt);
+      glow.style.opacity = (1 - smooth(0.42, 0.85, u)).toFixed(3);
       if (u >= 1) teardown();
-    }
-
-    function supportsClipPath() {
-      try { return !!(win.CSS && CSS.supports && CSS.supports('clip-path', 'path(evenodd,"M0 0H1V1H0Z")')); }
-      catch (e) { return false; }
     }
 
     function frame() {
       if (gone) return;
       var t = now();
       var raw = Math.max(0, (t - last) / 1000);
-      // smoothing/physics step is capped so a hitch never teleports anything; the choreography
-      // clock tolerates longer frames so a slow device (or a busy main thread while the page's
-      // own scripts start) still finishes in about the intended time instead of crawling
+      // smoothing step is capped so a hitch never teleports anything; the choreography clock
+      // tolerates longer frames so a slow device (or a busy main thread while the page's own
+      // scripts start) still finishes in about the intended time instead of crawling
       var dt = Math.min(0.1, raw);
       last = t;
       clock += Math.min(0.25, raw);
       try {
         if (phase === 'load') loadStep(dt, since());
-        else exitStep(dt);
+        else if (phase === 'flick') flickStep();
+        else revealStep();
       } catch (err) { teardown(); return; }
       raf(frame);
     }
     raf(frame);
 
     // background tabs pause rAF: make sure the hard limit still applies
-    exitTimer = setTimeout(function () { if (phase === 'load') { startExit(); } }, Math.max(0, HARD_EXIT + 80 - since()));
+    exitTimer = setTimeout(function () { if (phase !== 'reveal') startReveal(); }, Math.max(0, HARD_EXIT + 80 - since()));
 
-    api.skip = function () { if (phase === 'load') startExit(); else teardown(); };
+    api.skip = function () { if (phase !== 'reveal') startReveal(); else teardown(); };
   }
 
-  /* reduced motion: no counter, no typing, no spin — a still frame and a fade */
+  /* reduced motion: no counter, no flicker — a still frame (light already on) and a fade */
   function reducedRun(seen) {
-    var n = el.querySelector('.gsl-log-n');
-    if (n) n.textContent = '05/05';
     var minT = seen ? 150 : 450;
     var softCap = seen ? 600 : 1200;
     var fired = false;
