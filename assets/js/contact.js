@@ -153,7 +153,7 @@
 
   /* ---------- areas + map ---------- */
   const areas = document.querySelector('[data-areas]');
-  if (areas) areas.innerHTML = (CFG.serviceAreas || []).map(function (a, i) { return '<li class="chip' + (i ? '' : ' is-on') + '">' + GS.esc(a) + '</li>'; }).join('');
+  if (areas) areas.innerHTML = (CFG.serviceAreas || []).map(function (a) { return '<li class="tag">' + GS.esc(a) + '</li>'; }).join('');
   const map = document.querySelector('[data-map]');
   if (map && CFG.mapQuery) {
     map.innerHTML = '<iframe title="Map: Green Sun Technologies, ' + GS.esc(CFG.address ? CFG.address.join(', ') : '') + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=' + encodeURIComponent(CFG.mapQuery) + '&output=embed"></iframe>' +

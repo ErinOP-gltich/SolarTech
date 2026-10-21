@@ -34,12 +34,14 @@
     if (!hero || !canvas) return;
     const portrait = function () { return innerWidth < 760 || innerHeight > innerWidth * 1.15; };
     let mode = portrait();
-    let sun = mountSun(canvas, mode ? { center: [0.66, 0.3], radius: 0.4 } : { center: [0.74, 0.5], radius: 0.36 });
+    // phones: the sun sits high and small so the headline below it stays readable
+    const place = function (m) { return m ? { center: [0.64, 0.2], radius: 0.34 } : { center: [0.74, 0.5], radius: 0.36 }; };
+    let sun = mountSun(canvas, place(mode));
     addEventListener('resize', function () {
       if (portrait() === mode || !sun) return;
       mode = portrait();
       sun.destroy();
-      sun = mountSun(canvas, mode ? { center: [0.66, 0.3], radius: 0.4 } : { center: [0.74, 0.5], radius: 0.36 });
+      sun = mountSun(canvas, place(mode));
     });
     if (motion) {
       // as the hero scrolls away the sun swells and the headline lifts off

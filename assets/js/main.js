@@ -117,7 +117,7 @@
     const n = PRODUCTS.indexOf(p) + 1;
     return '' +
       '<article class="card glass glass-edge' + (opts.feature ? ' is-feature' : '') + '" data-id="' + esc(p.id) + '" data-flip-id="' + esc(p.id) + '">' +
-        '<div class="card-top"><span class="label">№ ' + (n < 10 ? '0' : '') + n + ' · ' + esc(cat ? cat.name.split(' ')[0] : '') + '</span>' +
+        '<div class="card-top"><span class="label">№ ' + (n < 10 ? '0' : '') + n + ' · ' + esc(cat ? cat.short || cat.name : '') + '</span>' +
           (p.badge ? '<span class="card-badge">' + esc(p.badge) + '</span>' : '') + '</div>' +
         '<a class="card-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true" data-cursor="Enquire">' +
           (big ? '<span class="card-watt cond">' + esc(big) + '</span>' : '') +

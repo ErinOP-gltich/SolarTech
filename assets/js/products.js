@@ -47,11 +47,11 @@
   }
 
   window.GS_CATEGORIES = [
-    { id: 'street', name: 'Solar Street Lights', blurb: '9 W lanes to 80 W highways. OSRAM LEDs, LiFePO₄ packs, IP66.', img: IMG + 'si-50w.webp' },
-    { id: 'mast', name: 'High Masts & Floods', blurb: 'Light whole junctions, yards and grounds from one point.', img: IMG + 'flood-60w.webp' },
-    { id: 'traffic', name: 'Traffic & Road Safety', blurb: 'Solar blinkers and push-button pedestrian crossings.', img: IMG + 'blinker-20w.webp' },
-    { id: 'storage', name: 'Energy Storage', blurb: 'LiFePO₄ battery packs rated for 5,000 cycles.', img: IMG + 'battery-100ah.webp' },
-    { id: 'poles', name: 'Poles & Decorative', blurb: 'Cast-aluminium decorative poles with drop-down lanterns.', img: IMG + 'deco-pole.webp' }
+    { id: 'street', short: 'Street', name: 'Solar Street Lights', blurb: '9 W lanes to 80 W highways. OSRAM LEDs, LiFePO₄ packs, IP66.', img: IMG + 'si-50w.webp' },
+    { id: 'mast', short: 'Mast & flood', name: 'High Masts & Floods', blurb: 'Light whole junctions, yards and grounds from one point.', img: IMG + 'flood-60w.webp' },
+    { id: 'traffic', short: 'Traffic', name: 'Traffic & Road Safety', blurb: 'Solar blinkers and push-button pedestrian crossings.', img: IMG + 'blinker-20w.webp' },
+    { id: 'storage', short: 'Storage', name: 'Energy Storage', blurb: 'LiFePO₄ battery packs rated for 5,000 cycles.', img: IMG + 'battery-100ah.webp' },
+    { id: 'poles', short: 'Poles', name: 'Poles & Decorative', blurb: 'Cast-aluminium decorative poles with drop-down lanterns.', img: IMG + 'deco-pole.webp' }
   ];
 
   window.GS_PRODUCTS = [

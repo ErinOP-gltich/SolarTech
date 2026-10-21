@@ -123,16 +123,18 @@
       <div class="cmd glass glass-strong refract" data-cmd>
         <div class="cmd-search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-          <input id="q" type="search" placeholder="Search 18 products — 40W, RMS, battery…" autocomplete="off" aria-label="Search products" data-q>
+          <input id="q" type="search" placeholder="Search — 40W, RMS, battery…" autocomplete="off" aria-label="Search products" data-q>
           <kbd aria-hidden="true">/</kbd>
         </div>
         <div class="seg" role="group" aria-label="Category" data-seg><span class="seg-ind" aria-hidden="true"></span></div>
         <div class="cmd-row2">
-          <span class="label">Power</span>
-          <span data-power style="display:contents"></span>
-          <span class="label" style="margin-left:var(--s3)">Features</span>
-          <span data-feat style="display:contents"></span>
-          <span class="grow"></span>
+          <div class="cmd-chips">
+            <span class="label">Power</span>
+            <span data-power style="display:contents"></span>
+            <span class="label" style="margin-left:var(--s3)">Features</span>
+            <span data-feat style="display:contents"></span>
+          </div>
+          <div class="cmd-tools">
           <label class="sr-only" for="sort">Sort by</label>
           <div class="select"><select id="sort" data-sort>
             <option value="featured">Recommended</option>
@@ -143,6 +145,7 @@
           <div class="viewtog" role="group" aria-label="View">
             <button type="button" class="sl" data-view="grid" aria-pressed="true" aria-label="Grid view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
             <button type="button" class="sl" data-view="list" aria-pressed="false" aria-label="List view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+          </div>
           </div>
         </div>
       </div>
@@ -172,7 +175,7 @@
           <a class="btn btn-plasma sl" href="contact.html" data-magnetic>Talk to an engineer <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
         <ul>
-          <li class="chip">LED aviation lights</li><li class="chip">Airport lighting</li><li class="chip">LED traffic lights</li><li class="chip">Industrial lights</li><li class="chip">Infrastructure lights</li><li class="chip">Decorative lights</li><li class="chip">Control panels</li><li class="chip">Solar mounting structures</li><li class="chip">Poles</li><li class="chip">Lithium battery packs</li>
+          <li class="tag">LED aviation lights</li><li class="tag">Airport lighting</li><li class="tag">LED traffic lights</li><li class="tag">Industrial lights</li><li class="tag">Infrastructure lights</li><li class="tag">Decorative lights</li><li class="tag">Control panels</li><li class="tag">Solar mounting structures</li><li class="tag">Poles</li><li class="tag">Lithium battery packs</li>
         </ul>
       </div>
     </div>
