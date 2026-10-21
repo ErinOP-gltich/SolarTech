@@ -447,7 +447,10 @@
       function reveal(e) {
         if (token !== imgToken || destroyed) return;
         nxt.onload = nxt.onerror = null;
-        nxt.classList.toggle('is-broken', !!(e && e.type === 'error') || !(nxt.complete && nxt.naturalWidth));
+        var ok = !(e && e.type === 'error') && nxt.complete && nxt.naturalWidth;
+        nxt.classList.toggle('is-broken', !ok);
+        // a very slender lamp (the 9 W) would read as a sliver at the shared height: let it grow
+        if (ok) nxt.style.setProperty('--boost', clamp(0.45 / (nxt.naturalWidth / nxt.naturalHeight), 1, 1.3).toFixed(3));
         nxt.alt = p.name; cur.alt = '';
         nxt.classList.add('is-on'); cur.classList.remove('is-on');
         imgOn ^= 1;

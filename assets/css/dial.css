@@ -376,12 +376,16 @@
   background: linear-gradient(180deg, #3a3a46, #15151b); box-shadow: 0 0 0 1px rgba(0, 0, 0, .6);
 }
 .ds-lamp { position: absolute; left: 0; right: 0; top: calc(var(--lt) / (var(--lt) + var(--lh)) * 100%); bottom: 0; }
-.ds-img {
-  position: absolute; inset: 0; width: 100%; height: 100%;
+.ds-img {                 /* --boost (from dial.js) lets very slender lamps grow upward a little */
+  position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% * var(--boost, 1));
   object-fit: contain; object-position: 50% 100%;
   opacity: 0;
   transform: translateY(-5%) scale(.94);
-  filter: drop-shadow(0 0 1px rgba(255, 230, 190, .35)) drop-shadow(0 16px 26px rgba(0, 0, 0, .7));
+  /* graded into the scene: a touch darker and denser, lit from its own spill below,
+     the top falling away into the dark */
+  filter: brightness(.86) contrast(1.08) saturate(.88) drop-shadow(0 0 1px rgba(255, 230, 190, .3)) drop-shadow(0 16px 26px rgba(0, 0, 0, .7));
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .82) 38%, #000 70%);
+          mask-image: linear-gradient(180deg, rgba(0, 0, 0, .5) 0%, rgba(0, 0, 0, .82) 38%, #000 70%);
   transition: opacity .55s var(--gd-ease), transform .9s var(--gd-ease);
 }
 .ds-img.is-on { opacity: 1; transform: none; }
