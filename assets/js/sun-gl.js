@@ -149,51 +149,66 @@
     '  w.z=uDetail>0.5?snoise(n*1.6+vec3(-6.1,3.7,t*0.015)):w.x*w.y;',
     '  float f=fbm(n*3.4+w*1.05,t);',                                    // churning turbulence
     '  float g=snoise(n*30.0+w*2.4+vec3(0.0,t*0.09,0.0));',              // granulation
-    '  float gran=(abs(g)*2.0-0.6)*smoothstep(70.0,220.0,uRadius);',   // fade cells out before they alias
+    '  float gran=(0.72*smoothstep(0.0,0.5,abs(g))+0.28*smoothstep(-0.3,0.7,g))*1.75-1.0;',
+    '  float lf=smoothstep(0.04,0.5,z);',                                  // foreshortening fade at the limb
+    '  gran*=smoothstep(70.0,220.0,uRadius)*(0.75+0.25*w.y)*lf;',   // fade cells out before they alias
     '  float vn=snoise(n*4.2+w*1.6+vec3(t*0.02,0.0,9.0));',              // flowing dark veins
     '  float veins=pow(1.0-abs(vn),14.0);',
     '  float plage=smoothstep(0.40,1.0,w.x*0.6+w.y*0.4);',
     '  float mu=z;',
     '  float lean=max(dot(normalize(p+1e-5),uPointer.xy),0.0)*uPointer.z*(1.0-mu);',
-    '  float tex=0.72*f+0.26*gran*(0.45+0.55*smoothstep(-0.3,0.5,f))-veins*(0.16+0.30*(1.0-mu))+0.30*plage;',
-    '  float heat=0.22+0.62*pow(mu,1.1)+0.19*tex+0.07*lean;',
+    '  float tex=0.72*f+0.26*gran*(0.45+0.55*smoothstep(-0.3,0.5,f))-veins*0.24*lf+0.30*plage;',
+    '  float heat=0.19+0.44*mu+0.30*pow(mu,8.0)+0.27*tex*(0.45+0.55*lf)+0.07*lean;',
     '  heat+=uI<1.0?(uI-1.0)*0.40:(uI-1.0)*0.17;',
     '  vec3 c=ramp(heat);',
-    '  float b=(1.0-0.38*pow(1.0-mu,4.0))*(0.95+0.07*tex)*(0.42+0.58*min(uI,1.0));',
+    '  float b=(1.0-0.38*pow(1.0-mu,4.0))*(0.93+0.12*tex)*(0.42+0.58*min(uI,1.0));',
     '  return c*b;',
     '}',
 
     // ---------------- prominences ----------------
+    // magnetic loops: a glowing bundle of fine strands arching between two footpoints; each one
+    // rises, hangs, then drains away and is reborn elsewhere on the limb
     'vec3 prominences(float ang,float h,float t){',
     '  vec3 acc=vec3(0.0);',
+    '  float sf=min(uRadius*0.9,260.0);',                    // strand frequency (~7 px period: never aliases)
     '  for(int k=0;k<3;k++){',
     '    float id=float(k);',
-    '    float period=13.0+id*4.7;',
+    '    float period=14.0+id*5.3;',
     '    float ph=t/period+id*0.37+uSeed*0.13;',
     '    float cyc=floor(ph);float f=ph-cyc;',
-    '    float env=smoothstep(0.0,0.22,f)*(1.0-smoothstep(0.58,1.0,f));',
+    '    float env=smoothstep(0.0,0.2,f)*(1.0-smoothstep(0.55,0.98,f));',
     '    if(env<0.002)continue;',
-    '    float a0=hash11(cyc*7.13+id*31.7+uSeed*3.1)*6.2831853;',
-    '    float w=0.06+0.07*hash11(cyc*3.71+id*11.3+0.5);',
-    '    float ht=(0.14+0.20*hash11(cyc*5.19+id*2.9+0.25))*(0.40+0.60*smoothstep(0.0,0.75,f));',
-    '    float x=mod(ang-a0+3.14159265,6.2831853)-3.14159265;',
-    '    if(abs(x)>w*2.4||h>ht*2.1)continue;',
-    '    float n=snoise(vec3(x*9.0,h*9.0-t*0.30,id*9.1+cyc*1.7));',
-    '    float n2=snoise(vec3(x*26.0,h*26.0-t*0.55,id*3.3-cyc));',
-    '    vec2 q=vec2(x/w,h/ht)+vec2(n,n2)*vec2(0.10,0.06);',
+    '    float r1=hash11(cyc*7.13+id*31.7+uSeed*3.1);',
+    '    float r2=hash11(cyc*3.71+id*11.3+0.5);',
+    '    float r3=hash11(cyc*5.19+id*2.9+0.25);',
+    '    float w=0.07+0.09*r2;',                                   // footpoint half-separation (radii)
+    '    float ht=(0.14+0.25*r3)*(0.35+0.65*smoothstep(0.0,0.7,f));', // loop height grows as it rises
+    '    float th=0.022+0.024*r3;',                                 // half thickness of the bundle
+    '    float x=mod(ang-r1*6.2831853+3.14159265,6.2831853)-3.14159265;',
+    '    x-=h*(r1-0.5)*0.9;',                                     // loops lean a little
+    '    if(abs(x)>w+th*5.0+0.05||h>ht+th*5.0+0.05)continue;',   // outside the compact support
+    '    float n=snoise(vec3(x*6.0,h*6.0-t*0.2,id*9.1+cyc*1.7));',
+    '    float n2=snoise(vec3(x*24.0,h*24.0-t*0.38,id*3.3-cyc));',
+    '    vec2 q=vec2(x/w,h/ht)+vec2(n,0.6*n)*0.06;',
     '    float e=length(q);',
-    '    float d=e-1.0;',
-    '    float threads=0.5+0.5*sin(e*30.0+n*1.1);',
-    '    threads=threads*threads*(0.6+0.4*n2);',
-    '    float arch=exp(-d*d*8.0)*(0.22+0.95*threads)*(0.62+0.48*n);',
-    '    float core=exp(-d*d*36.0)*0.3*(0.7+0.3*n2);',
-    '    float fill=exp(-e*e*2.2)*0.30*(0.55+0.45*n);',
-    '    float base=exp(-h*18.0)*exp(-x*x/(w*w)*1.2)*0.6;',
-    '    float top=smoothstep(-0.2,1.1,q.y);',
-    '    vec3 tint=mix(mix(C_SUN,C_ORANGE,0.6),C_FLARE,0.20+0.55*top);',
-    '    acc+=(tint*(arch+fill+base)+mix(C_HOT,C_SUN,0.5)*core)*env;',
+    '    vec2 gq=q/vec2(w,ht);',
+    '    float d=(e-1.0)*e/max(length(gq),1e-3)+n2*th*0.12;',     // ~euclidean distance from the loop spine
+    '    float ac=d/th;',
+    '    float band=exp(-ac*ac*1.6);',
+    '    float st=0.5+0.5*sin(d*sf+n*2.0);',
+    '    st*=st;',
+    '    float knots=0.6+0.4*snoise(vec3(atan(q.y,q.x)*3.0,t*0.1,id*5.0+cyc));',
+    '    float body=band*(0.35+0.95*st)*knots;',
+    '    float hc=max(1.0-ac*ac/22.0,0.0);',
+    '    float halo=hc*hc*0.20*(0.75+0.25*n);',                 // soft glow, zero before the support edge
+    '    float fill=smoothstep(1.0,0.2,e)*(0.5+0.5*n2)*0.10;',    // faint plasma held inside the arch
+    '    float fx=(abs(x)-w)/(0.55*w+th);',
+    '    float foot=max(1.0-h*16.0,0.0)*max(1.0-fx*fx*0.5,0.0)*0.6;',
+    '    float top=clamp(h/ht,0.0,1.0);',
+    '    vec3 tint=mix(mix(C_ORANGE,C_SUN,0.2),C_FLARE,0.2+0.65*top);',
+    '    acc+=(tint*(body+halo+fill)+mix(C_SUN,C_HOT,0.3)*(foot*foot+band*st*knots*0.3*(1.0-0.6*top)))*env;',
     '  }',
-    '  return acc*2.8;',
+    '  return acc*2.6;',
     '}',
 
     // ---------------- corona ----------------
@@ -234,7 +249,7 @@
     '    float rim=exp(-h*uRadius*0.9/(0.35+1.4*sp*sp+0.4*uDetail));',
     '    e+=mix(C_FLARE,C_ORANGE,0.55)*rim*1.25;',
     '  }',
-    '  if(h<0.65){e+=prominences(atan(dir.y,dir.x),h,t);}',
+    '  if(h<0.7){e+=prominences(atan(dir.y,dir.x),h,t);}',
     '  float gain=(0.10+0.90*min(uI,1.0))+max(uI-1.0,0.0)*0.85;',
     '  return e*gain*(1.0+0.45*lean);',
     '}',

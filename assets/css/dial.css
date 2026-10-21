@@ -29,7 +29,7 @@
 
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7.2fr);
+  grid-template-columns: minmax(0, 4.7fr) minmax(0, 7.3fr);
   color: var(--gd-text);
   font-family: var(--gd-body);
   border: 1px solid var(--gd-line);
@@ -41,7 +41,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .dial *, .dial *::before, .dial *::after { box-sizing: border-box; }
-.dial:empty { min-height: 640px; }
+.dial:empty { min-height: 680px; }
 
 /* shared bits ---------------------------------------------------------- */
 .dial-mono, .dial .dk-lab, .dial .dk-leg {
@@ -97,6 +97,11 @@
   box-shadow: 0 0 0 2px rgba(198, 255, 61, .12), 0 0 10px rgba(198, 255, 61, .8);
 }
 .dial-keys { display: inline-flex; gap: 4px; }
+.dial-hint-touch { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .dial-hint-fine { display: none; }
+  .dial-hint-touch { display: inline; }
+}
 .dial-keys kbd {
   display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px;
   font: 500 10px/1 var(--gd-mono); color: var(--gd-text);
@@ -179,7 +184,7 @@
   inset: 9.5%;
   background:
     repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .028) 0 1px, rgba(0, 0, 0, .05) 1px 2px, transparent 2px 3.5px),
-    conic-gradient(from 18deg, #34343f, #15151b 9%, #45455a 21%, #17171e 34%, #2b2b36 47%, #121217 58%, #40404f 71%, #16161d 85%, #34343f);
+    conic-gradient(from 18deg, #3a3a46, #141419 9%, #50506a 21%, #16161d 34%, #2e2e3a 47%, #111116 58%, #4a4a5e 71%, #15151c 85%, #3a3a46);
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, .9),
     0 0 0 2px rgba(255, 255, 255, .07),
@@ -191,10 +196,17 @@
   content: ''; position: absolute; inset: 7%; border-radius: 50%;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, .55), 0 1px 0 1px rgba(255, 255, 255, .06), inset 0 1px 0 rgba(255, 255, 255, .05);
 }
+/* engraved maker's legend (fixed) */
+.dk-engr { inset: 0; width: 100%; height: 100%; overflow: visible; }
+.dk-engr-ring { fill: none; stroke: rgba(0, 0, 0, .55); stroke-width: 1; }
+.dk-engr-ring + .dk-engr-ring { stroke: rgba(255, 255, 255, .05); }
+.dk-engr text { font: 500 9.5px var(--gd-mono); letter-spacing: .1em; }
+.dk-engr-t { fill: rgba(243, 239, 230, .30); }
+.dk-engr-sh { fill: rgba(0, 0, 0, .8); transform: translate(.5px, .9px); }
 /* indicator slot + glowing plasma filament — rotates */
 .dk-ind { inset: 0; will-change: transform; }
 .dk-ind i {
-  position: absolute; left: 50%; top: 1.6%; width: 2.2%; min-width: 4px; height: 20%;
+  position: absolute; left: 50%; top: 1.6%; width: 2.2%; min-width: 4px; height: 17.5%;
   translate: -50% 0; border-radius: 2px;
   background: #050507;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, .9), 0 1px 0 rgba(255, 255, 255, .08);
@@ -234,16 +246,18 @@
 .dial-bench {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
-  min-height: 660px;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+  min-height: 640px;
   overflow: hidden;
 }
 
 /* stage: the lamp, hung under nothing but its own light */
 .dial-stage {
+  --lt: 10;         /* lamp top, % of stage height (unitless so calc() can divide) */
+  --lh: 31;         /* lamp height, % */
   --apx: 50%;       /* beam apex x */
-  --apy: 41%;       /* beam apex y */
-  --fy: 87%;        /* floor line */
+  --apy: calc((var(--lt) + var(--lh) - 1.5) * 1%);   /* beam apex: the lamp's underside */
+  --fy: 86%;        /* floor line */
   position: relative;
   margin: 0;
   min-height: 100%;
@@ -260,7 +274,7 @@
 .dial.is-striking .ds-light, .dial.is-striking .ds-floor { animation: gd-strike 1.1s steps(1, end) both; }
 
 .ds-bloom {
-  left: var(--apx); top: 27%; width: 120%; aspect-ratio: 1; margin-left: -60%; translate: 0 -50%;
+  left: var(--apx); top: calc((var(--lt) + var(--lh) * .62) * 1%); width: 120%; aspect-ratio: 1; margin-left: -60%; translate: 0 -50%;
   background: radial-gradient(closest-side, rgba(255, 241, 184, .30), rgba(255, 196, 0, .16) 22%, rgba(255, 122, 0, .08) 46%, rgba(255, 59, 31, .03) 66%, transparent);
   opacity: calc(.18 + var(--lv) * .82);
   transform: scale(calc(.5 + var(--lv) * .7));
@@ -336,31 +350,49 @@
 
 /* the hanging lamp */
 .ds-hang {
-  position: absolute; z-index: 2; left: var(--apx); top: 0; width: 66%; height: 47%; margin-left: -33%;
+  position: absolute; z-index: 2; left: var(--apx); top: 0; width: 72%; margin-left: -36%;
+  height: calc((var(--lt) + var(--lh)) * 1%);
   transform-origin: 50% 0;
 }
 .ds-cable {
-  position: absolute; left: 50%; top: 0; width: 1px; height: 13.5%;
-  background: linear-gradient(180deg, transparent, rgba(243, 239, 230, .35));
+  position: absolute; left: 50%; top: 0; width: 1px; height: calc(var(--lt) / (var(--lt) + var(--lh)) * 100% + 2px);
+  background: linear-gradient(180deg, transparent, rgba(243, 239, 230, .4));
 }
 .ds-cable::after {      /* clamp */
   content: ''; position: absolute; left: -4px; bottom: -3px; width: 9px; height: 5px; border-radius: 1px;
   background: linear-gradient(180deg, #3a3a46, #15151b); box-shadow: 0 0 0 1px rgba(0, 0, 0, .6);
 }
-.ds-lamp { position: absolute; left: 0; right: 0; top: 14.5%; bottom: 0; }
+.ds-lamp { position: absolute; left: 0; right: 0; top: calc(var(--lt) / (var(--lt) + var(--lh)) * 100%); bottom: 0; }
 .ds-img {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: contain; object-position: 50% 0%;
+  object-fit: contain; object-position: 50% 100%;
   opacity: 0;
   transform: translateY(-5%) scale(.94);
   filter: drop-shadow(0 0 1px rgba(255, 230, 190, .35)) drop-shadow(0 16px 26px rgba(0, 0, 0, .7));
   transition: opacity .55s var(--gd-ease), transform .9s var(--gd-ease);
 }
 .ds-img.is-on { opacity: 1; transform: none; }
-.ds-rim {        /* warm rim light the beam throws back onto the lamp */
+.ds-rim {        /* warm light thrown back onto the lamp's underside */
   position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(60% 40% at 50% 88%, rgba(255, 196, 0, calc(var(--lv) * .22)), transparent 70%);
+  background: radial-gradient(46% 34% at 50% 100%, rgba(255, 214, 120, calc(.05 + var(--lv) * .3)), transparent 75%);
   mix-blend-mode: screen;
+}
+/* source FX over the lamp: glare + anamorphic streak */
+.ds-fx { position: absolute; inset: 0; z-index: 3; pointer-events: none; mix-blend-mode: screen; }
+.ds-fx > i { position: absolute; left: var(--apx); top: var(--apy); display: block; will-change: transform, opacity; }
+.ds-glare {
+  width: 34%; aspect-ratio: 1; margin-left: -17%; translate: 0 -50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 246, .95), rgba(255, 236, 170, .55) 14%, rgba(255, 196, 0, .2) 36%, rgba(255, 122, 0, .06) 62%, transparent);
+  opacity: calc(.12 + var(--lv) * var(--lv) * .88);
+  transform: scale(calc(.35 + var(--lv) * .75));
+}
+.ds-flare {
+  width: 150%; height: 18px; margin-left: -75%; translate: 0 -50%;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(255, 59, 31, .25) 18%, rgba(255, 122, 0, .55) 34%, rgba(255, 246, 214, 1) 50%, rgba(255, 122, 0, .55) 66%, rgba(255, 59, 31, .25) 82%, transparent 100%) center / 100% 2px no-repeat,
+    radial-gradient(50% 50% at 50% 50%, rgba(255, 170, 60, .35), transparent 100%);
+  opacity: calc(var(--lv) * var(--lv) * .95);
+  transform: scaleX(calc(.15 + var(--lv) * .85));
 }
 
 .ds-ann { position: absolute; z-index: 3; }
@@ -386,15 +418,17 @@
   padding: 26px clamp(22px, 2.6vw, 40px) 30px;
 }
 .dr-top { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--gd-line); }
+.dr-head { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: clamp(14px, 1.4vw, 22px); align-items: stretch; margin-top: 18px; }
+.dr-side { display: flex; flex-direction: column; justify-content: space-between; min-width: 0; padding: 2px 0 1px; }
 .dr-num {
   position: relative;
   display: flex; align-items: flex-start;
-  margin: 18px 0 2px -.04em;
+  margin: 0 0 0 -.03em;
   font-family: var(--gd-display);
   font-weight: 900;
   font-stretch: 62%;
   font-variation-settings: 'wdth' 62;
-  font-size: clamp(132px, 13.4vw, 212px);
+  font-size: clamp(120px, 12.4vw, 184px);
   line-height: 1;
   letter-spacing: -.01em;
 }
@@ -416,31 +450,32 @@
   background: radial-gradient(closest-side, rgba(255, 122, 0, calc(.08 + var(--lv) * .22)), transparent);
   filter: blur(10px);
 }
-.dr-unit { display: flex; flex-direction: column; gap: 10px; margin: .02em 0 0 .08em; }
+.dr-unit { display: flex; align-items: flex-start; gap: 12px; }
 .dr-unit b {
   font-family: var(--gd-display); font-weight: 900; font-stretch: 125%; font-variation-settings: 'wdth' 125;
-  font-size: .26em; line-height: .78; color: var(--gd-text);
+  font-size: clamp(34px, 3.1vw, 46px); line-height: .74; color: var(--gd-text);
 }
-.dr-unit .dial-mono { font-size: 10.5px; }
+.dr-unit .dial-mono { font-size: 10px; line-height: 1.25; }
 .dr-name {
-  margin: 14px 0 0;
+  margin: 0;
   font-family: var(--gd-display); font-weight: 900; font-stretch: 125%; font-variation-settings: 'wdth' 125;
-  font-size: clamp(17px, 1.45vw, 22px); line-height: 1.05; letter-spacing: -.005em; text-transform: uppercase;
+  font-size: clamp(13px, 1.1vw, 16px); line-height: 1.02; letter-spacing: -.005em; text-transform: uppercase;
 }
-.dr-name em {
+.dr-name-a { display: block; white-space: nowrap; }
+.dr-name em { display: block; margin-top: 2px;
   font-family: var(--gd-serif); font-style: italic; font-weight: 400; font-stretch: normal; font-variation-settings: normal;
   text-transform: none; font-size: 1.32em; letter-spacing: 0; color: var(--gd-sun);
 }
-.dr-name > span, .dr-part > b, .dr-spec .v, .dr-spec small { display: inline-block; }
-.dr-part { margin: 10px 0 0; }
+.dr-part > b, .dr-spec .v, .dr-spec small { display: inline-block; }
+.dr-part { margin: 8px 0 0; }
 .dr-part b { color: var(--gd-text); }
 
 .dr-specs {
   display: grid; grid-template-columns: 1fr 1fr;
-  margin: 22px 0 0;
+  margin: 24px 0 0;
   border-top: 1px solid var(--gd-line);
 }
-.dr-spec { position: relative; padding: 13px 14px 13px 0; border-bottom: 1px solid var(--gd-line); min-width: 0; }
+.dr-spec { position: relative; padding: 12px 14px 12px 0; border-bottom: 1px solid var(--gd-line); min-width: 0; }
 .dr-spec:nth-child(2n+1):not(.dr-spec--lm) { padding-left: 14px; border-left: 1px solid var(--gd-line); }
 .dr-spec--lm { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr; column-gap: 18px; align-items: end; padding-right: 0; }
 .dr-spec dt { margin: 0 0 6px; }
@@ -466,18 +501,18 @@
 .dr-spec--lm .dr-bar > i { box-shadow: 0 0 12px rgba(255, 150, 30, .6); }
 
 /* the night profile: 6 h at 100 %, then 6 h at 50 % */
-.dr-night { display: grid; grid-template-columns: auto 1fr auto; align-items: end; gap: 12px; margin-top: 16px; }
+.dr-night { display: grid; grid-template-columns: auto 1fr auto; align-items: end; gap: 12px; margin-top: 18px; }
 .dr-night-bars { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; height: 22px; align-items: end; }
 .dr-night-bars i { display: block; height: 100%; border-radius: 1px; background: linear-gradient(180deg, #FFC400, #FF7A00); opacity: .9; }
 .dr-night-bars i:nth-child(n+7) { height: 50%; background: linear-gradient(180deg, #FF7A00, #FF3B1F); opacity: .7; }
 .dr-night-cap { display: flex; justify-content: space-between; grid-column: 2; margin-top: -6px; }
 
 /* actions */
-.dr-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 22px; }
+.dr-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 22px; }
 .dr-cta, .dr-add {
   position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 12px;
-  min-height: 52px; padding: 0 22px; border-radius: 3px;
-  font: 600 15px/1 var(--gd-body); letter-spacing: -.005em; text-decoration: none; white-space: nowrap;
+  min-height: 52px; padding: 0 18px; border-radius: 3px;
+  font: 600 14.5px/1 var(--gd-body); letter-spacing: -.005em; text-decoration: none; white-space: nowrap;
   cursor: pointer; overflow: hidden; isolation: isolate;
   transition: transform .5s var(--gd-ease), box-shadow .5s var(--gd-ease), border-color .3s, color .3s, background-color .3s;
 }
@@ -496,7 +531,7 @@
 .dr-cta .dr-arrow { display: inline-block; transition: transform .5s var(--gd-ease); }
 .dr-cta:hover .dr-arrow { transform: translateX(5px); }
 .dr-add {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   color: var(--gd-text); background: rgba(255, 255, 255, .02);
   border: 1px solid var(--gd-line-2);
 }
@@ -522,17 +557,38 @@
 /* ======================================================================
    responsive
    ====================================================================== */
+/* tablet: knob + lamp side by side, readout across the bottom */
 @media (max-width: 1180px) {
-  .dial { grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); }
-  .dial-bench { grid-template-columns: 1fr; min-height: 0; }
-  .dial-stage { min-height: 360px; border-right: 0; border-bottom: 1px solid var(--gd-line); }
-  .dial-stage { --apy: 47%; --fy: 88%; }
-  .ds-hang { height: 52%; width: 56%; margin-left: -28%; }
-  .dr-num { font-size: clamp(120px, 15vw, 180px); }
+  .dial { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .dial-bench { display: contents; }
+  .dial-inst { grid-column: 1; grid-row: 1; }
+  .dial-stage { grid-column: 2; grid-row: 1; min-height: 520px; border-right: 0; }
+  .dial-read {
+    grid-column: 1 / -1; grid-row: 2;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); column-gap: clamp(24px, 4vw, 48px);
+    border-top: 1px solid var(--gd-line);
+    padding: 24px clamp(20px, 3vw, 40px) 28px;
+  }
+  .dr-top { grid-column: 1 / -1; }
+  .dr-head { grid-column: 1; }
+  .dr-specs { grid-column: 2; grid-row: 2 / span 3; align-self: start; }
+  .dr-night { grid-column: 1; }
+  .dr-actions { grid-column: 1; }
+  .dr-num { font-size: clamp(120px, 15vw, 168px); }
+  .dr-name { font-size: clamp(13px, 1.7vw, 16px); }
 }
+/* phone: numeral first (so it stays in view while turning), then knob, lamp, specs */
 @media (max-width: 760px) {
-  .dial { grid-template-columns: 1fr; }
-  .dial-inst { padding: 64px 0 64px; border-right: 0; border-bottom: 1px solid var(--gd-line); }
+  .dial { grid-template-columns: minmax(0, 1fr); }
+  .dial-read { display: contents; }
+  .dial > * { grid-column: 1; grid-row: auto; }
+  .dr-top { order: 1; margin: 0 16px; padding-top: 16px; }
+  .dr-head { order: 2; margin: 14px 16px 18px; }
+  .dial-inst { order: 3; padding: 56px 0; border-right: 0; border-top: 1px solid var(--gd-line); }
+  .dial-stage { order: 4; min-height: 380px; border-top: 1px solid var(--gd-line); --lt: 11; --lh: 27; --fy: 80%; }
+  .dr-specs { order: 5; margin: 0 16px; border-top: 1px solid var(--gd-line); }
+  .dr-night { order: 6; margin: 18px 16px 0; }
+  .dr-actions { order: 7; margin: 0 16px; padding: 22px 0 18px; flex-direction: column; }
   .dial-knob { width: 78vw; max-width: 440px; }
   .dial-ann--tl { left: 16px; top: 18px; }
   .dial-ann--tr { right: 16px; top: 18px; }
@@ -540,23 +596,24 @@
   .dial-ann--br { right: 16px; bottom: 18px; }
   .dk-lab { font-size: 23px; }
   .dk-leg { font-size: 17px; }
-  .dial-stage { min-height: 340px; }
-  .ds-hang { width: 64%; margin-left: -32%; }
+  .ds-hang { width: 70%; margin-left: -35%; }
   .ds-ann--tl { left: 16px; top: 16px; }
   .ds-ann--tr { right: 16px; top: 16px; }
   .ds-ann--bl { left: 16px; bottom: 14px; }
   .ds-ann--br { right: 16px; bottom: 14px; }
-  .dial-read { padding: 20px 16px 22px; }
-  .dr-num { font-size: min(46vw, 200px); margin-top: 16px; }
-  .dr-name { font-size: 17px; }
+  .dr-num { font-size: min(40vw, 190px); }
+  .dr-name { font-size: 15px; }
+  .dr-unit b { font-size: 34px; }
   .dr-spec .v { font-size: 16px; }
   .dr-spec--lm .v { font-size: 28px; }
-  .dr-actions { flex-direction: column; }
   .dr-cta, .dr-add { width: 100%; min-height: 54px; }
+  .dial-x--tl, .dial-x--bl { left: -1px; }
+  .dial-x--tr, .dial-x--br { right: -1px; }
 }
 @media (max-width: 360px) {
   .dial-ann--tr, .dial-ann--br { display: none; }
   .dr-spec .v { font-size: 15px; }
+  .dr-name { font-size: 13px; }
 }
 
 /* ======================================================================

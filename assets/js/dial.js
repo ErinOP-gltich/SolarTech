@@ -88,6 +88,16 @@
       '<path d="M-27,-58 V-30 M27,-58 V-30"/><path d="M-56,-6 C-56,40 -30,52 0,52 C30,52 56,40 56,-6"/><path d="M0,52 V66"/></g></svg>';
   }
 
+  // engraved legend around the hub (fixed, like the maker's mark on a machined face)
+  function engraveSVG(id) {
+    var t = 'GREEN SUN TECHNOLOGIES \u00b7 GUWAHATI \u00b7 OSRAM 155 LM/W \u00b7 IP66 \u00b7 LiFePO\u2084 \u00b7 ';
+    return '<svg class="dk-engr" viewBox="-200 -200 400 400" aria-hidden="true" focusable="false"><defs>' +
+      '<path id="' + id + '-eng" d="M0,-98 A98,98 0 1 1 -0.01,-98"/></defs>' +
+      '<circle class="dk-engr-ring" r="110"/><circle class="dk-engr-ring" r="86"/>' +
+      '<text class="dk-engr-sh"><textPath href="#' + id + '-eng" textLength="606" lengthAdjust="spacing">' + t + '</textPath></text>' +
+      '<text class="dk-engr-t"><textPath href="#' + id + '-eng" textLength="606" lengthAdjust="spacing">' + t + '</textPath></text></svg>';
+  }
+
   function scaleSVG(id, items, step) {
     var n = items.length, span = Math.max(1, n - 1), s = '', k, a;
     var R_TRACK = 222;
@@ -154,12 +164,12 @@
         '<div class="dial-knob" role="slider" tabindex="0" aria-label="Street light wattage" aria-describedby="' + id + '-help">' +
           scaleSVG(id, items, step) +
           '<div class="dk-cap">' +
-            '<i class="dk-shadow"></i><i class="dk-grip"></i><i class="dk-shade"></i><i class="dk-face"></i>' +
+            '<i class="dk-shadow"></i><i class="dk-grip"></i><i class="dk-shade"></i><i class="dk-face"></i>' + engraveSVG(id) +
             '<i class="dk-ind"><i></i><b class="dk-spark"></b></i>' +
             '<i class="dk-bloom"></i>' + raysSVG(id) + coreSVG(id) + '<i class="dk-gloss"></i>' +
           '</div>' +
         '</div>' +
-        '<div class="dial-ann dial-ann--bl dial-mono" aria-hidden="true"><span>Drag · Scroll</span><span class="dial-keys"><kbd>←</kbd><kbd>→</kbd></span></div>' +
+        '<div class="dial-ann dial-ann--bl dial-mono" aria-hidden="true"><span class="dial-hint-fine">Drag · Scroll</span><span class="dial-hint-fine dial-keys"><kbd>←</kbd><kbd>→</kbd></span><span class="dial-hint-touch">Turn the dial · Tap a number</span></div>' +
         '<div class="dial-ann dial-ann--br dial-mono" aria-hidden="true">' + GEO + '</div>' +
         '<p class="dial-sr" id="' + id + '-help">Use the arrow keys to step through the wattages, Home and End for the lowest and highest.</p>' +
       '</div>' +
@@ -172,6 +182,7 @@
           '<div class="ds-hang"><i class="ds-cable" aria-hidden="true"></i><div class="ds-lamp">' +
             '<img class="ds-img" alt="" decoding="async" draggable="false"><img class="ds-img" alt="" decoding="async" draggable="false"><i class="ds-rim" aria-hidden="true"></i>' +
           '</div></div>' +
+          '<div class="ds-fx" aria-hidden="true"><i class="ds-glare"></i><i class="ds-flare"></i></div>' +
           '<div class="ds-ann ds-ann--tl" aria-hidden="true"><span class="dial-mono">Fig. <b data-fig>01</b></span><span class="dial-mono" data-part-s></span></div>' +
           '<div class="ds-ann ds-ann--tr" aria-hidden="true"><span class="dial-mono">Beam</span><span class="dial-mono"><b data-pct>0</b>% of max</span></div>' +
           '<figcaption class="ds-ann ds-ann--bl"><span class="dial-mono">OSRAM LED · 155 lm/W</span><span class="dial-mono">Beam shown is illustrative</span></figcaption>' +
@@ -179,9 +190,14 @@
         '</figure>' +
         '<div class="dial-read">' +
           '<div class="dr-top dial-mono"><span>№ <b data-idx>01</b> / ' + pad(cnt, 2) + '</span><span>Semi-integrated · street</span></div>' +
-          '<div class="dr-num" aria-hidden="true">' + num + '<span class="dr-unit"><b>W</b><span class="dial-mono">Rated<br>power</span></span></div>' +
-          '<p class="dr-name" data-name></p>' +
-          '<p class="dr-part dial-mono">Part № <b data-part></b></p>' +
+          '<div class="dr-head">' +
+            '<div class="dr-num" aria-hidden="true">' + num + '</div>' +
+            '<div class="dr-side">' +
+              '<span class="dr-unit" aria-hidden="true"><b>W</b><span class="dial-mono">Rated<br>power</span></span>' +
+              '<p class="dr-name" data-name></p>' +
+              '<p class="dr-part dial-mono">Part № <b data-part></b></p>' +
+            '</div>' +
+          '</div>' +
           '<dl class="dr-specs">' +
             '<div class="dr-spec dr-spec--lm"><dt class="dial-mono">Lumens</dt><dd><span class="v" data-lm>0</span><small>LED output @155 lm/W</small></dd><i class="dr-bar" aria-hidden="true"><i data-bar="lm"></i></i></div>' +
             '<div class="dr-spec"><dt class="dial-mono">Battery</dt><dd><span class="v" data-battery></span><small data-chem></small><i class="dr-bar" aria-hidden="true"><i data-bar="ah"></i></i></dd></div>' +
@@ -289,7 +305,7 @@
     function nameHTML(p) {
       var rest = String(p.name || '').replace(/^\s*\d+(?:\.\d+)?\s*W\s*/i, '');
       var m = rest.match(/^(.*?)\s+(Solar\b.*)$/i);
-      return m ? '<span>' + esc(m[1]) + ' <em>' + esc(m[2].toLowerCase()) + '</em></span>' : '<span>' + esc(rest || p.name) + '</span>';
+      return m ? '<span class="dr-name-a">' + esc(m[1]) + '</span> <em>' + esc(m[2].toLowerCase()) + '</em>' : '<span class="dr-name-a">' + esc(rest || p.name) + '</span>';
     }
     function setBar(node, frac) { if (node) node.style.setProperty('--p', isFinite(frac) ? clamp(frac, 0, 1).toFixed(4) : '0'); }
 
@@ -662,9 +678,10 @@
       dust.w = w; dust.h = h; dust.dpr = dpr;
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       var cs = getComputedStyle(stage);
+      var lt = parseFloat(cs.getPropertyValue('--lt')), lh = parseFloat(cs.getPropertyValue('--lh'));
       dust.ax = w * (parseFloat(cs.getPropertyValue('--apx')) || 50) / 100;
-      dust.ay = h * (parseFloat(cs.getPropertyValue('--apy')) || 41) / 100;
-      dust.fy = h * (parseFloat(cs.getPropertyValue('--fy')) || 87) / 100;
+      dust.ay = h * ((isFinite(lt) ? lt : 10) + (isFinite(lh) ? lh : 31) - 1.5) / 100;
+      dust.fy = h * (parseFloat(cs.getPropertyValue('--fy')) || 86) / 100;
       var count = w < 420 ? 46 : 80;
       dust.ps = [];
       for (var k = 0; k < count; k++) dust.ps.push(mote(true));
