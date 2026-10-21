@@ -234,14 +234,18 @@
     }
 
     function noiseTile(seed, size, amp) {
+      // fine grain drawn at half size and scaled up smooth, so the road reads as worn asphalt, not TV static
       var c = makeCanvas(size, size), g = c.getContext('2d'), r = rng(seed);
-      var img = g.createImageData(size, size), d = img.data;
-      for (var i = 0; i < size * size; i++) {
+      var h = size / 2, fine = makeCanvas(h, h), fg = fine.getContext('2d');
+      var img = fg.createImageData(h, h), d = img.data;
+      for (var i = 0; i < h * h; i++) {
         var v = r(), lum = v < 0.5 ? 0 : 255;
         d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = lum;
-        d[i * 4 + 3] = Math.round(Math.pow(Math.abs(v - 0.5) * 2, 2.2) * 255 * amp);
+        d[i * 4 + 3] = Math.round(Math.pow(Math.abs(v - 0.5) * 2, 2.6) * 255 * amp);
       }
-      g.putImageData(img, 0, 0);
+      fg.putImageData(img, 0, 0);
+      g.imageSmoothingEnabled = true;
+      g.drawImage(fine, 0, 0, size, size);
       // a few bigger aggregate stones
       for (i = 0; i < size * 0.9; i++) {
         g.fillStyle = r() < 0.5 ? 'rgba(255,255,255,' + (0.08 + r() * 0.12) + ')' : 'rgba(0,0,0,' + (0.1 + r() * 0.2) + ')';
@@ -340,7 +344,7 @@
         ctx.save();
         ctx.beginPath(); ctx.rect(0, yb, W, ya - yb + 0.5); ctx.clip();
         ctx.setTransform(dpr * sc, 0, 0, dpr * sc * clamp(squash, 0.05, 1), dpr * (b * 37 % 128), dpr * yb);
-        ctx.globalAlpha = (isLit ? 0.55 : 0.5) * (1 - sstep(30, 160, zm));
+        ctx.globalAlpha = (isLit ? 0.42 : 0.34) * (1 - sstep(30, 160, zm));
         ctx.fillStyle = pat;
         ctx.fillRect(-W, 0, 4 * W / sc + 256, (ya - yb) / (sc * clamp(squash, 0.05, 1)) + 128);
         ctx.restore();

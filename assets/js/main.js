@@ -25,9 +25,12 @@
     });
   }
 
-  // a refresh always starts at the top (the head script turns off the browser's scroll restoration);
-  // a link to a section (#day, #catalogue…) still lands on that section
-  if (!location.hash) scrollTo(0, 0);
+  // a refresh always starts at the top: the head script turns off the browser's scroll restoration and drops
+  // a #section left in the address; a link to a section (#day, #catalogue…) still lands on that section.
+  // Safari can still put the old position back once the page has loaded, so check again then.
+  function toTop() { if ((window.GS_RELOAD_HASH || !location.hash) && scrollY) scrollTo(0, 0); }
+  toTop();
+  if (root.classList.contains('is-loading')) addEventListener('load', toTop);
 
   /* ---------- page-ready: fires when the loading screen starts to reveal the page ---------- */
   const readyQueue = [];
@@ -320,8 +323,7 @@
       try { target = document.getElementById(decodeURIComponent(url.hash.slice(1))); } catch (err) { /* malformed hash */ }
       if (!target) return;
       e.preventDefault();
-      lenis.scrollTo(target, { offset: -20 });
-      history.pushState(null, '', url.hash);
+      lenis.scrollTo(target, { offset: -20 }); // the address keeps no #section, so a refresh still opens at the top
       // move keyboard focus too, as a native jump would (skip link, in-page links)
       if (!target.matches('a[href], button, input, select, textarea, [tabindex]')) target.setAttribute('tabindex', '-1');
       target.focus({ preventScroll: true });

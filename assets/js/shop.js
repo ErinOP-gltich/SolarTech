@@ -236,6 +236,11 @@
 
   const params = new URLSearchParams(location.search);
   if (params.get('q')) { state.q = params.get('q'); qInput.value = state.q; }
+  // a refresh keeps the category filter but, like every page, opens at the top (the head script took the
+  // #category out of the address so the browser wouldn't jump to it; put it back without scrolling)
+  const kept = (window.GS_RELOAD_HASH || '').slice(1);
+  const refreshed = CATS.some(function (c) { return c.id === kept; });
+  if (refreshed) history.replaceState(null, '', '#' + kept);
   fromHash();
   buildBar();
   buildGrid();
@@ -246,6 +251,6 @@
   // page intro
   GS.ready(function () {
     document.querySelectorAll('[data-hero-line]').forEach(function (l, i) { GS.splitIn(l, .1 + i * .12); });
-    if (state.cat !== 'all') { const c = $('#catalogue'); if (c) setTimeout(function () { if (GS.lenis) GS.lenis.scrollTo(c, { offset: -20 }); else c.scrollIntoView(); }, 400); }
+    if (state.cat !== 'all' && !refreshed) { const c = $('#catalogue'); if (c) setTimeout(function () { if (GS.lenis) GS.lenis.scrollTo(c, { offset: -20 }); else c.scrollIntoView(); }, 400); }
   });
 })();
