@@ -348,17 +348,10 @@
   function nav() {
     const bar = document.querySelector('[data-nav]');
     if (!bar) return;
-    let lastY = scrollY;
-    addEventListener('scroll', function () {
-      const y = scrollY, d = y - lastY;
-      const menuOpen = document.getElementById('menu') && document.getElementById('menu').classList.contains('is-open');
-      if (y < innerHeight * .6 || menuOpen) bar.classList.remove('is-hidden');
-      else if (Math.abs(d) < 4) return; // too small to tell a direction (end of a smooth scroll): keep the state and the anchor
-      else bar.classList.toggle('is-hidden', d > 0);
-      lastY = y;
-    }, { passive: true });
-    // a keyboard user tabbing into the hidden bar brings it back
-    bar.addEventListener('focusin', function () { bar.classList.remove('is-hidden'); });
+    // the bar always stays on screen; once the page moves it gets a denser glass so it reads over anything
+    const paintBar = function () { bar.classList.toggle('is-scrolled', scrollY > 24); };
+    addEventListener('scroll', paintBar, { passive: true });
+    paintBar();
 
     // Guwahati time in the bar
     const clock = bar.querySelector('[data-ist]');
@@ -467,6 +460,33 @@
     root.classList.add('lg-refract');
   }
 
+  /* ---------- footer sign: the letters switch on one by one when it comes into view ---------- */
+  function footerSign() {
+    const sign = document.querySelector('[data-sign]');
+    if (!sign) return;
+    const letters = [];
+    sign.querySelectorAll('span').forEach(function (word) {
+      const text = word.textContent;
+      word.textContent = '';
+      Array.from(text).forEach(function (ch) {
+        const i = document.createElement('i');
+        i.textContent = ch;
+        i.setAttribute('data-l', ch);
+        word.appendChild(i);
+        letters.push(i);
+      });
+    });
+    const light = function () {
+      sign.classList.add('is-lit');
+      letters.forEach(function (i, n) { i.style.setProperty('--dl', (reduceMotion ? 0 : n * .11 + (n % 3) * .04) + 's'); i.classList.add('on'); });
+    };
+    if (reduceMotion || !('IntersectionObserver' in window)) { light(); return; }
+    const io = new IntersectionObserver(function (en) {
+      if (en[0].isIntersecting) { io.disconnect(); light(); }
+    }, { threshold: .55 });
+    io.observe(sign);
+  }
+
   /* ---------- "Pause motion": stops the looping animations (tickers, marquee, drifting light, the sun) ---------- */
   let motionPaused = false;
   function motionToggle() {
@@ -500,6 +520,7 @@
   cursor();
   magnetic();
   lightbox();
+  footerSign();
   motionToggle();
 
   window.GS = {

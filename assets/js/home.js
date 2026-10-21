@@ -110,12 +110,16 @@
     addEventListener('resize', measure);
     let visible = true, lastY = scrollY, vel = 0, skew = 0, raf = 0;
     // the loop only runs while the marquee is on screen and motion isn't paused
-    const wake = function () { if (!raf && visible && !GS.motionPaused) { lastY = scrollY; raf = requestAnimationFrame(loop); } };
+    let lastT = 0;
+    const wake = function () { if (!raf && visible && !GS.motionPaused) { lastY = scrollY; lastT = 0; raf = requestAnimationFrame(loop); } };
     new IntersectionObserver(function (en) { visible = en[0].isIntersecting; wake(); }).observe(box);
     document.addEventListener('gs:motion', wake);
-    function loop() {
+    function loop(now) {
       raf = 0;
       if (!visible || GS.motionPaused) return;
+      // time-based so it runs at the same speed on 60 Hz and 120 Hz screens
+      const dt = lastT ? Math.min(3, (now - lastT) / 16.667) : 1;
+      lastT = now;
       const y = scrollY;
       const lv = GS.lenis ? GS.lenis.velocity : (y - lastY);
       lastY = y;
@@ -123,7 +127,7 @@
       skew += (clamp(vel * -.35, -12, 12) - skew) * .1;
       if (visible) {
         st.forEach(function (s) {
-          s.x += s.dir * (1.1 + Math.abs(vel) * .55);
+          s.x += s.dir * (3.2 + Math.abs(vel) * .8) * dt; // ~190 px/s at rest, faster while scrolling
           if (s.x <= -s.w) s.x += s.w;
           if (s.x > 0) s.x -= s.w;
           s.el.style.transform = 'translate3d(' + s.x.toFixed(1) + 'px,0,0) skewX(' + skew.toFixed(2) + 'deg)';
