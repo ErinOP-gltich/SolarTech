@@ -51,7 +51,7 @@
 
 /* ---------- the headline: in the dark, and in the beam ---------- */
 .hb-title {
-  font-size: clamp(40px, 8.1vw, 124px);
+  font-size: clamp(40px, 6.9vw, 112px);
   color: var(--hb-unlit);
   text-shadow: 0 0 2px rgba(5, 5, 7, .7), 0 0 18px rgba(5, 5, 7, .75), 0 0 48px rgba(5, 5, 7, .55);
 }
@@ -59,8 +59,10 @@
 .hb-title.is-in .ln { overflow: visible; } /* the intro mask is done: let the lit glow breathe past the line box */
 .hb-title .ln > span { display: inline-block; white-space: nowrap; }
 .hb-title .it { --hb-indent: 1.45em; padding-left: var(--hb-indent); }
-/* background-clip text + text-shadow paints the shadow over the gradient; give this line a filter halo instead */
-.hb-title .grad { text-shadow: none; filter: drop-shadow(0 0 14px rgba(5, 5, 7, .8)); }
+/* moonlit silver for the words in the dark (the gradient line keeps its plasma);
+   background-clip text + text-shadow paints the shadow over the gradient, so these lines get a filter halo instead */
+.hb-title .hb-lit:not(.grad) { background: linear-gradient(180deg, #F6F3EC 0%, #D9D5E0 48%, #A9A5B8 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hb-title .hb-lit, .hb-title .grad { text-shadow: none; filter: drop-shadow(0 0 14px rgba(5, 5, 7, .8)); }
 
 .hb-lit { position: relative; }
 .hb-lit::after {
@@ -92,7 +94,7 @@ html:not(.js) .hb-lit::after { content: none; }
 
 /* ---------- the ticker the client loved: faster, brighter ---------- */
 .hb .hero-foot { position: relative; z-index: 1; border-top-color: rgba(243, 239, 230, .14); }
-.hb .ticker .ticker-track { animation-duration: 8s; gap: var(--s7); }
+.hb .ticker-track span { padding-right: var(--s7); }
 .hb .ticker { font-size: 12px; color: var(--text-2); }
 .hb .ticker-track span::before { content: '✺'; color: var(--sun); text-shadow: 0 0 10px rgba(255, 196, 0, .6); }
 

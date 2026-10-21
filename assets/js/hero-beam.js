@@ -119,7 +119,7 @@
     }
     var tight = ar < 1.45; // 1024×768-ish
     return { portrait: false, camH: 7.6, pitch: 20, vfov: tight ? 58 : 54, ppx: tight ? 0.58 : 0.6, camX: tight ? -1.6 : -2.4,
-      lamp: [tight ? 0.75 : 0.735, tight ? 0.26 : 0.275], lampDist: tight ? 3.5 : 3.3, beta: 17, minY: 0.3, maxZ: 40,
+      lamp: [tight ? 0.77 : 0.775, tight ? 0.245 : 0.25], lampDist: tight ? 3.9 : 3.75, beta: 17, minY: 0.3, maxZ: 40,
       rest: [0.6, 0.68], sweep: [0.56, 0.3, 0.66, 0.15] };
   }
 

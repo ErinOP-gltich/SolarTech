@@ -21,7 +21,7 @@
       // scrolling away tilts the lamp and narrows its beam
       if (beam && motion) ST.create({ trigger: hero, start: 'top top', end: 'bottom top', scrub: true, onUpdate: function (st) { beam.setProgress(st.progress); } });
     });
-    if (motion) gsap.to(hero.querySelector('.hero-mid'), { yPercent: -18, opacity: 0, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+    if (motion) gsap.to(hero.querySelector('.hero-mid'), { yPercent: -18, opacity: 0, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: .6 } });
   }
 
   function heroIntro() {
@@ -223,20 +223,37 @@
     }
     const RISE = 5.5, SET = 18;
     const sunPower = function (t) { return t > RISE && t < SET ? Math.sin(Math.PI * (t - RISE) / (SET - RISE)) : 0; };
-    const lampLevel = function (t) { return t < 5.5 ? .5 : t < 18 ? 0 : t < 24 ? 1 : .5; };
+    const ramp = function (t, a, b) { const k = clamp((t - a) / (b - a), 0, 1); return k * k * (3 - 2 * k); };
+    // lamp and charging fade over ~20 minutes of story time instead of switching in one frame
+    const lampLevel = function (t) { return .5 * (1 - ramp(t, 5.35, 5.65)) + ramp(t, 17.85, 18.15) - .5 * ramp(t, 23.85, 24.15) + .5 * ramp(t, 28.85, 29.15); };
+    const charging = function (t) { return ramp(t, 5.9, 6.3) * (1 - ramp(t, 15.2, 15.6)); };
     const phaseOf = function (t) { return t < 6.5 ? 0 : t < 18 ? 1 : t < 24 ? 2 : 3; };
 
     function fitScene() { scene.setAttribute('viewBox', innerWidth < 760 ? '760 0 480 900' : '0 0 1600 900'); }
     fitScene();
     addEventListener('resize', fitScene);
 
-    let phase = -1, raf = 0;
-    function update() {
-      raf = 0;
+    // the scene eases toward the scroll position (critically damped), so it glides instead of stepping
+    let phase = -1, raf = 0, cur = null, last = 0, swapTimer = 0;
+    function target() {
       const r = sec.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > innerHeight) return;
-      const p = clamp(-r.top / (sec.offsetHeight - innerHeight), 0, 1);
-      const t = 5 + 24 * p;
+      return { on: r.bottom > -innerHeight * .25 && r.top < innerHeight * 1.25, t: 5 + 24 * clamp(-r.top / (sec.offsetHeight - innerHeight), 0, 1) };
+    }
+    function tick(now) {
+      raf = 0;
+      const tg = target();
+      if (!tg.on) { cur = null; return; }
+      const dt = last ? Math.min(.1, (now - last) / 1000) : 0;
+      last = now;
+      if (cur === null || GS.reduceMotion) cur = tg.t;
+      else cur += (tg.t - cur) * (1 - Math.exp(-dt * 7));
+      if (Math.abs(tg.t - cur) < .004) cur = tg.t;
+      render(cur);
+      if (cur !== tg.t) raf = requestAnimationFrame(tick); else last = 0;
+    }
+    function wake() { if (!raf) raf = requestAnimationFrame(tick); }
+    function render(t) {
+      const p = (t - 5) / 24;
       const sp = sunPower(t);
       const dark = clamp(1 - sp * 2.4, 0, 1);
       const lamp = lampLevel(t);
@@ -247,10 +264,10 @@
       stick.style.setProperty('--bot', interp(SKY, t, 2));
       stick.style.setProperty('--night', dark.toFixed(3));
       stick.style.setProperty('--shade', (dark * .75).toFixed(3));
-      stick.style.setProperty('--lamp', lamp);
+      stick.style.setProperty('--lamp', lamp.toFixed(3));
       stick.style.setProperty('--sunpow', clamp(sp * 3, 0, 1).toFixed(3));
-      stick.style.setProperty('--charging', t > 6 && t < 15.5 ? 1 : 0);
-      stick.style.setProperty('--hint', p < .02 ? 1 : 0);
+      stick.style.setProperty('--charging', charging(t).toFixed(3));
+      stick.style.setProperty('--hint', (1 - ramp(p, .005, .03)).toFixed(3));
 
       const u = (t - RISE) / (SET - RISE);
       const sx = W * (.08 + .84 * clamp(u, 0, 1));
@@ -264,25 +281,33 @@
       clock.firstChild.nodeValue = pad(Math.floor(t) % 24) + ':' + pad(Math.floor((t % 1) * 60));
       bars.bat.style.setProperty('--v', (bat / 100).toFixed(3));
       bars.sun.style.setProperty('--v', sp.toFixed(3));
-      bars.lamp.style.setProperty('--v', lamp);
+      bars.lamp.style.setProperty('--v', lamp.toFixed(3));
       outs.bat.textContent = Math.round(bat) + '%';
       outs.sun.textContent = Math.round(sp * 100) + '%';
       outs.lamp.textContent = Math.round(lamp * 100) + '%';
 
       const ph = phaseOf(t);
       if (ph !== phase) {
+        const first = phase < 0;
         phase = ph;
-        phaseEl.querySelector('h3').textContent = PHASES[ph].h;
-        phaseEl.querySelector('p').textContent = PHASES[ph].p;
         dots.forEach(function (d, i) { d.classList.toggle('on', i <= ph); });
+        // the story text cross-fades: out, swap, in (always landing on the latest phase)
+        const swap = function () {
+          phaseEl.querySelector('h3').textContent = PHASES[phase].h;
+          phaseEl.querySelector('p').textContent = PHASES[phase].p;
+          phaseEl.classList.remove('is-swapping');
+          swapTimer = 0;
+        };
+        if (first || GS.reduceMotion) swap();
+        else { phaseEl.classList.add('is-swapping'); clearTimeout(swapTimer); swapTimer = setTimeout(swap, 220); }
       }
     }
     phaseEl.insertAdjacentHTML('beforebegin', '<ol class="sr-only">' + PHASES.map(function (x) {
       return '<li><h3>' + GS.esc(x.h) + '</h3><p>' + GS.esc(x.p) + '</p></li>';
     }).join('') + '</ol>');
-    addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
-    addEventListener('resize', update);
-    update();
+    addEventListener('scroll', wake, { passive: true });
+    addEventListener('resize', function () { cur = null; wake(); });
+    wake();
   }
 
   /* ---------- 7. the showroom: vertical scroll drives a horizontal run of products ---------- */
@@ -298,7 +323,7 @@
       const cat = window.GS_CATEGORIES.find(function (c) { return c.id === p.cat; });
       const specs = (p.key || [['Battery', p.battery], ['Panel', p.panel], ['Backup', p.autonomy]]).concat([['Protection', p.ip || '—']]).slice(0, 4);
       return '<article class="show-card glass glass-edge">' +
-        '<a class="sc-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true" data-cursor="Enquire">' +
+        '<a class="sc-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true">' +
           (big ? '<span class="sc-watt cond">' + GS.esc(big) + '</span>' : '') + '<img src="' + GS.esc(p.img) + '" alt="" loading="lazy"></a>' +
         '<div class="sc-body">' +
           '<span class="label">№ ' + pad(i + 1) + ' / ' + pad(items.length) + ' · ' + GS.esc(cat ? cat.name : '') + '</span>' +

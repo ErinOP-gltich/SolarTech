@@ -130,7 +130,6 @@
   -webkit-user-select: none;
 }
 .dial-knob.is-dragging { cursor: grabbing; }
-html.has-cursor .dial-knob, html.has-cursor .dial-knob.is-dragging { cursor: none; }
 .dial-knob > * { position: absolute; }
 
 /* static scale (SVG) */

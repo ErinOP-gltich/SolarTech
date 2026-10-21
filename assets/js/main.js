@@ -25,6 +25,10 @@
     });
   }
 
+  // a refresh always starts at the top (the head script turns off the browser's scroll restoration);
+  // a link to a section (#day, #catalogue…) still lands on that section
+  if (!location.hash) scrollTo(0, 0);
+
   /* ---------- page-ready: fires when the loading screen starts to reveal the page ---------- */
   const readyQueue = [];
   let isReady = false;
@@ -133,7 +137,7 @@
       '<article class="card glass glass-edge' + (opts.feature ? ' is-feature' : '') + '" data-id="' + esc(p.id) + '" data-flip-id="' + esc(p.id) + '">' +
         '<div class="card-top"><span class="label">№ ' + (n < 10 ? '0' : '') + n + ' · ' + esc(cat ? cat.short || cat.name : '') + '</span>' +
           (p.badge ? '<span class="card-badge">' + esc(p.badge) + '</span>' : '') + '</div>' +
-        '<a class="card-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true" data-cursor="Enquire">' +
+        '<a class="card-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true">' +
           (big ? '<span class="card-watt cond">' + esc(big) + '</span>' : '') +
           '<img src="' + esc(p.img) + '" alt="" loading="lazy" decoding="async">' +
         '</a>' +
@@ -229,74 +233,74 @@
     setTimeout(function () { s.remove(); }, 700);
   });
 
-  /* ---------- liquid glass: the specular highlight follows the pointer ---------- */
-  function glassLight() {
+  /* ---------- liquid glass: the light inside a panel follows the pointer, eased so it glides ---------- */
+  // One loop serves every panel: each eases its specular highlight (and, for product cards, a gentle 3D tilt)
+  // toward the pointer, glides back when the pointer leaves, and the loop sleeps once everything has settled.
+  function glassMotion() {
     if (!finePointer) return;
-    let last = null;
+    const live = new Map();
+    let raf = 0, last = 0, current = null;
+    const state = function (el) {
+      let s = live.get(el);
+      if (!s) {
+        const r = el.getBoundingClientRect();
+        s = { x: r.width * .3, y: 0, tx: r.width * .3, ty: 0, a: 0, ta: 0, rx: 0, ry: 0, trx: 0, tr: 0, card: el.classList.contains('card') && !reduceMotion };
+        live.set(el, s);
+      }
+      return s;
+    };
+    function frame(now) {
+      raf = 0;
+      const dt = last ? Math.min(.05, (now - last) / 1000) : 1 / 60;
+      last = now;
+      const kLight = 1 - Math.exp(-dt * 11), kTilt = 1 - Math.exp(-dt * 7);
+      let busy = false;
+      live.forEach(function (s, el) {
+        s.x += (s.tx - s.x) * kLight; s.y += (s.ty - s.y) * kLight; s.a += (s.ta - s.a) * kTilt;
+        el.style.setProperty('--gx', s.x.toFixed(1) + 'px');
+        el.style.setProperty('--gy', s.y.toFixed(1) + 'px');
+        el.style.setProperty('--ga', s.a.toFixed(3));
+        if (s.card) {
+          s.rx += (s.trx - s.rx) * kTilt; s.ry += (s.tr - s.ry) * kTilt;
+          el.style.transform = 'perspective(1000px) rotateX(' + s.rx.toFixed(2) + 'deg) rotateY(' + s.ry.toFixed(2) + 'deg)';
+        }
+        const settled = Math.abs(s.tx - s.x) < .4 && Math.abs(s.ty - s.y) < .4 && Math.abs(s.ta - s.a) < .004 &&
+          Math.abs(s.trx - s.rx) < .01 && Math.abs(s.tr - s.ry) < .01;
+        if (settled && s.ta === 0) {
+          live.delete(el);
+          el.style.removeProperty('--gx'); el.style.removeProperty('--gy'); el.style.removeProperty('--ga');
+          if (s.card) el.style.transform = '';
+        } else if (!settled) busy = true;
+      });
+      if (busy) raf = requestAnimationFrame(frame); else last = 0;
+    }
+    const wake = function () { if (!raf) raf = requestAnimationFrame(frame); };
+    const release = function (el) { const s = el && live.get(el); if (s) { s.ta = 0; s.trx = 0; s.tr = 0; } };
     document.addEventListener('pointermove', function (e) {
+      if (e.pointerType === 'touch') return;
       const g = e.target.closest && e.target.closest('.glass');
-      if (last && last !== g) last.style.removeProperty('--gx');
-      last = g;
-      if (!g) return;
-      const r = g.getBoundingClientRect();
-      g.style.setProperty('--gx', (e.clientX - r.left).toFixed(0) + 'px');
-      g.style.setProperty('--gy', (e.clientY - r.top).toFixed(0) + 'px');
+      if (current && current !== g) release(current);
+      current = g;
+      if (g) {
+        const s = state(g), r = g.getBoundingClientRect();
+        s.tx = e.clientX - r.left; s.ty = e.clientY - r.top; s.ta = 1;
+        if (s.card) {
+          const open = g.classList.contains('is-open');
+          s.trx = open ? 0 : -((e.clientY - r.top) / r.height - .5) * 7;
+          s.tr = open ? 0 : ((e.clientX - r.left) / r.width - .5) * 7;
+        }
+      }
+      wake();
     }, { passive: true });
-  }
-
-  // 3D tilt for product cards
-  function tilt() {
-    if (!finePointer || reduceMotion) return;
-    document.addEventListener('pointermove', function (e) {
-      const c = e.target.closest && e.target.closest('.card');
-      if (!c || c.classList.contains('is-open')) return;
-      const r = c.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
-      c.style.transform = 'perspective(1000px) rotateX(' + (-y * 7).toFixed(2) + 'deg) rotateY(' + (x * 7).toFixed(2) + 'deg)';
-    }, { passive: true });
-    document.addEventListener('pointerout', function (e) {
-      const c = e.target.closest && e.target.closest('.card');
-      if (c && !c.contains(e.relatedTarget)) c.style.transform = '';
-    });
-  }
-
-  /* ---------- custom cursor ---------- */
-  function cursor() {
-    if (!finePointer || reduceMotion || matchMedia('(forced-colors: active), (prefers-contrast: more)').matches) return;
-    const el = document.createElement('div');
-    el.className = 'cursor';
-    el.setAttribute('aria-hidden', 'true');
-    el.innerHTML = '<div class="cursor-ring"><span class="cursor-label"></span></div><div class="cursor-dot"></div>';
-    document.body.appendChild(el);
-    root.classList.add('has-cursor');
-    const ring = el.querySelector('.cursor-ring'), dot = el.querySelector('.cursor-dot'), label = el.querySelector('.cursor-label');
-    let x = -100, y = -100, rx = x, ry = y;
-    (function loop() {
-      rx += (x - rx) * .18; ry += (y - ry) * .18;
-      ring.style.transform = 'translate(' + rx.toFixed(1) + 'px,' + ry.toFixed(1) + 'px)';
-      dot.style.transform = 'translate(' + x + 'px,' + y + 'px)';
-      requestAnimationFrame(loop);
-    })();
-    document.addEventListener('pointermove', function (e) {
-      x = e.clientX; y = e.clientY;
-      const t = e.target.closest ? e.target : null;
-      const big = t && t.closest('[data-cursor]');
-      const link = t && t.closest('a, button, [role="slider"], [role="radio"], label, select');
-      el.classList.toggle('is-big', !!big);
-      el.classList.toggle('is-link', !big && !!link);
-      if (big) label.textContent = big.dataset.cursor;
-      const field = t && t.closest('input, textarea, select, iframe');
-      el.classList.toggle('is-hidden', !!field);
-    }, { passive: true });
-    document.addEventListener('pointerleave', function () { el.classList.add('is-hidden'); });
-    document.addEventListener('pointerenter', function () { el.classList.remove('is-hidden'); });
+    document.documentElement.addEventListener('pointerleave', function () { release(current); current = null; wake(); });
   }
 
   /* ---------- smooth scroll (Lenis) driven by the GSAP ticker so ScrollTrigger stays in sync ---------- */
   let lenis = null;
   function smooth() {
     if (reduceMotion || !window.Lenis) return;
-    lenis = new window.Lenis({ duration: 1.15, smoothWheel: true, wheelMultiplier: 1 });
+    lenis = new window.Lenis({ lerp: .085, duration: 1.2, smoothWheel: true, wheelMultiplier: .95, touchMultiplier: 1.5 });
+    if (window.ScrollTrigger) window.ScrollTrigger.config({ ignoreMobileResize: true }); // no re-layout when a phone's address bar slides
     // the loading screen locks the page; keep Lenis still until it lifts
     if (root.classList.contains('is-loading')) { lenis.stop(); ready(function () { lenis.start(); }); }
     if (gsap) {
@@ -460,6 +464,33 @@
     root.classList.add('lg-refract');
   }
 
+  /* ---------- credential tickers: a seamless loop at a steady reading speed ---------- */
+  // The track scrolls by half its width, so it must be two identical halves, each at least as wide as
+  // the strip: the original items are repeated until they are, and the duration is set from that width.
+  function tickers() {
+    const SPEED = 60; // px per second
+    document.querySelectorAll('.ticker-track').forEach(function (track) {
+      const box = track.parentElement;
+      const base = Array.from(track.children).filter(function (s) { return !s.hasAttribute('aria-hidden'); }).map(function (s) { return s.cloneNode(true); });
+      if (!base.length) return;
+      const build = function () {
+        track.textContent = '';
+        let reps = 0;
+        const add = function () { base.forEach(function (s, i) { const c = s.cloneNode(true); if (reps) c.setAttribute('aria-hidden', 'true'); track.appendChild(c); }); reps++; };
+        add();
+        const unit = track.scrollWidth;
+        while (track.scrollWidth < box.clientWidth + unit && reps < 12) add();
+        const half = track.scrollWidth;
+        for (let r = reps; r > 0; r--) add(); // second, identical half
+        track.style.setProperty('--tick-dur', (half / SPEED).toFixed(2) + 's');
+      };
+      build();
+      let w = box.clientWidth, timer = 0;
+      addEventListener('resize', function () { clearTimeout(timer); timer = setTimeout(function () { if (box.clientWidth !== w) { w = box.clientWidth; build(); } }, 200); });
+      if (document.fonts) document.fonts.ready.then(build);
+    });
+  }
+
   /* ---------- footer sign: the letters switch on one by one when it comes into view ---------- */
   function footerSign() {
     const sign = document.querySelector('[data-sign]');
@@ -515,12 +546,11 @@
   smooth();
   nav();
   reveals();
-  glassLight();
-  tilt();
-  cursor();
+  glassMotion();
   magnetic();
   lightbox();
   footerSign();
+  tickers();
   motionToggle();
 
   window.GS = {
