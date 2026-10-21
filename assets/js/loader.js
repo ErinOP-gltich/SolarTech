@@ -138,7 +138,7 @@
     var sun = $('.gsl-sun'), core = $('.gsl-core'), dial = $('.gsl-dial');
     var ember = $('.gsl-ember'), hot = $('.gsl-hot');
     var faceLit = $('.gsl-face:not(.gsl-face--dark)'), faceDark = $('.gsl-face--dark');
-    var flash = $('.gsl-flash'), glow = $('.gsl-glow');
+    var flash = $('.gsl-flash'), glow = $('.gsl-glow'), streak = $('.gsl-streak');
     var fx = $('.gsl-fx');
     var head = $('.gsl-bar b');
     var lines = $$('.gsl-log li').map(function (li) {
@@ -362,7 +362,7 @@
         { duration: 1200, delay: 60, easing: EXPO, fill: 'both' });
       $$('.gsl-face path').forEach(function (path, i) {
         animate(path, [{ strokeDashoffset: 1.05 }, { strokeDashoffset: 0 }],
-          { duration: 700, delay: 380 + i * 160, easing: EXPO, fill: 'both' });
+          { duration: 700, delay: 380 + (i % 3) * 160, easing: EXPO, fill: 'both' });
       });
       animate(core, [{ transform: 'scale(.86)' }, { transform: 'none' }], { duration: 1600, easing: EXPO });
     } else {
@@ -406,6 +406,8 @@
         var k = smooth(0.24, 0.56, pp);
         faceDark.style.opacity = k.toFixed(3);
         faceLit.style.opacity = (1 - k).toFixed(3);
+        streak.style.opacity = (0.85 * smooth(0.3, 1, pp)).toFixed(3);
+        streak.style.transform = 'scaleX(' + (0.25 + 0.75 * expoOut(pp)).toFixed(3) + ')';
         var ticks = Math.floor(pp * 72 + 1e-6) / 72;
         if (ticks !== dialT) { dialT = ticks; dial.style.setProperty('--t', ticks.toFixed(4)); }
         setSpin(0.05 + 0.95 * pp * pp);
@@ -457,6 +459,8 @@
         flash.style.opacity = (smooth(0, 1, f) * (1 - smooth(X.flash + 0.15, X.flash + 0.55, te))).toFixed(3);
         flash.style.transform = 'scale(' + (0.6 + 0.9 * expoOut(f)).toFixed(3) + ')';
         glow.style.opacity = '1';
+        streak.style.opacity = (1 - smooth(0.25, 0.75, te)).toFixed(3);
+        streak.style.transform = 'scaleX(' + (1 + 1.2 * expoOut(f)).toFixed(3) + ') scaleY(' + (1 + 1.5 * smooth(0, 1, f)).toFixed(3) + ')';
         if (!X.burst && te >= X.flash * 0.85) { X.burst = true; burst(); }
       }
       // 2 · burn-through: a circular hole races out from the sun's centre

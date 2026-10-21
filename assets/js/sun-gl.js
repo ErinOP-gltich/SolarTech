@@ -115,7 +115,7 @@
     '  for(int i=0;i<5;i++){',
     '    if(float(i)>=uOct)break;',
     '    float fi=float(i);',
-    '    s+=a*snoise(p+vec3(0.031,-0.022,0.027)*t*(1.0+fi*0.9));',
+    '    s+=a*snoise(p+vec3(0.026,-0.019,0.023)*t*(1.0+fi*0.8));',
     '    p=M3*p*2.03;a*=0.5;',
     '  }',
     '  return s;',
@@ -136,11 +136,11 @@
     '  float z=sqrt(max(1.0-rr*rr,0.0));',
     '  vec3 n=uRot*vec3(p,z);',
     '  vec3 w;',
-    '  w.x=snoise(n*1.6+vec3(0.0,0.0,t*0.040+uSeed));',
-    '  w.y=snoise(n*1.6+vec3(4.3,-2.1,-t*0.036));',
-    '  w.z=uDetail>0.5?snoise(n*1.6+vec3(-6.1,3.7,t*0.044)):w.x*w.y;',
+    '  w.x=snoise(n*1.6+vec3(0.0,0.0,t*0.014+uSeed));',
+    '  w.y=snoise(n*1.6+vec3(4.3,-2.1,-t*0.012));',
+    '  w.z=uDetail>0.5?snoise(n*1.6+vec3(-6.1,3.7,t*0.015)):w.x*w.y;',
     '  float f=fbm(n*3.4+w*1.05,t);',                                    // churning turbulence
-    '  float g=snoise(n*30.0+w*2.4+vec3(0.0,t*0.20,0.0));',              // granulation
+    '  float g=snoise(n*30.0+w*2.4+vec3(0.0,t*0.09,0.0));',              // granulation
     '  float gran=(abs(g)*2.0-0.6)*smoothstep(70.0,220.0,uRadius);',   // fade cells out before they alias
     '  float vn=snoise(n*4.2+w*1.6+vec3(t*0.02,0.0,9.0));',              // flowing dark veins
     '  float veins=pow(1.0-abs(vn),14.0);',

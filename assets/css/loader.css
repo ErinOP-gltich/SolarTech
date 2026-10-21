@@ -38,7 +38,8 @@ html.js .gsl {
 
   display: block;
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0; left: 0; bottom: 0;
+  width: 100vw;   /* also covers the scrollbar gutter reserved while locked */
   z-index: 2147483000;
   overflow: hidden;
   background: var(--void);
@@ -93,6 +94,18 @@ html.js .gsl {
 .gsl-k:nth-of-type(2) { right: 6px; top: 6px; }
 .gsl-k:nth-of-type(3) { left: 6px; bottom: 6px; }
 .gsl-k:nth-of-type(4) { right: 6px; bottom: 6px; }
+
+/* anamorphic flare: a horizontal streak of light leaking from behind the sun */
+.gsl-streak {
+  position: absolute; left: -10%; width: 120%; top: var(--cy); height: 120px; margin-top: -60px;
+  opacity: 0; transform: scaleX(.2); will-change: transform, opacity; pointer-events: none;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 150, 30, .28), rgba(255, 90, 20, .08) 45%, transparent 100%);
+}
+.gsl-streak::before {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 59, 31, .35) 18%, rgba(255, 196, 0, .75) 38%, #FFF8E2 50%, rgba(255, 196, 0, .75) 62%, rgba(255, 59, 31, .35) 82%, transparent 100%);
+  box-shadow: 0 0 12px 1px rgba(255, 170, 40, .45);
+}
 
 /* ---------- the sun ------------------------------------------------------ */
 .gsl-sun {
@@ -317,7 +330,7 @@ html.js .gsl {
 
 /* repeat visit in the same session: just the mark + hairline */
 .gsl--short .gsl-top, .gsl--short .gsl-count, .gsl--short .gsl-log,
-.gsl--short .gsl-x, .gsl--short .gsl-k, .gsl--short .gsl-dial b { display: none; }
+.gsl--short .gsl-x, .gsl--short .gsl-k, .gsl--short .gsl-dial b, .gsl--short .gsl-streak { display: none; }
 .gsl--short .gsl-sun { --s: min(30vh, 46vw, 300px); }
 .gsl--short .gsl-bar { top: 0; transform: none; }
 .gsl--short .gsl-core, .gsl--short .gsl-dial, .gsl--short .gsl-face--dark { opacity: 1; transform: none; }
@@ -326,7 +339,7 @@ html.js .gsl {
 .gsl--short .gsl-ember, .gsl--short .gsl-face:not(.gsl-face--dark) { opacity: 0; }
 
 /* reduced motion: a still frame, then a plain fade */
-.gsl--reduced .gsl-count, .gsl--reduced .gsl-bar, .gsl--reduced .gsl-fx,
+.gsl--reduced .gsl-count, .gsl--reduced .gsl-bar, .gsl--reduced .gsl-fx, .gsl--reduced .gsl-streak,
 .gsl--reduced .gsl-dial::after { display: none; }
 .gsl--reduced .gsl-bar, .gsl--reduced .gsl-dial { transform: none; }
 .gsl--reduced .gsl-x i { transform: none; }

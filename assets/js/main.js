@@ -35,7 +35,7 @@
   }
   function ready(fn) { if (isReady) fn(); else readyQueue.push(fn); }
   if (window.GSLoader && window.GSLoader.done) window.GSLoader.done.then(fireReady);
-  else if (root.classList.contains('is-loaded') || !document.getElementById('loader')) setTimeout(fireReady, 0);
+  else if (root.classList.contains('is-loaded') || !document.getElementById('gsl')) setTimeout(fireReady, 0);
   document.addEventListener('gs:loaded', fireReady);
   setTimeout(fireReady, 7000); // never wait forever
 
@@ -272,6 +272,8 @@
   function smooth() {
     if (reduceMotion || !window.Lenis) return;
     lenis = new window.Lenis({ duration: 1.15, smoothWheel: true, wheelMultiplier: 1 });
+    // the loading screen locks the page; keep Lenis still until it lifts
+    if (root.classList.contains('is-loading')) { lenis.stop(); ready(function () { lenis.start(); }); }
     if (gsap) {
       lenis.on('scroll', function () { if (window.ScrollTrigger) window.ScrollTrigger.update(); });
       gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
