@@ -204,10 +204,95 @@
           '</div>' +
           '<div class="dr-actions">' +
             '<a class="dr-cta" data-cta href="#"><span data-cta-t></span><span class="dr-arrow" aria-hidden="true">→</span></a>' +
-            '<button class="dr-add" type="button" data-add-q aria-pressed="false" hidden><span class="dr-ic" aria-hidden="true"></span><span data-add-t>Add to quote</span></button>' +
+            '<button class="dr-add" type="button" data-add-q aria-pressed="false" hidden><span class="dr-ic" aria-hidden="true"></span><span data-add-t>Add to quote</span><span class="dial-sr" data-add-n></span></button>' +
           '</div>' +
         '</div>' +
       '</div>';
+  }
+
+  /* ---------------------------------------------------------------- photos
+     Some catalogue cut-outs show two views of the lamp side by side; hung under one light that
+     reads as two lamps. When the pixels are readable (same origin) the photo is split at its
+     transparent gutters, the most detailed view is kept and the empty margins are trimmed.
+     Anything unreadable (file://, opaque, a single view already) is shown exactly as supplied. */
+  var PHOTOS = {};
+  function photo(url, cb) {
+    var e = PHOTOS[url];
+    if (!e) {
+      e = PHOTOS[url] = { done: false, src: url, cbs: [] };
+      var im = new Image();
+      var fin = function (src) {
+        if (e.done) return;
+        e.done = true;
+        if (src) e.src = src;
+        var l = e.cbs; e.cbs = [];
+        l.forEach(function (f) { f(e.src); });
+      };
+      im.onload = function () { singleView(im, fin); };
+      im.onerror = function () { fin(null); };
+      im.src = url;
+    }
+    if (cb) { if (e.done) cb(e.src); else e.cbs.push(cb); }
+  }
+  function singleView(im, fin) {
+    var crop = null;
+    try { crop = findView(im); } catch (err) { crop = null; }    // a tainted canvas throws
+    if (!crop) { fin(null); return; }
+    try {
+      var cv = document.createElement('canvas');
+      cv.width = crop[2]; cv.height = crop[3];
+      cv.getContext('2d').drawImage(im, crop[0], crop[1], crop[2], crop[3], 0, 0, crop[2], crop[3]);
+      if (cv.toBlob && window.URL && URL.createObjectURL) cv.toBlob(function (b) { fin(b ? URL.createObjectURL(b) : null); }, 'image/png');
+      else fin(cv.toDataURL('image/png'));
+    } catch (err) { fin(null); }
+  }
+  function findView(im) {
+    var W = im.naturalWidth, H = im.naturalHeight;
+    if (!W || !H) return null;
+    var s = Math.min(1, 220 / Math.max(W, H)), w = Math.max(8, Math.round(W * s)), h = Math.max(8, Math.round(H * s));
+    var cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    var cx = cv.getContext('2d');
+    if (!cx) return null;
+    cx.drawImage(im, 0, 0, w, h);
+    var d = cx.getImageData(0, 0, w, h).data, col = [], x, y, a, solid = 0;
+    for (x = 0; x < w; x++) col[x] = 0;
+    for (y = 0; y < h; y++) for (x = 0; x < w; x++) { a = d[(y * w + x) * 4 + 3]; if (a > 40) col[x]++; if (a > 250) solid++; }
+    if (solid > w * h * 0.97) return null;                       // not a cut-out
+    // runs of occupied columns; hairline gaps are bridged, slivers dropped
+    var segs = [], st = -1, gapMax = Math.max(2, Math.round(w * 0.04)), minW = w * 0.14;
+    for (x = 0; x <= w; x++) {
+      var occ = x < w && col[x] > 1;
+      if (occ && st < 0) st = x;
+      else if (!occ && st >= 0) {
+        var l = segs[segs.length - 1];
+        if (l && st - l[1] - 1 <= gapMax) l[1] = x - 1; else segs.push([st, x - 1]);
+        st = -1;
+      }
+    }
+    segs = segs.filter(function (g) { return g[1] - g[0] + 1 >= minW; });
+    if (!segs.length) return null;
+    // keep the most detailed view: mean luminance edge energy inside the silhouette
+    var best = segs[0], bestE = -1;
+    function lum(i) { return d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11; }
+    if (segs.length > 1) segs.forEach(function (g) {
+      var e = 0, c = 0, yy, xx;
+      for (yy = 0; yy < h - 1; yy++) for (xx = g[0]; xx < g[1]; xx++) {
+        var i = (yy * w + xx) * 4, j = i + 4, q = i + w * 4;
+        if (d[i + 3] < 200 || d[j + 3] < 200 || d[q + 3] < 200) continue;
+        var L = lum(i);
+        e += Math.abs(L - lum(j)) + Math.abs(L - lum(q)); c++;
+      }
+      e = c ? e / c : 0;
+      if (e > bestE) { bestE = e; best = g; }
+    });
+    var top = h, bot = -1;
+    for (y = 0; y < h; y++) for (x = best[0]; x <= best[1]; x++) if (d[(y * w + x) * 4 + 3] > 40) { if (y < top) top = y; bot = y; break; }
+    if (bot < 0) return null;
+    var X0 = Math.max(0, Math.floor((best[0] - 1) / s)), X1 = Math.min(W, Math.ceil((best[1] + 2) / s));
+    var Y0 = Math.max(0, Math.floor((top - 1) / s)), Y1 = Math.min(H, Math.ceil((bot + 2) / s));
+    if ((X1 - X0) * (Y1 - Y0) > W * H * 0.9) return null;          // nothing worth cutting
+    return [X0, Y0, X1 - X0, Y1 - Y0];
   }
 
   var ICON_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
@@ -241,7 +326,8 @@
     });
 
     function indexOf(key) {
-      for (var k = 0; k < n; k++) if (items[k].id === key || (typeof key === 'number' && items[k].watt === key)) return k;
+      var w = typeof key === 'number' ? key : typeof key === 'string' && /^\s*\d+(\.\d+)?\s*w?\s*$/i.test(key) ? parseFloat(key) : NaN;
+      for (var k = 0; k < n; k++) if (items[k].id === key || items[k].watt === w) return k;
       return -1;
     }
     var start = indexOf(opts.initial);
@@ -263,15 +349,14 @@
       name: $('[data-name]'), part: $('[data-part]'), partS: $('[data-part-s]'), fig: $('[data-fig]'), idx: $('[data-idx]'), pct: $('[data-pct]'),
       lm: $('[data-lm]'), battery: $('[data-battery]'), chem: $('[data-chem]'), panel: $('[data-panel]'), ptype: $('[data-ptype]'),
       backup: $('[data-backup]'), optic: $('[data-optic]'), ip: $('[data-ip]'),
-      cta: $('[data-cta]'), ctaT: $('[data-cta-t]'), add: $('[data-add-q]'), addT: $('[data-add-t]'),
+      cta: $('[data-cta]'), ctaT: $('[data-cta-t]'), add: $('[data-add-q]'), addT: $('[data-add-t]'), addN: $('[data-add-n]'),
       barLm: $('[data-bar="lm"]'), barAh: $('[data-bar="ah"]'), barWp: $('[data-bar="wp"]')
     };
     knob.setAttribute('aria-valuemin', wMin);
     knob.setAttribute('aria-valuemax', wMax);
 
-    // preload every photo so swaps are instant
-    var seen = {};
-    items.forEach(function (p) { if (p.img && !seen[p.img]) { seen[p.img] = 1; var im = new Image(); im.decoding = 'async'; im.src = p.img; } });
+    // preload (and prepare) every photo so swaps are instant
+    items.forEach(function (p) { if (p.img) photo(p.img); });
 
     /* ---------- state ---------- */
     var value = -1;          // committed index (aria, onChange)
@@ -281,11 +366,11 @@
     var vel = 0;             // stops / s
     var zeta = 0.5;          // spring damping ratio for the current move
     var detent = -1;         // last stop the knob passed
-    var drag = null, intro = null, raf = 0, last = 0, lastA = null, lastLv = -1;
+    var drag = null, intro = null, raf = 0, last = 0, inFrame = false, lastA = null, lastLv = -1;
     var lm = { val: 0, from: 0, to: 0, t0: 0, on: false };
     var imgOn = 0, imgSrc = '', imgToken = 0, swingAnim = null;
     var wheelAcc = 0, wheelLast = 0, wheelStep = 0, wheelPass = 0, pageScrollAt = 0;
-    var dust = null, visible = false, destroyed = false;
+    var dust = null, visible = false, knobSeen = false, loaderDone = false, destroyed = false;
     var cleanups = [];
     function on(t, ev, fn, o) { t.addEventListener(ev, fn, o || false); cleanups.push(function () { t.removeEventListener(ev, fn, o || false); }); }
 
@@ -359,15 +444,20 @@
       if (url === imgSrc) { cur.alt = p.name; return false; }
       imgSrc = url;
       var nxt = imgs[imgOn ^ 1], token = ++imgToken;
-      function go() {
+      function reveal() {
         if (token !== imgToken || destroyed) return;
+        nxt.onload = nxt.onerror = null;
         nxt.alt = p.name; cur.alt = '';
         nxt.classList.add('is-on'); cur.classList.remove('is-on');
         imgOn ^= 1;
       }
       nxt.onload = nxt.onerror = null;
-      nxt.src = url;
-      if (nxt.complete && nxt.naturalWidth) go(); else { nxt.onload = go; nxt.onerror = go; }
+      if (!url) { nxt.removeAttribute('src'); reveal(); return true; }
+      photo(url, function (src) {
+        if (token !== imgToken || destroyed) return;
+        if (nxt.getAttribute('src') !== src) nxt.src = src;
+        if (nxt.complete && nxt.naturalWidth) reveal(); else { nxt.onload = reveal; nxt.onerror = reveal; }
+      });
       return true;
     }
     function swing(dir, big) {
@@ -396,7 +486,7 @@
       if (!q || !p) return;
       var isOn = inQuote(q, p.id);
       el.add.setAttribute('aria-pressed', isOn ? 'true' : 'false');
-      el.add.setAttribute('aria-label', 'Add the ' + p.name + ' to your quote list');
+      el.addN.textContent = ' \u2014 ' + p.name;     // accessible name = the visible words + the product
       el.add.querySelector('.dr-ic').innerHTML = isOn ? ICON_CHECK : ICON_PLUS;
       el.addT.textContent = isOn ? 'In your quote' : 'Add to quote';
     }
@@ -477,12 +567,16 @@
         else if (intro) show(d, 1);
       }
     }
-    function kick() { if (!raf && !destroyed) { last = now(); raf = requestAnimationFrame(frame); } }
+    function kick() { if (!raf && !destroyed) { if (!inFrame) last = now(); raf = requestAnimationFrame(frame); } }
     function frame(t) {
       raf = 0;
       if (destroyed) return;
       var dt = clamp((t - last) / 1000, 0.001, 0.05);
       last = t;
+      inFrame = true;
+      try { return tick(t, dt); } finally { inFrame = false; }
+    }
+    function tick(t, dt) {
       var busy = false;
       if (intro) {
         busy = stepIntro(t);
@@ -490,10 +584,10 @@
         var np = pos + (drag.goal - pos) * (1 - Math.exp(-dt * 34));
         vel = (np - pos) / dt; pos = np; busy = true;
       } else if (pos !== target || vel !== 0) {
-        var K = 230, c = 2 * zeta * Math.sqrt(K), steps = Math.ceil(dt * 240), h = dt / steps;
+        var K = 280, c = 2 * zeta * Math.sqrt(K), steps = Math.ceil(dt * 240), h = dt / steps;
         for (var s = 0; s < steps; s++) { var acc = -K * (pos - target) - c * vel; vel += acc * h; pos += vel * h; }
         if (pos < -0.32) { pos = -0.32; vel = 0; } else if (pos > n - 1 + 0.32) { pos = n - 1 + 0.32; vel = 0; }
-        if (Math.abs(pos - target) < 0.0008 && Math.abs(vel) < 0.01) { pos = target; vel = 0; } else busy = true;
+        if (Math.abs(pos - target) < 0.0015 && Math.abs(vel) < 0.02) { pos = target; vel = 0; } else busy = true;
       }
       paint();
       if (lm.on) {
@@ -503,11 +597,14 @@
         paintLm();
       }
       if (dust && dust.run) { stepDust(dt); busy = true; }
-      if (busy) raf = requestAnimationFrame(frame);
+      // a kick() from inside this frame (show() → lumens count) has already queued the next one:
+      // never start a second loop, or every detent would add another rAF chain for good
+      if (busy && !raf) raf = requestAnimationFrame(frame);
     }
 
     /* ---------- intro: power-on sweep the first time the dial is seen ---------- */
     function startIntro() {
+      introTimer = 0;
       if (intro || destroyed) return;
       root.classList.remove('is-armed');
       if (reduced()) { pos = target; paint(); finishIntro(); return; }
@@ -534,6 +631,7 @@
       finishIntro();
     }
     function disarm() {           // the visitor got there first: skip the intro altogether
+      if (introTimer) { clearTimeout(introTimer); introTimer = 0; introArmed = true; }
       if (!introArmed) return;
       introArmed = false;
       root.classList.remove('is-armed');
@@ -562,7 +660,7 @@
     }
     function onDown(e) {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
-      if (drag) return;
+      if (drag && drag.active) return;              // one turning hand at a time (a stale tap record is replaced)
       var g = geom(), dx = e.clientX - g.cx, dy = e.clientY - g.cy, dist = Math.sqrt(dx * dx + dy * dy);
       var onCap = dist <= g.R * (200 / 300) * 1.04;
       disarm();
@@ -710,7 +808,8 @@
     }
     function sizeDust() {
       if (!dust) return;
-      var r = stage.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+      // the motes are soft sprites: 1x backing store is plenty and keeps the per-frame upload small
+      var r = stage.getBoundingClientRect(), dpr = 1;
       var w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
       if (w === dust.w && h === dust.h && dpr === dust.dpr) return;
       dust.w = w; dust.h = h; dust.dpr = dpr;
@@ -791,7 +890,10 @@
     on(document, 'gs:quote', syncAdd);
     on(document, 'visibilitychange', dustState);
     if (mq) {
-      var mqFn = function () { if (reduced()) { cancelIntro(); pos = target; vel = 0; root.classList.remove('is-armed'); paint(); } dustState(); };
+      var mqFn = function () {
+        if (reduced()) { disarm(); cancelIntro(); pos = target; vel = 0; root.classList.remove('is-armed'); paint(); }
+        dustState();
+      };
       if (mq.addEventListener) on(mq, 'change', mqFn); else if (mq.addListener) { mq.addListener(mqFn); cleanups.push(function () { mq.removeListener(mqFn); }); }
     }
     if (!quoteApi()) on(window, 'load', syncAdd);   // the site script may arrive after us
@@ -804,7 +906,7 @@
 
     // first paint: the committed value is the start stop; for the intro the knob is parked at MIN
     var canIntro = !reduced() && 'IntersectionObserver' in window;
-    var io = null, introArmed = canIntro, loaderGaveUp = false;
+    var io = null, introArmed = canIntro, introTimer = 0, loaderGaveUp = false;
     value = start;
     setAria(start);
     if (canIntro) { root.classList.add('is-armed'); pos = 0; show(0, 1); }
@@ -812,20 +914,27 @@
     paint();
 
     function maybeIntro() {
-      if (!introArmed || !visible) return;
+      if (!introArmed || !knobSeen || destroyed) return;
       var html = document.documentElement;
-      if (html.classList.contains('is-loading') && !loaderGaveUp) return;     // wait for the site loader to lift
+      // wait for the site loader to lift ('gs:loaded' fires as its exit starts, before .is-loading goes)
+      if (html.classList.contains('is-loading') && !loaderDone && !loaderGaveUp) return;
       introArmed = false;
-      setTimeout(startIntro, 120);
+      introTimer = setTimeout(startIntro, 120);
     }
     if ('IntersectionObserver' in window) {
+      // the intro waits until the knob itself is at least half on screen; the dust only drifts
+      // while the stage (the beam) is on screen
       io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) { visible = en.isIntersecting && en.intersectionRatio > 0; });
+        entries.forEach(function (en) {
+          if (en.target === stage) visible = en.isIntersecting;
+          else knobSeen = en.isIntersecting && en.intersectionRatio >= 0.5;
+        });
         dustState();
         maybeIntro();
-      }, { threshold: [0, 0.35] });
-      io.observe(root);
-      on(document, 'gs:loaded', function () { setTimeout(maybeIntro, 200); });
+      }, { threshold: [0, 0.5, 0.75, 1] });
+      io.observe(knob);
+      io.observe(stage);
+      on(document, 'gs:loaded', function () { loaderDone = true; setTimeout(maybeIntro, 260); });
     } else {
       visible = true; dustState();
     }
@@ -845,6 +954,7 @@
       destroyed = true;
       if (raf) cancelAnimationFrame(raf);
       clearTimeout(safety);
+      clearTimeout(introTimer);
       if (io) io.disconnect();
       if (ro) ro.disconnect();
       if (swingAnim) swingAnim.cancel();

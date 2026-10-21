@@ -117,7 +117,7 @@
   border-radius: 50%;
   outline: none;
   cursor: grab;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;            /* the scale lets the page scroll and zoom; the cap turns */
   user-select: none;
   -webkit-user-select: none;
 }
@@ -159,7 +159,7 @@
 .dk-lab-w { font-size: .72em; fill: var(--gd-sun); }
 .dk-leg { fill: var(--gd-muted); font-size: 12px; text-anchor: middle; dominant-baseline: central; }
 .dk-leg--hot { fill: var(--gd-text); }
-.dk-focus { fill: none; stroke: var(--gd-sun); stroke-width: 1.5; stroke-dasharray: 2 5; opacity: 0; transition: opacity .25s; }
+.dk-focus { fill: none; stroke: var(--gd-sun); stroke-width: 3; stroke-dasharray: 5 6; opacity: 0; transition: opacity .25s; }
 .dial-knob:focus-visible .dk-focus { opacity: 1; }
 
 /* the knob cap (HTML layers so the metal can use conic gradients) */
@@ -273,6 +273,7 @@
     radial-gradient(90% 60% at 50% 100%, rgba(255, 90, 20, .06), transparent 70%),
     linear-gradient(180deg, #07070A 0%, #050507 100%);
   isolation: isolate;
+  container-type: inline-size;
 }
 .ds-light, .ds-light > i, .ds-floor, .ds-dust, .ds-ruler { position: absolute; pointer-events: none; }
 .ds-light { inset: 0; z-index: 0; }
@@ -423,6 +424,11 @@
   background-repeat: no-repeat;
 }
 .ds-ruler--r { left: auto; right: 0; transform: scaleX(-1); }
+/* a narrow stage (1180-1250 px desktops, small phones) has no room for both footers:
+   IP66 and dusk-to-dawn are in the readout anyway */
+@container (max-width: 344px) {
+  .ds-ann--br { display: none; }
+}
 
 /* readout --------------------------------------------------------------- */
 .dial-read {
@@ -629,8 +635,16 @@
 }
 @media (max-width: 360px) {
   .dial-ann--tr, .dial-ann--br { display: none; }
+  .dr-top > span + span { display: none; }   /* repeated by the name below */
+  .dr-name-a { white-space: normal; }
   .dr-spec .v { font-size: 15px; }
   .dr-name { font-size: 13px; }
+}
+
+/* Windows high contrast: keep the focus and the level readable */
+@media (forced-colors: active) {
+  .dial-knob:focus-visible { outline: 2px solid CanvasText; outline-offset: 4px; }
+  .dr-strip i { color: CanvasText; background: none; }
 }
 
 /* ======================================================================

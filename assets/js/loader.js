@@ -26,7 +26,6 @@
   var HARD_EXIT = 4700;      // ms: the exit (0.9 s) begins no later than this…
   var HARD_REMOVE = 5950;    // …and the loader is gone by this, counted from navigation start
   var TOO_LATE = 6300;       // loader.js arrived this late: the CSS failsafe is about to lift the curtain anyway
-  var HOLD = 'gsl-hold';     // <html> class: page content stays unpainted behind the opaque curtain
   var EXPO = 'cubic-bezier(.16,1,.3,1)';
 
   var hasPerf = !!(win.performance && performance.now);
@@ -54,7 +53,6 @@
     if (api.loaded) return;
     api.loaded = true;
     root.classList.add('is-loaded');
-    root.classList.remove(HOLD);   // the page paints again (one frame before the burn-through opens)
     try { win.sessionStorage.setItem(KEY, '1'); } catch (e) { /* private mode */ }
     try { doc.dispatchEvent(new CustomEvent('gs:loaded', { detail: { mode: api.mode } })); } catch (e) { /* listener threw */ }
     resolveDone();
@@ -65,8 +63,11 @@
     if (gone) return;
     gone = true;
     signal();
+    if (hardTimer) clearTimeout(hardTimer);
+    api.skip = function () {};   // drop the reference to the boot closure (canvas, sprites…)
     root.classList.remove('is-loading');
     for (var i = 0; i < cleanups.length; i++) { try { cleanups[i](); } catch (e) { /* ignore */ } }
+    cleanups.length = 0;
     // cancel every WAAPI animation (some are infinite) so the detached subtree can be collected
     try { if (el && el.getAnimations) el.getAnimations({ subtree: true }).forEach(function (a) { a.cancel(); }); } catch (e) { /* ignore */ }
     if (el && el.parentNode) el.parentNode.removeChild(el);
@@ -88,12 +89,24 @@
   }
 
   root.classList.add('is-loading');
-  // The curtain is opaque, so skip painting the page behind it (aura blurs, grain, glass…) until the
-  // exit starts — this keeps the loader smooth on weak GPUs. Only when the snippet sits directly
-  // in <body>, as documented, so the rule can never hide the loader itself.
-  if (el.parentNode === doc.body) root.classList.add(HOLD);
+
+  // Focus is never trapped, so Tab still walks the page behind the curtain — but focusing a link
+  // far down would scroll the locked page (overflow:hidden still allows focus scrolling) and the
+  // visitor would land mid-page when the curtain lifts. Keep the position; focus itself moves.
+  var holdScroll = function (e) {
+    if (e.key !== 'Tab' || gone) return;
+    var x = win.pageXOffset || 0, y = win.pageYOffset || 0;
+    var undo = function () {
+      if (root.classList.contains('is-loading') && (win.pageXOffset !== x || win.pageYOffset !== y)) win.scrollTo(x, y);
+    };
+    setTimeout(undo, 0);
+    raf(undo);
+  };
+  doc.addEventListener('keydown', holdScroll, true);
+  cleanups.push(function () { doc.removeEventListener('keydown', holdScroll, true); });
+
   // absolute safety net (performance.now() counts from navigation start)
-  setTimeout(teardown, Math.max(600, HARD_REMOVE - since()));
+  var hardTimer = setTimeout(teardown, Math.max(600, HARD_REMOVE - since()));
 
   try { boot(); } catch (err) { teardown(); }
 
@@ -104,6 +117,7 @@
     var seen = false;
     try { seen = win.sessionStorage.getItem(KEY) === '1'; } catch (e) { /* ignore */ }
     var mode = api.mode = reduce ? 'reduced' : (seen ? 'short' : 'full');
+    var exitTimer = 0;
     el.classList.add('gsl--' + mode);
     if (reduce && seen) el.classList.add('gsl--short');
 
@@ -115,8 +129,12 @@
     function inOut(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
     function expoOut(x) { return x >= 1 ? 1 : 1 - Math.pow(2, -10 * x); }
     function animate(node, frames, opts) {
-      if (!node || !node.animate) return null;
-      try { return node.animate(frames, opts); } catch (e) { return null; }
+      if (!node) return null;
+      try { if (node.animate) return node.animate(frames, opts); } catch (e) { /* fall through */ }
+      // no Web Animations: jump to the end state so nothing stays hidden at its 'from' keyframe
+      var end = frames[frames.length - 1];
+      for (var k in end) if (k !== 'offset' && k !== 'easing') { try { node.style[k] = end[k]; } catch (e) { /* ignore */ } }
+      return null;
     }
 
     /* ---- readiness signals ---------------------------------------------- */
@@ -160,6 +178,9 @@
     var flash = $('.gsl-flash'), glow = $('.gsl-glow'), streak = $('.gsl-streak'), shafts = $('.gsl-shafts');
     var fx = $('.gsl-fx');
     var head = $('.gsl-bar b');
+    // --p is written only where it is read: setting it on the root restyled (and repainted) the
+    // whole full-screen root layer every frame
+    var pNodes = [glow, $('.gsl-dial em'), $('.gsl-bar i')].filter(Boolean);
     var lines = $$('.gsl-log li').map(function (li) {
       var span = li.querySelector('span');
       return { li: li, span: span, text: span.textContent, n: -1, d: -1, state: '' };
@@ -277,9 +298,10 @@
     win.addEventListener('resize', onResize);
     cleanups.push(function () {
       win.removeEventListener('resize', onResize);
+      clearTimeout(exitTimer);
       if (spin) spin.cancel();
       if (ctx) { fx.width = fx.height = 0; }   // hand the canvas memory back now
-      parts.length = 0;
+      parts.length = 0; sprites = []; ctx = null; fx = null; spin = null; ring = null;
     });
 
     var spinDir = 1;
@@ -423,7 +445,8 @@
     }
 
     function paint(pp, dt) {
-      el.style.setProperty('--p', pp.toFixed(4));
+      var ps = pp.toFixed(4);
+      for (var pi = 0; pi < pNodes.length; pi++) pNodes[pi].style.setProperty('--p', ps);
       if (head) head.style.transform = 'translate3d(' + (pp * W).toFixed(1) + 'px,0,0)';
       if (mode === 'full') {
         ember.style.opacity = (1 - smooth(0.04, 0.6, pp)).toFixed(3);
@@ -538,7 +561,7 @@
     raf(frame);
 
     // background tabs pause rAF: make sure the hard limit still applies
-    setTimeout(function () { if (phase === 'load') { startExit(); } }, Math.max(0, HARD_EXIT + 80 - since()));
+    exitTimer = setTimeout(function () { if (phase === 'load') { startExit(); } }, Math.max(0, HARD_EXIT + 80 - since()));
 
     api.skip = function () { if (phase === 'load') startExit(); else teardown(); };
   }
