@@ -101,9 +101,7 @@
   function scaleSVG(id, items, step) {
     var n = items.length, span = Math.max(1, n - 1), s = '', k, a;
     var R_TRACK = 222;
-    s += '<svg class="dk-scale" viewBox="-300 -300 600 600" aria-hidden="true" focusable="false"><defs>' +
-      '<mask id="' + id + '-rev" maskUnits="userSpaceOnUse" x="-300" y="-300" width="600" height="600">' +
-      '<path class="dk-mask" d="' + arcD(R_TRACK, A0, A0 + SWEEP) + '" fill="none" stroke="#fff" stroke-width="60" pathLength="1000" stroke-dasharray="0 2000"/></mask></defs>';
+    s += '<svg class="dk-scale" viewBox="-300 -300 600 600" aria-hidden="true" focusable="false">';
 
     // machined rings + crosshair marks
     s += '<circle class="dk-ring" r="294"/><circle class="dk-ring" r="289"/><circle class="dk-ring dk-ring--2" r="211"/><circle class="dk-ring" r="206"/>';
@@ -119,13 +117,8 @@
     for (k = 0; k < n - 1; k++) for (var m = 1; m < 5; m++) minor += radial(238, 246, A0 + (k + m / 5) * step);
     s += '<path class="dk-min" d="' + minor + '"/>';
 
-    // track + plasma level arc (54 colour segments, revealed by the mask)
+    // track (the plasma level arc itself is a pre-rendered canvas, see drawArc)
     s += '<path class="dk-track" d="' + arcD(R_TRACK, A0, A0 + SWEEP) + '"/>';
-    var segs = '', N = 54, w = SWEEP / N;
-    for (k = 0; k < N; k++) {
-      segs += '<path class="dk-seg" stroke="' + plasma((k + 0.5) / N) + '" d="' + arcD(R_TRACK, A0 + k * w, A0 + (k + 1) * w + (k < N - 1 ? 0.35 : 0)) + '"/>';
-    }
-    s += '<g mask="url(#' + id + '-rev)"><g class="dk-glow">' + segs + '</g>' + segs + '</g>';
 
     // major ticks + labels
     for (k = 0; k < n; k++) {
@@ -141,8 +134,6 @@
     s += '<text class="dk-leg" x="' + r2(mx[0]) + '" y="' + r2(mx[1]) + '">MAX</text>';
     s += '<text class="dk-leg dk-leg--hot" x="0" y="246">WATTS</text>';
 
-    // comet head riding the level arc
-    s += '<g class="dk-tip"><circle class="dk-tip-halo" cx="0" cy="-' + R_TRACK + '" r="11"/><circle class="dk-tip-core" cx="0" cy="-' + R_TRACK + '" r="4"/></g>';
     s += '<circle class="dk-focus" r="300"/>';
     return s + '</svg>';
   }
@@ -163,6 +154,8 @@
         '<div class="dial-ann dial-ann--tr dial-mono"><span>' + pad(cnt, 2) + ' stops · <b>' + esc(items[0].watt) + '–' + esc(items[items.length - 1].watt) + ' W</b></span></div>' +
         '<div class="dial-knob" role="slider" tabindex="0" aria-label="Street light wattage" aria-describedby="' + id + '-help">' +
           scaleSVG(id, items, step) +
+          '<canvas class="dk-arc" aria-hidden="true"></canvas>' +
+          '<i class="dk-tip" aria-hidden="true"><b></b></i>' +
           '<div class="dk-cap">' +
             '<i class="dk-shadow"></i><i class="dk-grip"></i><i class="dk-shade"></i><i class="dk-face"></i>' + engraveSVG(id) +
             '<i class="dk-ind"><i></i><b class="dk-spark"></b></i>' +
@@ -262,7 +255,7 @@
     var $$ = function (s) { return Array.prototype.slice.call(root.querySelectorAll(s)); };
     var knob = $('.dial-knob'), cap = $('.dk-cap');
     var grip = $('.dk-grip'), ind = $('.dk-ind'), rays = $('.dk-rays'), spark = $('.dk-spark');
-    var mask = $('.dk-mask'), tip = $('.dk-tip');
+    var arcCv = $('.dk-arc'), tip = $('.dk-tip');
     var majors = $$('.dk-maj'), labels = $$('.dk-lab');
     var stage = $('.dial-stage'), hang = $('.ds-hang'), imgs = $$('.ds-img'), canvas = $('.ds-dust');
     var strips = $$('.dr-strip'), digs = $$('.dr-dig');
@@ -465,8 +458,8 @@
         var tr = 'rotate(' + a.toFixed(3) + 'deg)';
         grip.style.transform = tr; ind.style.transform = tr; rays.style.transform = tr;
         var frac = clamp(pos / span, 0, 1);
-        mask.setAttribute('stroke-dasharray', (frac * 1000).toFixed(2) + ' 2000');
-        tip.setAttribute('transform', 'rotate(' + clamp(a, A0, A0 + SWEEP).toFixed(3) + ')');
+        arcCv.style.setProperty('--sw', (frac * SWEEP).toFixed(2) + 'deg');
+        tip.style.transform = 'rotate(' + clamp(a, A0, A0 + SWEEP).toFixed(3) + 'deg)';
         tip.style.opacity = frac < 0.002 ? '0' : '1';
       }
       var lv = levelAt(pos);
@@ -660,6 +653,31 @@
       go(target + d, 'key');
     }
 
+    /* ---------- the plasma level arc: rendered once (with its glow), revealed by a conic mask ---------- */
+    var arcSize = 0;
+    function drawArc() {
+      var ctx = arcCv.getContext && arcCv.getContext('2d');
+      if (!ctx) return;
+      var css = knob.getBoundingClientRect().width, dpr = Math.min(2, window.devicePixelRatio || 1);
+      var px = Math.round(css * dpr);
+      if (!px || px === arcSize) return;
+      arcSize = px;
+      arcCv.width = arcCv.height = px;
+      var u = px / 600, N = 72, w = SWEEP / N, k, a0, a1;
+      ctx.setTransform(u, 0, 0, u, px / 2, px / 2);
+      ctx.lineCap = 'butt';
+      function seg(k, width, alpha, blur) {
+        a0 = (A0 + k * w - 90) * Math.PI / 180; a1 = (A0 + (k + 1) * w + (k < N - 1 ? 0.4 : 0) - 90) * Math.PI / 180;
+        var c = plasma((k + 0.5) / N);
+        ctx.globalAlpha = alpha; ctx.strokeStyle = c; ctx.lineWidth = width;
+        ctx.shadowColor = blur ? c : 'transparent'; ctx.shadowBlur = blur * u;
+        ctx.beginPath(); ctx.arc(0, 0, 222, a0, a1); ctx.stroke();
+      }
+      for (k = 0; k < N; k++) seg(k, 10, 0.45, 22);   // glow
+      for (k = 0; k < N; k++) seg(k, 5, 1, 0);        // the filament
+      ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+    }
+
     /* ---------- dust motes drifting through the beam (canvas) ---------- */
     function setupDust() {
       var ctx = canvas.getContext && canvas.getContext('2d');
@@ -761,9 +779,10 @@
     if (!quoteApi()) on(window, 'load', syncAdd);   // the site script may arrive after us
 
     setupDust();
+    drawArc();
     var ro = null;
-    if (window.ResizeObserver) { ro = new ResizeObserver(function () { sizeDust(); }); ro.observe(stage); }
-    else on(window, 'resize', sizeDust);
+    if (window.ResizeObserver) { ro = new ResizeObserver(function () { sizeDust(); drawArc(); }); ro.observe(stage); ro.observe(knob); }
+    else on(window, 'resize', function () { sizeDust(); drawArc(); });
 
     // first paint: the committed value is the start stop; for the intro the knob is parked at MIN
     var canIntro = !reduced() && 'IntersectionObserver' in window;

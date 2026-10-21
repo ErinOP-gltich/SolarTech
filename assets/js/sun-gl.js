@@ -2,9 +2,10 @@
  * Green Sun Technologies — sun-gl.js  ·  real-time WebGL plasma sun (Solar Noir v2)
  * ---------------------------------------------------------------------------------
  * A stylised, photoreal-ish star rendered in one fragment shader on a TRANSPARENT,
- * premultiplied-alpha canvas: boiling domain-warped plasma with granulation and limb
- * darkening, a chromospheric rim with spicules, a layered corona with slowly rotating
- * filamentary streamers, and prominences that rise off the limb and fade away.
+ * premultiplied-alpha canvas: boiling domain-warped plasma with soft granulation, a white-hot
+ * core that cools through #FFC400 and #FF7A00 to a #FF3B1F limb, a chromospheric rim with
+ * spicules, a layered corona with slowly rotating filamentary streamers, and prominences
+ * (magnetic loops of fine strands) that rise off the limb, hang, and drain away.
  * No dependencies (GSAP is NOT required). Plain ES2019, exposes window.GSSun.
  *
  * API
@@ -22,24 +23,33 @@
  *   sun.setPointer(nx, ny)          // -1..1 over the canvas (nx -1 = left, ny -1 = top);
  *                                   // pass null to release. Not needed when opts.pointer is on.
  *   sun.resize()                    // force a re-measure (a ResizeObserver already does this)
- *   sun.destroy()                   // stop, unhook every listener, free GL objects
+ *   sun.destroy()                   // stop, unhook every listener, clear the canvas
  *   // extras: sun.setCenter(x, y), sun.setRadius(r)   (live, e.g. scroll-driven)
  *   //         sun.pause(), sun.play()                 (e.g. while a menu covers the hero)
  *   //         sun.snapshot(seconds)  pauses and draws one frame at that clock time (posters/tests)
  *   //         sun.stats(), sun.gl    (false on the no-op controller)
  *
  * Behaviour
- *   - Canvas backing store follows its CSS box (ResizeObserver) × min(devicePixelRatio, dprMax).
- *   - Shaders compile without blocking the main thread where KHR_parallel_shader_compile exists.
- *   - Rendering pauses while the canvas is off-screen (IntersectionObserver) or the tab is hidden.
- *   - quality 'auto': starts 'low' on small screens; if frames average > 22 ms for ~2 s the
- *     internal resolution / octave count steps down (four levels, then half-rate as a last resort).
- *   - prefers-reduced-motion: ONE static frame (re-rendered on resize/intensity), no loop, no
- *     pointer reaction. Live changes to the OS setting are followed.
- *   - No WebGL / shader failure / context lost: class "no-gl" is added to canvas.parentElement
- *     and a no-op controller is returned (after webglcontextrestored it recovers by itself).
+ *   - The canvas needs a CSS size (e.g. position:absolute; inset:0; width:100%; height:100%).
+ *     Its backing store follows that box (ResizeObserver) × min(devicePixelRatio, dprMax).
+ *   - The shader compiles off the main thread: mount() never waits for it (KHR_parallel_shader_compile
+ *     where available, otherwise the status query is deferred a few frames). The first frame is drawn
+ *     when it is ready, so fade the canvas in on "gl-on" / "gs:sun-ready" (see the CSS below).
+ *   - The linked program is cached on the canvas's GL context: destroy() + mount() on the SAME canvas
+ *     (e.g. to switch layouts on rotate) draws in the same task, with no recompile and no blank frame.
+ *   - Rendering pauses while the canvas is off-screen (IntersectionObserver) or the tab is hidden;
+ *     changes made meanwhile are drawn when it comes back.
+ *   - quality 'auto': starts 'low' on small screens / weak devices; when typical frames (the slowest
+ *     quarter is ignored, so main-thread hiccups don't count) take > 22 ms for ~2 s, the internal
+ *     resolution / octave count steps down (four levels, then half-rate as a last resort).
+ *   - prefers-reduced-motion: ONE static frame (re-rendered on resize / setters), no loop, no pointer
+ *     reaction. Live changes to the OS setting are followed.
+ *   - No WebGL / software-only WebGL / shader failure / context lost: class "no-gl" is added to
+ *     canvas.parentElement and a bubbling "gs:sun-fallback" event fires on the canvas. mount() returns a
+ *     no-op controller when it can't start at all; after webglcontextrestored it recovers by itself.
  *   - After the first frame: class "gl-on" on the parent and a bubbling "gs:sun-ready" event
  *     on the canvas (handy for a loader or a fade-in).
+ *   - The canvas gets aria-hidden="true" unless it already has aria-hidden or a role.
  *
  * Recommended CSS (fallback for parents marked .no-gl; vmin values suit a full-viewport hero
  * with the default center / radius):
