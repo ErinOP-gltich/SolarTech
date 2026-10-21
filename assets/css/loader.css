@@ -13,6 +13,14 @@
    background, so match it to the loader's (grain-lifted) edge tone. */
 html.is-loading { overflow: hidden; scrollbar-gutter: stable; background-color: #0A0A0C; }
 
+/* While the curtain is opaque, the page behind it is laid out (fonts, images, measurements all
+   proceed) but not painted, so its blurs / glass / grain don't compete with the loader for the
+   GPU. loader.js adds html.gsl-hold only when #gsl is a direct child of <body>, and removes it
+   the moment the exit starts (together with html.is-loaded). */
+@media screen {
+  html.gsl-hold body > :not(.gsl) { visibility: hidden; }
+}
+
 .gsl { display: none; }
 
 html.js .gsl {
@@ -53,6 +61,7 @@ html.js .gsl {
   touch-action: none;
   overscroll-behavior: none;
   cursor: progress;
+  forced-color-adjust: none;   /* decorative, short-lived: keep it intact in Windows high-contrast */
   /* Failsafe: if loader.js never runs, the curtain lifts by itself. */
   animation: gsl-failsafe .5s ease 6.5s forwards;
 }
@@ -395,5 +404,29 @@ html.js .gsl {
   html.js .gsl { --cy: 36%; --s: min(36vh, 58vw); }
   .gsl-log-h { display: none; }
 }
+/* narrow phones (320–400px): both top labels must fit on one line */
+@media (max-width: 400px) {
+  .gsl-top { font-size: 10px; letter-spacing: .07em; gap: 10px; }
+  .gsl-top > span { gap: 7px; }
+}
+/* squarer desktops/tablets (4:3, 3:2): a smaller mark keeps the dial clear of the boot log */
+@media (min-width: 721px) and (max-aspect-ratio: 3/2) {
+  html.js .gsl { --s: min(42vh, 60vw, 460px); }
+}
+/* landscape phones / short windows: counter left, log right, mark between them */
+@media (max-height: 520px) and (min-aspect-ratio: 3/2) {
+  html.js .gsl { --cy: 54%; --s: min(44vh, 30vw); }
+  .gsl-dial b { display: none; }
+  .gsl-count { --fs: min(25vh, 15vw); }
+  .gsl-log {
+    left: auto; right: var(--pad); bottom: var(--pad);
+    width: max(205px, min(330px, calc(50% - var(--s) * .72 - 2 * var(--pad))));
+    font-size: 10px;
+  }
+  .gsl-log li { height: 16px; line-height: 16px; }
+  .gsl-log-h { display: none; }
+}
 
-html.is-loading:not(.is-loaded) body > :not(.gsl) { visibility: hidden; }
+@media print {
+  html.js .gsl { display: none; }
+}

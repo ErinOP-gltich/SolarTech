@@ -25,6 +25,8 @@
   var KEY = 'gs-ignited';
   var HARD_EXIT = 4700;      // ms: the exit (0.9 s) begins no later than this…
   var HARD_REMOVE = 5950;    // …and the loader is gone by this, counted from navigation start
+  var TOO_LATE = 6300;       // loader.js arrived this late: the CSS failsafe is about to lift the curtain anyway
+  var HOLD = 'gsl-hold';     // <html> class: page content stays unpainted behind the opaque curtain
   var EXPO = 'cubic-bezier(.16,1,.3,1)';
 
   var hasPerf = !!(win.performance && performance.now);
@@ -52,6 +54,7 @@
     if (api.loaded) return;
     api.loaded = true;
     root.classList.add('is-loaded');
+    root.classList.remove(HOLD);   // the page paints again (one frame before the burn-through opens)
     try { win.sessionStorage.setItem(KEY, '1'); } catch (e) { /* private mode */ }
     try { doc.dispatchEvent(new CustomEvent('gs:loaded', { detail: { mode: api.mode } })); } catch (e) { /* listener threw */ }
     resolveDone();
@@ -64,6 +67,8 @@
     signal();
     root.classList.remove('is-loading');
     for (var i = 0; i < cleanups.length; i++) { try { cleanups[i](); } catch (e) { /* ignore */ } }
+    // cancel every WAAPI animation (some are infinite) so the detached subtree can be collected
+    try { if (el && el.getAnimations) el.getAnimations({ subtree: true }).forEach(function (a) { a.cancel(); }); } catch (e) { /* ignore */ }
     if (el && el.parentNode) el.parentNode.removeChild(el);
     el = null;
     resolveRevealed();
@@ -74,13 +79,19 @@
     else fn();
   }
 
-  // Nothing to show (no snippet, or <html> lacks "js"): still announce, once page scripts have run.
-  if (!el || !root.classList.contains('js')) {
+  // Nothing to show (no snippet, <html> lacks "js", or this script arrived so late that the
+  // CSS failsafe is lifting the curtain anyway): still announce, once page scripts have run.
+  if (!el || !root.classList.contains('js') || since() > TOO_LATE) {
+    if (el) el.style.display = 'none';
     onReady(function () { setTimeout(teardown, 0); });
     return;
   }
 
   root.classList.add('is-loading');
+  // The curtain is opaque, so skip painting the page behind it (aura blurs, grain, glass…) until the
+  // exit starts — this keeps the loader smooth on weak GPUs. Only when the snippet sits directly
+  // in <body>, as documented, so the rule can never hide the loader itself.
+  if (el.parentNode === doc.body) root.classList.add(HOLD);
   // absolute safety net (performance.now() counts from navigation start)
   setTimeout(teardown, Math.max(600, HARD_REMOVE - since()));
 
@@ -249,8 +260,10 @@
       ];
     }
     function sizeCanvas() {
+      // the loader's own box, not innerWidth: a reserved scrollbar gutter (classic scrollbars)
+      // makes it narrower, and a mismatch would offset the canvas corona from the CSS hole
+      W = el.clientWidth || win.innerWidth; H = el.clientHeight || win.innerHeight;
       if (!ctx) return;
-      W = win.innerWidth; H = win.innerHeight;
       fx.width = Math.round(W * DPR); fx.height = Math.round(H * DPR);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     }
@@ -509,9 +522,13 @@
     function frame() {
       if (gone) return;
       var t = now();
-      var dt = Math.min(0.05, Math.max(0, (t - last) / 1000));
+      var raw = Math.max(0, (t - last) / 1000);
+      // smoothing/physics step is capped so a hitch never teleports anything; the choreography
+      // clock tolerates longer frames so a slow device (or a busy main thread while the page's
+      // own scripts start) still finishes in about the intended time instead of crawling
+      var dt = Math.min(0.1, raw);
       last = t;
-      clock += dt;
+      clock += Math.min(0.25, raw);
       try {
         if (phase === 'load') loadStep(dt, since());
         else exitStep(dt);
