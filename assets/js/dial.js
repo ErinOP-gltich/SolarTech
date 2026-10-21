@@ -192,7 +192,7 @@
             '</div>' +
           '</div>' +
           '<dl class="dr-specs">' +
-            '<div class="dr-spec dr-spec--lm"><dt class="dial-mono">Lumens</dt><dd><span class="v" data-lm>0</span><small>LED output @155 lm/W</small></dd><i class="dr-bar" aria-hidden="true"><i data-bar="lm"></i></i></div>' +
+            '<div class="dr-spec dr-spec--lm"><dt class="dial-mono">Lumens</dt><dd><span class="v" data-lm>0</span><i class="dr-bar" aria-hidden="true"><i data-bar="lm"></i></i><small>LED output @155 lm/W</small></dd></div>' +
             '<div class="dr-spec"><dt class="dial-mono">Battery</dt><dd><span class="v" data-battery></span><small data-chem></small><i class="dr-bar" aria-hidden="true"><i data-bar="ah"></i></i></dd></div>' +
             '<div class="dr-spec"><dt class="dial-mono">Panel</dt><dd><span class="v" data-panel></span><small data-ptype></small><i class="dr-bar" aria-hidden="true"><i data-bar="wp"></i></i></dd></div>' +
             '<div class="dr-spec"><dt class="dial-mono">Backup</dt><dd><span class="v" data-backup></span><small>Autonomy</small></dd></div>' +
@@ -463,7 +463,11 @@
         tip.style.opacity = frac < 0.002 ? '0' : '1';
       }
       var lv = levelAt(pos);
-      if (Math.abs(lv - lastLv) > 0.0005) { lastLv = lv; root.style.setProperty('--lv', lv.toFixed(4)); }
+      if (Math.abs(lv - lastLv) > 0.0005) {
+        lastLv = lv;
+        root.style.setProperty('--lv', lv.toFixed(4));
+        if (dust && !dust.run) drawDust();          // reduced motion / off-screen: keep the still frame in step
+      }
       var d = clamp(Math.round(pos), 0, n - 1);
       if (d !== detent) {
         var had = detent >= 0;
@@ -620,7 +624,7 @@
       var dx = e.deltaX * mult, dy = e.deltaY * mult;
       var v = Math.abs(dx) > Math.abs(dy) ? dx : -dy;
       if (!v) return;
-      var t = now(), engaged = t - wheelLast < 420;
+      var t = e.timeStamp || now(), engaged = t - wheelLast < 420;   // input time, so main-thread jank can't split a gesture
       // a page-scroll gesture that carries the knob under the cursor stays a page scroll
       // until the wheel pauses; only a fresh gesture on the knob turns it
       if (!engaged && (t - pageScrollAt < 240 || t - wheelPass < 650)) { wheelPass = t; return; }
@@ -663,18 +667,32 @@
       if (!px || px === arcSize) return;
       arcSize = px;
       arcCv.width = arcCv.height = px;
-      var u = px / 600, N = 72, w = SWEEP / N, k, a0, a1;
+      var u = px / 600, A = (A0 - 90) * Math.PI / 180, B = (A0 + SWEEP - 90) * Math.PI / 180;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, px, px);
       ctx.setTransform(u, 0, 0, u, px / 2, px / 2);
       ctx.lineCap = 'butt';
-      function seg(k, width, alpha, blur) {
-        a0 = (A0 + k * w - 90) * Math.PI / 180; a1 = (A0 + (k + 1) * w + (k < N - 1 ? 0.4 : 0) - 90) * Math.PI / 180;
-        var c = plasma((k + 0.5) / N);
-        ctx.globalAlpha = alpha; ctx.strokeStyle = c; ctx.lineWidth = width;
-        ctx.shadowColor = blur ? c : 'transparent'; ctx.shadowBlur = blur * u;
-        ctx.beginPath(); ctx.arc(0, 0, 222, a0, a1); ctx.stroke();
+      if (typeof ctx.createConicGradient === 'function') {
+        // one seamless stroke: the plasma runs along the arc
+        var g = ctx.createConicGradient(A, 0, 0), f = SWEEP / 360;
+        for (var k = 0; k <= 12; k++) g.addColorStop(k / 12 * f, plasma(k / 12));
+        g.addColorStop(Math.min(1, f + 0.001), plasma(1));
+        var arc = function (width, alpha) { ctx.globalAlpha = alpha; ctx.strokeStyle = g; ctx.lineWidth = width; ctx.beginPath(); ctx.arc(0, 0, 222, A, B); ctx.stroke(); };
+        if ('filter' in ctx) { ctx.filter = 'blur(' + (9 * u).toFixed(2) + 'px)'; arc(12, 0.75); ctx.filter = 'none'; }
+        else { ctx.shadowColor = 'rgba(255,140,30,.8)'; ctx.shadowBlur = 18 * u; arc(8, 0.5); ctx.shadowBlur = 0; }
+        arc(5, 1);
+      } else {
+        var N = 72, w = SWEEP / N, a0, a1;
+        var seg = function (k, width, alpha, blur) {
+          a0 = (A0 + k * w - 90) * Math.PI / 180; a1 = (A0 + (k + 1) * w + (k < N - 1 ? 0.4 : 0) - 90) * Math.PI / 180;
+          var c = plasma((k + 0.5) / N);
+          ctx.globalAlpha = alpha; ctx.strokeStyle = c; ctx.lineWidth = width;
+          ctx.shadowColor = blur ? c : 'transparent'; ctx.shadowBlur = blur * u;
+          ctx.beginPath(); ctx.arc(0, 0, 222, a0, a1); ctx.stroke();
+        };
+        for (var j = 0; j < N; j++) seg(j, 10, 0.45, 22);
+        for (j = 0; j < N; j++) seg(j, 5, 1, 0);
       }
-      for (k = 0; k < N; k++) seg(k, 10, 0.45, 22);   // glow
-      for (k = 0; k < N; k++) seg(k, 5, 1, 0);        // the filament
       ctx.globalAlpha = 1; ctx.shadowBlur = 0;
     }
 
@@ -768,7 +786,7 @@
     on(knob, 'keydown', onKey);
     on(knob, 'wheel', onWheel, { passive: false });
     on(knob, 'dragstart', function (e) { e.preventDefault(); });
-    on(window, 'scroll', function () { pageScrollAt = now(); }, { passive: true });
+    on(window, 'scroll', function (e) { pageScrollAt = e.timeStamp || now(); }, { passive: true });
     on(el.add, 'click', toggleQuote);
     on(document, 'gs:quote', syncAdd);
     on(document, 'visibilitychange', dustState);

@@ -288,7 +288,7 @@
 }
 /* volumetric beam: soft-edged conic wedge from the apex, faded with distance */
 .ds-cone {
-  left: var(--apx); top: var(--apy); width: 220%; margin-left: -110%; height: calc(var(--fy) - var(--apy) + 12%);
+  left: var(--apx); top: var(--apy); width: 180%; margin-left: -90%; height: calc(var(--fy) - var(--apy) + 10%);
   transform-origin: 50% 0;
   -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .8) 40%, rgba(0, 0, 0, .35) 82%, transparent 100%);
           mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .8) 40%, rgba(0, 0, 0, .35) 82%, transparent 100%);
@@ -306,7 +306,7 @@
 }
 /* god rays inside the beam */
 .ds-rays {
-  left: var(--apx); top: var(--apy); width: 220%; margin-left: -110%; height: calc(var(--fy) - var(--apy) + 6%);
+  left: var(--apx); top: var(--apy); width: 180%; margin-left: -90%; height: calc(var(--fy) - var(--apy) + 6%);
   transform-origin: 50% 0;
   background:
     repeating-conic-gradient(from 140deg at 50% 0%, rgba(255, 236, 190, 0) 0deg, rgba(255, 236, 190, .16) 1.1deg, rgba(255, 236, 190, 0) 2.9deg),
@@ -336,7 +336,7 @@
 }
 /* floor: perspective grid lit only where the pool lands */
 .ds-floor {
-  left: -60%; right: -60%; top: var(--fy); height: 70%;
+  left: -35%; right: -35%; top: var(--fy); height: 60%;
   background-image:
     linear-gradient(90deg, rgba(255, 220, 160, .22) 1px, transparent 1px),
     linear-gradient(0deg, rgba(255, 220, 160, .22) 1px, transparent 1px);
@@ -401,7 +401,7 @@
   transform: scale(calc(.35 + var(--lv) * .75));
 }
 .ds-flare {
-  width: 150%; height: 18px; margin-left: -75%; translate: 0 -50%;
+  width: 124%; height: 18px; margin-left: -62%; translate: 0 -50%;
   background:
     linear-gradient(90deg, transparent 0%, rgba(255, 59, 31, .25) 18%, rgba(255, 122, 0, .55) 34%, rgba(255, 246, 214, 1) 50%, rgba(255, 122, 0, .55) 66%, rgba(255, 59, 31, .25) 82%, transparent 100%) center / 100% 2px no-repeat,
     radial-gradient(50% 50% at 50% 50%, rgba(255, 170, 60, .35), transparent 100%);
@@ -492,7 +492,9 @@
 }
 .dr-spec { position: relative; padding: 12px 14px 12px 0; border-bottom: 1px solid var(--gd-line); min-width: 0; }
 .dr-spec:nth-child(2n+1):not(.dr-spec--lm) { padding-left: 14px; border-left: 1px solid var(--gd-line); }
-.dr-spec--lm { grid-column: 1 / -1; display: grid; grid-template-columns: auto 1fr; column-gap: 18px; align-items: end; padding-right: 0; }
+.dr-spec--lm { grid-column: 1 / -1; padding-right: 0; }
+.dr-spec--lm dd { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 18px; align-items: center; }
+.dr-spec--lm small { grid-column: 1 / -1; }
 .dr-spec dt { margin: 0 0 6px; }
 .dr-spec dd { margin: 0; min-width: 0; }
 .dr-spec .v { font: 600 17px/1.15 var(--gd-body); letter-spacing: -.01em; white-space: nowrap; }
@@ -503,7 +505,6 @@
   font-variant-numeric: tabular-nums;
 }
 .dr-spec--lm .v span { font-family: var(--gd-mono); font-weight: 500; font-size: 13px; letter-spacing: .1em; color: var(--gd-muted); margin-left: 6px; font-stretch: normal; font-variation-settings: normal; }
-.dr-spec--lm dt { grid-column: 1 / -1; }
 .dr-bar { position: relative; display: block; height: 2px; margin-top: 10px; background: rgba(243, 239, 230, .08); overflow: hidden; }
 .dr-bar > i {
   position: absolute; inset: 0; display: block;
@@ -512,7 +513,7 @@
   transform: scaleX(var(--p, 0));
   transition: transform 1s var(--gd-ease);
 }
-.dr-spec--lm .dr-bar { height: 3px; margin: 0 0 6px; align-self: center; }
+.dr-spec--lm .dr-bar { height: 3px; margin: 0; }
 .dr-spec--lm .dr-bar > i { box-shadow: 0 0 12px rgba(255, 150, 30, .6); }
 
 /* the night profile: 6 h at 100 %, then 6 h at 50 % */
@@ -609,6 +610,7 @@
   .dial-ann--tr { right: 16px; top: 18px; }
   .dial-ann--bl { left: 16px; bottom: 18px; }
   .dial-ann--br { right: 16px; bottom: 18px; }
+  .dial-ann--br { display: none; } /* the touch hint needs the whole width on phones */
   .dk-lab { font-size: 23px; }
   .dk-leg { font-size: 17px; }
   .ds-hang { width: 70%; margin-left: -35%; }

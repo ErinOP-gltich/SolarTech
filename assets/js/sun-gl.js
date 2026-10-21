@@ -163,7 +163,7 @@
     '  float lf=smoothstep(0.04,0.5,z);',                                  // foreshortening fade at the limb
     '  gran*=smoothstep(70.0,220.0,uRadius)*(0.75+0.25*w.y)*lf;',   // fade cells out before they alias
     '  float vn=snoise(n*4.2+w*1.6+vec3(t*0.02,0.0,9.0));',              // flowing dark veins
-    '  float veins=pow(1.0-abs(vn),14.0);',
+    '  float veins=pow(max(1.0-abs(vn),0.0),14.0);',
     '  float plage=smoothstep(0.40,1.0,w.x*0.6+w.y*0.4);',
     '  float mu=z;',
     '  float lean=max(dot(normalize(p+1e-5),uPointer.xy),0.0)*uPointer.z*(1.0-mu);',
@@ -189,12 +189,13 @@
     '    float env=smoothstep(0.0,0.2,f)*(1.0-smoothstep(0.55,0.98,f));',
     '    if(env<0.002)continue;',
     '    float r1=hash11(cyc*7.13+id*31.7+uSeed*3.1);',
+    '    float x=mod(ang-r1*6.2831853+3.14159265,6.2831853)-3.14159265;',
+    '    if(abs(x)>0.46+0.45*h)continue;',                       // cheap angular reject (widest loop + lean)
     '    float r2=hash11(cyc*3.71+id*11.3+0.5);',
     '    float r3=hash11(cyc*5.19+id*2.9+0.25);',
     '    float w=0.07+0.09*r2;',                                   // footpoint half-separation (radii)
     '    float ht=(0.14+0.25*r3)*(0.35+0.65*smoothstep(0.0,0.7,f));', // loop height grows as it rises
     '    float th=0.022+0.024*r3;',                                 // half thickness of the bundle
-    '    float x=mod(ang-r1*6.2831853+3.14159265,6.2831853)-3.14159265;',
     '    x-=h*(r1-0.5)*0.9;',                                     // loops lean a little
     '    if(abs(x)>w+th*5.0+0.05||h>ht+th*5.0+0.05)continue;',   // outside the compact support
     '    float n=snoise(vec3(x*6.0,h*6.0-t*0.2,id*9.1+cyc*1.7));',
@@ -207,11 +208,11 @@
     '    float band=exp(-ac*ac*1.6);',
     '    float st=0.5+0.5*sin(d*sf+n*2.0);',
     '    st*=st;',
-    '    float knots=0.6+0.4*snoise(vec3(atan(q.y,q.x)*3.0,t*0.1,id*5.0+cyc));',
+    '    float knots=0.6+0.4*sin(atan(q.y,q.x+1e-5)*6.0+n*2.5+id*2.1+cyc*1.3+t*0.15);',
     '    float body=band*(0.35+0.95*st)*knots;',
     '    float hc=max(1.0-ac*ac/22.0,0.0);',
     '    float halo=hc*hc*0.20*(0.75+0.25*n);',                 // soft glow, zero before the support edge
-    '    float fill=smoothstep(1.0,0.2,e)*(0.5+0.5*n2)*0.10;',    // faint plasma held inside the arch
+    '    float fill=(1.0-smoothstep(0.2,1.0,e))*(0.5+0.5*n2)*0.10;', // faint plasma held inside the arch
     '    float fx=(abs(x)-w)/(0.55*w+th);',
     '    float foot=max(1.0-h*16.0,0.0)*max(1.0-fx*fx*0.5,0.0)*0.6;',
     '    float top=clamp(h/ht,0.0,1.0);',
@@ -237,10 +238,10 @@
     '    float lr=log(1.0+hn);',
     '    lobes=smoothstep(-0.45,0.9,snoise(vec3(d*1.5,t*0.030+uSeed)));',
     '    float fa=snoise(vec3(d*7.0,lr*0.9-t*0.045+uSeed*3.0));',
-    '    fil=pow(1.0-abs(fa),6.0);',
+    '    fil=pow(max(1.0-abs(fa),0.0),6.0);',
     '    if(uDetail>0.5){',
     '      float fb=snoise(vec3(d*19.0,lr*0.6-t*0.03+7.0));',
-    '      fine=pow(1.0-abs(fb),9.0)*smoothstep(60.0,180.0,uRadius);',
+    '      fine=pow(max(1.0-abs(fb),0.0),9.0)*smoothstep(60.0,180.0,uRadius);',
     '    }',
     '  }',
     '  float f1=exp(-hn*20.0);',
@@ -302,7 +303,7 @@
     { scale: 0.72, oct: 3, detail: 0, maxPx: 1.4e6 },
     { scale: 0.5, oct: 3, detail: 0, maxPx: 0.9e6 }
   ];
-  var STATIC_T = 41.5; // clock time with prominences on the limb, used for the reduced-motion frame
+  var STATIC_T = 311.6; // clock time with three prominences up on the limb (default seed), for the reduced-motion frame
   var SLOW_MS = 22;    // 'auto' steps down when typical frames take longer than this
   var UNIFORMS = ['uCenter', 'uRadius', 'uTime', 'uI', 'uPointer', 'uOct', 'uDetail', 'uSeed', 'uMaxR', 'uRot'];
   // linked programs, per WebGL context: destroy() + mount() on the same canvas reuses it (no recompile, no blank frame)
@@ -382,7 +383,7 @@
       level = small || weak ? 2 : 0;
     }
     var bw = 0, bh = 0, dprSeen = 0;
-    var clock = 18.0 + seed * 7.0; // start mid-cycle so prominences are already alive
+    var clock = 14.0 + seed * 7.0; // start just as three prominences rise (default seed), not on a bare limb
     var last = 0, carry = 0;
     var samples = [], sampleT = 0, warmT = 1.5, slowStreak = 0, frameMs = 0, throttle = false, frameFlip = false;
     var ptr = { has: false, cx: 0, cy: 0, manual: false, nx: 0, ny: 0 };
@@ -471,6 +472,7 @@
       th = Math.max(1, Math.round(th));
       if (tw === bw && th === bh) return 1;
       bw = canvas.width = tw; bh = canvas.height = th;
+      dirty = true; // the backing store is now blank until the next draw
       return 2;
     }
 
@@ -575,7 +577,7 @@
       last = now;
       monitor(Math.min(raw, 0.5));
       carry += raw > 0.25 ? 1 / 60 : raw; // after a stall, don't jump the clock
-      if (throttle) { frameFlip = !frameFlip; if (frameFlip) return; }
+      if (throttle) { frameFlip = !frameFlip; if (frameFlip && !dirty) return; } // half rate, but never leave a cleared buffer
       var step = Math.min(carry, 0.1);
       carry = 0;
       clock += step;
