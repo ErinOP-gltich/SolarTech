@@ -210,6 +210,30 @@
   });
 
   if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) document.querySelectorAll('[data-kbd]').forEach(function (k) { k.textContent = '⌘K'; });
+  // While the command bar is pinned over the catalogue, the site nav tucks away and the bar moves up into its
+  // place; once the products have scrolled past, the nav comes back. Measured from a marker at the bar's
+  // natural position, so the bar moving up never flips the state back (wide screens only: below 1180 px the
+  // bar is not sticky).
+  (function tuckNav() {
+    const cmd = $('[data-cmd]'), cat = $('#catalogue');
+    if (!cmd || !cat || !document.querySelector('[data-nav]')) return;
+    const mark = document.createElement('div');
+    mark.setAttribute('aria-hidden', 'true');
+    cmd.before(mark);
+    const wide = matchMedia('(min-width: 1181px)');
+    const pinAt = function () { return document.querySelector('[data-nav]').offsetHeight + 24; }; // the bar's sticky top: nav height + --s5
+    let tucked = false, raf = 0;
+    const check = function () {
+      raf = 0;
+      const want = wide.matches && mark.getBoundingClientRect().top <= pinAt() &&
+        cat.getBoundingClientRect().bottom > cmd.offsetHeight + innerHeight * .35;
+      if (want !== tucked) { tucked = want; document.documentElement.classList.toggle('nav-tucked', want); }
+    };
+    addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(check); }, { passive: true });
+    addEventListener('resize', check);
+    check();
+  })();
+
   const params = new URLSearchParams(location.search);
   if (params.get('q')) { state.q = params.get('q'); qInput.value = state.q; }
   fromHash();
