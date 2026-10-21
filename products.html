@@ -102,7 +102,7 @@
   <header class="phero" aria-labelledby="ph">
     <img class="phero-sun" src="assets/brand/favicon.svg" alt="">
     <div class="wrap">
-      <ol class="crumbs label"><li><a href="index.html">Home</a></li><li>Marketplace</li></ol>
+      <nav aria-label="Breadcrumb"><ol class="crumbs label"><li><a href="index.html">Home</a></li><li aria-current="page">Marketplace</li></ol></nav>
       <h1 class="h1" id="ph"><span data-hero-line>The</span> <span class="it grad" data-hero-line>marketplace.</span></h1>
       <p class="lede rv">Eighteen products, every datasheet, one quote. Turn the dial to find your street light — or browse everything below.</p>
     </div>
@@ -110,21 +110,21 @@
 
   <section aria-labelledby="dial-h" data-dial-sec>
     <div class="wrap">
-      <div class="sec-head rv"><span class="label no">№ 01</span><span class="label" id="dial-h">The wattage dial</span><span class="rule"></span><span class="label">Semi-integrated street lights · 9–80 W</span></div>
+      <div class="sec-head rv"><span class="label no">№ 01</span><h2 class="label" id="dial-h">The wattage dial</h2><span class="rule"></span><span class="label">Semi-integrated street lights · 9–80 W</span></div>
       <div class="dial" id="dial" data-dial></div>
     </div>
   </section>
 
   <section class="sec" id="catalogue" aria-labelledby="cat-h" style="padding-top:var(--s9)">
     <div class="wrap">
-      <div class="sec-head rv"><span class="label no">№ 02</span><span class="label">Everything we make</span><span class="rule"></span><span class="label">Press / to search</span></div>
+      <div class="sec-head rv"><span class="label no">№ 02</span><span class="label">Everything we make</span><span class="rule"></span><span class="label"><span data-kbd>Ctrl K</span> to search</span></div>
       <h2 class="h2 rv" id="cat-h">Every <span class="it grad">light,</span> every spec.</h2>
 
       <div class="cmd glass glass-strong refract" data-cmd>
         <div class="cmd-search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
           <input id="q" type="search" placeholder="Search — 40W, RMS, battery…" autocomplete="off" aria-label="Search products" data-q>
-          <kbd aria-hidden="true">/</kbd>
+          <kbd aria-hidden="true" data-kbd>Ctrl K</kbd>
         </div>
         <div class="seg" role="group" aria-label="Category" data-seg><span class="seg-ind" aria-hidden="true"></span></div>
         <div class="cmd-row2">
@@ -190,7 +190,7 @@
         <p>The best way to power up. Solar &amp; LED lighting designed, built and serviced in Guwahati, Assam.</p>
       </div>
       <div>
-        <h4 class="label">Marketplace</h4>
+        <h2 class="label">Marketplace</h2>
         <ul>
           <li><a href="products.html#street">Solar street lights</a></li>
           <li><a href="products.html#mast">High masts &amp; floods</a></li>
@@ -200,7 +200,7 @@
         </ul>
       </div>
       <div>
-        <h4 class="label">Company</h4>
+        <h2 class="label">Company</h2>
         <ul>
           <li><a href="index.html#about">About us</a></li>
           <li><a href="index.html#day">How it works</a></li>
@@ -209,7 +209,7 @@
         </ul>
       </div>
       <div>
-        <h4 class="label">Reach us</h4>
+        <h2 class="label">Reach us</h2>
         <address data-cfg="address">Pub Boragaon, NH-37, Belwali Road<br>Ward No. 10, Guwahati<br>Kamrup Metropolitan, Assam 781035</address>
         <ul style="margin-top:var(--s3)">
           <li><a data-cfg="phone" href="tel:+919920996608">+91 99209 96608</a></li>
@@ -219,6 +219,7 @@
     </div>
     <div class="ftr-base">
       <span class="label">© <span data-year>2026</span> Green Sun Technologies · GSTIN <span data-cfg="gstin">18BPLPS0265L1ZB</span></span>
+      <button class="motion-tog label sl" type="button" aria-pressed="false" data-motion-toggle><span class="state" aria-hidden="true"></span><i aria-hidden="true"></i>Pause motion</button>
       <button class="btn btn-glass glass btn-sm sl" type="button" data-top>Back to top ↑</button>
     </div>
   </div>

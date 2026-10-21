@@ -133,6 +133,7 @@
         <span>ISO 9001:2015</span><span>ISO 14001:2015</span><span>Udyam MSME</span><span>OSRAM LEDs · 155 lm/W</span><span>IP66</span><span>LiFePO₄ 12.8 V</span><span>Dusk-to-dawn</span><span>Made in Assam</span>
         <span aria-hidden="true">ISO 9001:2015</span><span aria-hidden="true">ISO 14001:2015</span><span aria-hidden="true">Udyam MSME</span><span aria-hidden="true">OSRAM LEDs · 155 lm/W</span><span aria-hidden="true">IP66</span><span aria-hidden="true">LiFePO₄ 12.8 V</span><span aria-hidden="true">Dusk-to-dawn</span><span aria-hidden="true">Made in Assam</span>
       </div></div>
+      <button class="motion-tog label sl" type="button" aria-pressed="false" data-motion-toggle><span class="state" aria-hidden="true"></span><i aria-hidden="true"></i>Pause motion</button>
       <a class="scroll-cue label" href="#about"><i></i>Scroll</a>
     </div>
   </section>
@@ -146,9 +147,9 @@
   <!-- ABOUT ============================================================ -->
   <section class="sec" id="about" aria-labelledby="about-h">
     <div class="wrap about">
-      <aside class="about-side">
-        <p class="label rv" id="about-h"><span class="no" style="color:var(--sun)">№ 01</span> — Who we are</p>
-      </aside>
+      <div class="about-side">
+        <h2 class="label rv" id="about-h"><span class="no" style="color:var(--sun)">№ 01</span> — Who we are</h2>
+      </div>
       <div>
         <p class="statement" data-litup>Green Sun Technologies is a <em class="hl">Guwahati-born</em> engineering company. We <em class="gr">design,</em> <em class="gr">manufacture,</em> <em class="gr">sell</em> and <em class="gr">service</em> solar &amp; LED lighting — from a <em class="hl">9-watt</em> village-lane light to a <em class="hl">12-metre</em> high mast — and we stand behind <em class="it">every single one.</em></p>
 
@@ -194,7 +195,7 @@
   <!-- NUMBERS ========================================================== -->
   <section class="sec" id="numbers" aria-labelledby="num-h" style="padding-top:0">
     <div class="wrap">
-      <div class="sec-head rv"><span class="label no">№ 02</span><span class="label" id="num-h">By the numbers</span><span class="rule"></span><span class="label">From our datasheets</span></div>
+      <div class="sec-head rv"><span class="label no">№ 02</span><h2 class="label" id="num-h">By the numbers</h2><span class="rule"></span><span class="label">From our datasheets</span></div>
       <div class="stats">
         <div class="stat rv"><div class="stat-n cond"><span data-count="155">155</span><small>lm/W</small></div><div class="stat-l"><span class="label">LED efficacy</span><p>OSRAM chips that turn every watt into 155 lumens.</p></div></div>
         <div class="stat rv"><div class="stat-n cond"><span data-count="50000">50,000</span><small>hrs</small></div><div class="stat-l"><span class="label">LED life</span><p>About eleven years of dusk-to-dawn nights.</p></div></div>
@@ -292,7 +293,7 @@
   <!-- FAMILIES ======================================================== -->
   <section class="sec" id="families" aria-labelledby="fam-h">
     <div class="wrap">
-      <div class="sec-head rv"><span class="label no">№ 05</span><span class="label" id="fam-h">Product families</span><span class="rule"></span><span class="label">5 families · 18 products</span></div>
+      <div class="sec-head rv"><span class="label no">№ 05</span><h2 class="label" id="fam-h">Product families</h2><span class="rule"></span><span class="label">5 families · 18 products</span></div>
       <ul class="fam" data-peek-list>
         <li class="rv"><a href="products.html#street" data-peek="assets/img/products/si-50w.webp"><span class="label n">01</span><span class="h3">Solar street <span class="it">lights</span></span><span class="label cnt">12 products</span></a></li>
         <li class="rv"><a href="products.html#mast" data-peek="assets/img/products/flood-60w.webp"><span class="label n">02</span><span class="h3">High masts &amp; <span class="it">floods</span></span><span class="label cnt">2 products</span></a></li>
@@ -313,7 +314,7 @@
         <div class="finder-opts" role="radiogroup" aria-label="What are you lighting?" data-finder></div>
       </div>
       <div class="rv" style="--d:.1s">
-        <div data-finder-out aria-live="polite"></div>
+        <div data-finder-out></div>
       </div>
     </div>
   </section>
@@ -324,7 +325,7 @@
       <div class="sec-head rv"><span class="label no">№ 07</span><span class="label">Certified &amp; registered</span><span class="rule"></span><span class="label">Tap an ISO card to view it</span></div>
       <h2 class="h2 rv" id="cert-h">Paperwork you can <span class="it grad">actually check.</span></h2>
       <div class="certs">
-        <button class="cert glass glass-edge rv" type="button" data-cert="assets/img/certs/iso9001.webp" data-alt="ISO 9001:2015 certificate of registration for Green Sun Technologies" data-cursor="View">
+        <article class="cert cert-link glass glass-edge rv" data-cursor="View">
           <span class="holo" aria-hidden="true"></span>
           <svg class="seal" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="none" stroke="#FFC400" stroke-width="1.5" stroke-dasharray="3 4"/><circle cx="32" cy="32" r="23" fill="#FFC400"/><text x="32" y="36.5" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="12" fill="#050507">ISO</text></svg>
           <span class="std">ISO 9001:2015</span>
@@ -334,9 +335,9 @@
             <div><dt>Body</dt><dd>KSR Certification LLP</dd></div>
             <div><dt>Valid till</dt><dd>15 Nov 2027</dd></div>
           </dl>
-          <span class="view label">View certificate →</span>
-        </button>
-        <button class="cert glass glass-edge rv" type="button" style="--d:.08s" data-cert="assets/img/certs/iso14001.webp" data-alt="ISO 14001:2015 certificate of registration for Green Sun Technologies" data-cursor="View">
+          <button class="view label" type="button" data-cert="assets/img/certs/iso9001.webp" data-alt="ISO 9001:2015 certificate of registration for Green Sun Technologies" aria-label="View certificate: ISO 9001:2015">View certificate →</button>
+        </article>
+        <article class="cert cert-link glass glass-edge rv" style="--d:.08s" data-cursor="View">
           <span class="holo" aria-hidden="true"></span>
           <svg class="seal" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="none" stroke="#C6FF3D" stroke-width="1.5" stroke-dasharray="3 4"/><circle cx="32" cy="32" r="23" fill="#C6FF3D"/><text x="32" y="36.5" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="12" fill="#050507">ISO</text></svg>
           <span class="std">ISO 14001:2015</span>
@@ -346,8 +347,8 @@
             <div><dt>Body</dt><dd>ICIL</dd></div>
             <div><dt>Recertify</dt><dd>27 Aug 2028</dd></div>
           </dl>
-          <span class="view label">View certificate →</span>
-        </button>
+          <button class="view label" type="button" data-cert="assets/img/certs/iso14001.webp" data-alt="ISO 14001:2015 certificate of registration for Green Sun Technologies" aria-label="View certificate: ISO 14001:2015">View certificate →</button>
+        </article>
         <div class="cert glass glass-edge rv" style="--d:.16s">
           <span class="holo" aria-hidden="true"></span>
           <svg class="seal" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="none" stroke="#FF7A00" stroke-width="1.5" stroke-dasharray="3 4"/><circle cx="32" cy="32" r="23" fill="#FF7A00"/><text x="32" y="36" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="9.5" fill="#050507">MSME</text></svg>
@@ -415,7 +416,7 @@
         <p>The best way to power up. Solar &amp; LED lighting designed, built and serviced in Guwahati, Assam.</p>
       </div>
       <div>
-        <h4 class="label">Marketplace</h4>
+        <h2 class="label">Marketplace</h2>
         <ul>
           <li><a href="products.html#street">Solar street lights</a></li>
           <li><a href="products.html#mast">High masts &amp; floods</a></li>
@@ -425,7 +426,7 @@
         </ul>
       </div>
       <div>
-        <h4 class="label">Company</h4>
+        <h2 class="label">Company</h2>
         <ul>
           <li><a href="#about">About us</a></li>
           <li><a href="#day">How it works</a></li>
@@ -434,7 +435,7 @@
         </ul>
       </div>
       <div>
-        <h4 class="label">Reach us</h4>
+        <h2 class="label">Reach us</h2>
         <address data-cfg="address">Pub Boragaon, NH-37, Belwali Road<br>Ward No. 10, Guwahati<br>Kamrup Metropolitan, Assam 781035</address>
         <ul style="margin-top:var(--s3)">
           <li><a data-cfg="phone" href="tel:+919920996608">+91 99209 96608</a></li>
@@ -444,6 +445,7 @@
     </div>
     <div class="ftr-base">
       <span class="label">© <span data-year>2026</span> Green Sun Technologies · GSTIN <span data-cfg="gstin">18BPLPS0265L1ZB</span></span>
+      <button class="motion-tog label sl" type="button" aria-pressed="false" data-motion-toggle><span class="state" aria-hidden="true"></span><i aria-hidden="true"></i>Pause motion</button>
       <button class="btn btn-glass glass btn-sm sl" type="button" data-top>Back to sunrise ↑</button>
     </div>
   </div>

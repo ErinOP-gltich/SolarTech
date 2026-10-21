@@ -118,8 +118,8 @@
           '<td class="nm"><b>' + GS.esc(p.name) + '</b><span class="label">' + GS.esc(p.part) + '</span></td>' +
           '<td class="watt">' + (p.watt ? p.watt + 'W' : '—') + '</td><td>' + GS.esc(p.battery) + '</td><td>' + GS.esc(p.panel) + '</td>' +
           '<td>' + GS.esc(p.autonomy || '—') + '</td><td>' + GS.esc(p.ip || '—') + '</td>' +
-          '<td><div style="display:flex;gap:8px;justify-content:flex-end">' + GS.btn('Enquire', href, 'btn-plasma btn-sm') +
-          '<button class="icon-btn glass sl" type="button" data-add="' + p.id + '" aria-pressed="false" aria-label="Add ' + GS.esc(p.short || p.name) + ' to quote list"><span class="state" aria-hidden="true"></span>' + GS.icon.plus + '</button></div></td></tr>';
+          '<td><div style="display:flex;gap:8px;justify-content:flex-end">' + GS.btn('Enquire', href, 'btn-plasma btn-sm', ' aria-label="Enquire about ' + GS.esc(p.name) + '"') +
+          '<button class="icon-btn glass sl" type="button" data-add="' + GS.esc(p.id) + '" aria-pressed="false" aria-label="Add ' + GS.esc(p.short || p.name) + ' to quote list"><span class="state" aria-hidden="true"></span>' + GS.icon.plus + '</button></div></td></tr>';
       }).join('') + '</tbody></table>';
     document.dispatchEvent(new CustomEvent('gs:quote'));
   }
@@ -189,6 +189,7 @@
     state.q = ''; qInput.value = ''; state.power.clear(); state.feat.clear(); state.cat = 'all';
     history.replaceState(null, '', location.pathname);
     render(true);
+    qInput.focus(); // the reset button hides itself, so give focus a home
   });
   addEventListener('hashchange', function () {
     fromHash(); render(true);
@@ -204,10 +205,11 @@
   });
   addEventListener('resize', function () { moveIndicator(true); });
   addEventListener('keydown', function (e) {
-    const a = document.activeElement;
-    if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey && !(a && (/input|textarea|select/i.test(a.tagName) || a.isContentEditable || a.closest('[role="slider"]')))) { e.preventDefault(); qInput.focus(); }
+    // Ctrl/⌘ + K jumps to search (a modified shortcut, so it can't fire by accident while typing or using a screen reader)
+    if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey) && !e.altKey) { e.preventDefault(); qInput.focus(); qInput.select(); }
   });
 
+  if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) document.querySelectorAll('[data-kbd]').forEach(function (k) { k.textContent = '⌘K'; });
   const params = new URLSearchParams(location.search);
   if (params.get('q')) { state.q = params.get('q'); qInput.value = state.q; }
   fromHash();

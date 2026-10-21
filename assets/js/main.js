@@ -34,6 +34,11 @@
     readyQueue.splice(0).forEach(function (fn) { try { fn(); } catch (e) { setTimeout(function () { throw e; }); } });
   }
   function ready(fn) { if (isReady) fn(); else readyQueue.push(fn); }
+  if (root.classList.contains('is-loading')) {
+    const behind = Array.from(document.body ? document.body.children : []).filter(function (n) { return n.id !== 'gsl' && n.tagName !== 'SCRIPT'; });
+    behind.forEach(function (n) { n.inert = true; });
+    ready(function () { behind.forEach(function (n) { n.inert = false; }); });
+  }
   if (window.GSLoader && window.GSLoader.done) window.GSLoader.done.then(fireReady);
   else if (root.classList.contains('is-loaded') || !document.getElementById('gsl')) setTimeout(fireReady, 0);
   document.addEventListener('gs:loaded', fireReady);
@@ -93,7 +98,7 @@
           const t = n.textContent.trim();
           const lbl = document.createElement('span');
           lbl.className = 'lbl';
-          lbl.innerHTML = '<span data-t="' + esc(t) + '">' + esc(t) + '</span>';
+          lbl.innerHTML = lblHTML(t);
           b.replaceChild(lbl, n);
         }
       });
@@ -103,9 +108,11 @@
     });
   }
 
+  // the label and its hover-roll copy; the copy is hidden from assistive tech so names aren't read twice
+  function lblHTML(t) { return '<span>' + esc(t) + '</span><span aria-hidden="true">' + esc(t) + '</span>'; }
   function btn(label, href, cls, extra) {
     return '<a class="btn ' + (cls || 'btn-plasma') + ' sl" href="' + href + '"' + (extra || '') + '><span class="state" aria-hidden="true"></span>' +
-      '<span class="lbl"><span data-t="' + esc(label) + '">' + esc(label) + '</span></span>' + ICON.arrow + '</a>';
+      '<span class="lbl">' + lblHTML(label) + '</span>' + ICON.arrow + '</a>';
   }
 
   function keySpecs(p) {
@@ -139,11 +146,11 @@
           }).join('') + '</dl>' +
         '</div>' +
         '<div class="card-actions">' +
-          btn('Enquire', href, 'btn-plasma btn-sm') +
+          btn('Enquire', href, 'btn-plasma btn-sm', ' aria-label="Enquire about ' + esc(p.name) + '"') +
           '<button class="icon-btn glass sl' + (on ? ' is-on' : '') + '" type="button" data-add="' + esc(p.id) + '" aria-pressed="' + on + '" aria-label="Add ' + esc(p.short || p.name) + ' to quote list"><span class="state" aria-hidden="true"></span>' + (on ? ICON.check : ICON.plus) + '</button>' +
-          '<button class="icon-btn glass sl" type="button" data-more aria-expanded="false" aria-controls="' + moreId + '" aria-label="Full specifications"><span class="state" aria-hidden="true"></span>' + ICON.chevron + '</button>' +
+          '<button class="icon-btn glass sl" type="button" data-more aria-expanded="false" aria-controls="' + moreId + '" aria-label="Full specifications: ' + esc(p.short || p.name) + '"><span class="state" aria-hidden="true"></span>' + ICON.chevron + '</button>' +
         '</div>' +
-        '<div class="card-more" id="' + moreId + '"><div><dl>' + (p.specs || []).map(function (s) {
+        '<div class="card-more" id="' + moreId + '"><div inert><dl>' + (p.specs || []).map(function (s) {
           return '<div><dt>' + esc(s[0]) + '</dt><dd>' + esc(s[1]) + '</dd></div>';
         }).join('') + '</dl></div></div>' +
       '</article>';
@@ -165,18 +172,23 @@
   addEventListener('pageshow', function (e) { if (e.persisted) resync(); });
 
   /* ---------- snackbar ---------- */
-  let toastEl, toastTimer;
+  let toastTimer;
+  const toastEl = document.createElement('div');
+  toastEl.className = 'toast glass glass-strong';
+  toastEl.setAttribute('role', 'status');
+  toastEl.inert = true;
+  document.body.appendChild(toastEl);
   function toast(msg, link) {
-    if (!toastEl) {
-      toastEl = document.createElement('div');
-      toastEl.className = 'toast glass glass-strong';
-      toastEl.setAttribute('role', 'status');
-      document.body.appendChild(toastEl);
-    }
     toastEl.innerHTML = '<span>' + esc(msg) + '</span>' + (link ? btn(link.text, link.href, 'btn-volt btn-sm') : '');
+    toastEl.inert = false;
     requestAnimationFrame(function () { toastEl.classList.add('is-on'); });
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toastEl.classList.remove('is-on'); }, 3600);
+    // stays while hovered or focused, so there's time to reach the link
+    const hide = function () {
+      if (toastEl.matches(':hover, :focus-within')) { toastTimer = setTimeout(hide, 1500); return; }
+      toastEl.classList.remove('is-on'); toastEl.inert = true;
+    };
+    toastTimer = setTimeout(hide, 4200);
   }
 
   /* ---------- delegated clicks: quote list, spec drawers, ripples ---------- */
@@ -199,6 +211,8 @@
       const c = more.closest('.card');
       const open = c.classList.toggle('is-open');
       more.setAttribute('aria-expanded', open);
+      const body = c.querySelector('.card-more > div');
+      if (body) body.inert = !open;
       if (window.ScrollTrigger) setTimeout(function () { window.ScrollTrigger.refresh(); }, 850);
     }
   });
@@ -248,7 +262,7 @@
 
   /* ---------- custom cursor ---------- */
   function cursor() {
-    if (!finePointer || reduceMotion) return;
+    if (!finePointer || reduceMotion || matchMedia('(forced-colors: active), (prefers-contrast: more)').matches) return;
     const el = document.createElement('div');
     el.className = 'cursor';
     el.setAttribute('aria-hidden', 'true');
@@ -360,12 +374,19 @@
     const burger = bar.querySelector('.nav-burger');
     const menu = document.getElementById('menu');
     if (burger && menu) {
+      const outside = function () {
+        return Array.from(document.body.children).filter(function (n) { return n !== menu && n !== bar && !n.contains(bar) && n.tagName !== 'SCRIPT'; })
+          .concat(Array.from(bar.querySelectorAll('a, button')).filter(function (n) { return n !== burger; }));
+      };
       function setOpen(open) {
+        const was = menu.classList.contains('is-open');
         burger.setAttribute('aria-expanded', open);
         menu.classList.toggle('is-open', open);
         menu.inert = !open;
+        outside().forEach(function (n) { n.inert = open; });
         if (lenis) { if (open) lenis.stop(); else lenis.start(); }
         document.body.style.overflow = open ? 'hidden' : '';
+        if (open && !was) { const first = menu.querySelector('a'); if (first) setTimeout(function () { first.focus(); }, 60); }
       }
       menu.inert = true;
       burger.addEventListener('click', function () { setOpen(burger.getAttribute('aria-expanded') !== 'true'); });
@@ -388,19 +409,30 @@
     els.forEach(function (el) { io.observe(el); });
   }
 
+  // a heading whose words are animated separately gets one plain, screen-reader-only copy of its text
+  function labelHeading(el) {
+    const h = el.closest('h1, h2, h3');
+    if (!h || h.querySelector(':scope > [data-sr-copy]')) return;
+    const text = h.textContent.replace(/\s+/g, ' ').trim();
+    Array.from(h.children).forEach(function (c) { c.setAttribute('aria-hidden', 'true'); });
+    h.insertAdjacentHTML('afterbegin', '<span class="sr-only" data-sr-copy>' + esc(text) + '</span>');
+  }
+
   // split a heading into masked lines of characters and animate them in (GSAP SplitText)
   function splitIn(el, delay) {
     if (!el) return;
     if (!gsap || reduceMotion) { el.style.opacity = 1; return; }
     // gradient text can't be split (background-clip doesn't survive per-letter transforms): slide the word up as one
     if (!window.SplitText || el.classList.contains('grad')) {
+      labelHeading(el);
       gsap.set(el, { opacity: 1 });
       gsap.from(el, { yPercent: 110, duration: 1.2, ease: 'expo.out', delay: (delay || 0) + .1 });
       return;
     }
     gsap.registerPlugin(window.SplitText);
+    labelHeading(el);
     const go = function () {
-      const split = new window.SplitText(el, { type: 'lines,chars', linesClass: 'line-mask', charsClass: 'ch' });
+      const split = new window.SplitText(el, { type: 'lines,chars', linesClass: 'line-mask', charsClass: 'ch', aria: 'hidden' });
       gsap.set(el, { opacity: 1 });
       gsap.from(split.chars, { yPercent: 115, rotate: 6, duration: 1.1, ease: 'expo.out', stagger: .018, delay: delay || 0 });
     };
@@ -435,6 +467,26 @@
     root.classList.add('lg-refract');
   }
 
+  /* ---------- "Pause motion": stops the looping animations (tickers, marquee, drifting light, the sun) ---------- */
+  let motionPaused = false;
+  function motionToggle() {
+    try { motionPaused = localStorage.getItem('gs-motion') === 'paused'; } catch (e) { /* storage blocked */ }
+    const btns = document.querySelectorAll('[data-motion-toggle]');
+    const apply = function () {
+      root.classList.toggle('motion-paused', motionPaused);
+      btns.forEach(function (b) { b.setAttribute('aria-pressed', motionPaused); });
+      document.dispatchEvent(new CustomEvent('gs:motion', { detail: { paused: motionPaused } }));
+    };
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        motionPaused = !motionPaused;
+        try { localStorage.setItem('gs-motion', motionPaused ? 'paused' : 'on'); } catch (e) { /* not persisted */ }
+        apply();
+      });
+    });
+    apply();
+  }
+
   document.querySelectorAll('[data-top]').forEach(function (b) { b.addEventListener('click', scrollToTop); });
 
   fillConfig();
@@ -448,10 +500,12 @@
   cursor();
   magnetic();
   lightbox();
+  motionToggle();
 
   window.GS = {
     config: CFG, products: PRODUCTS, byId: byId, quote: quote, card: card, btn: btn, esc: esc, icon: ICON, toast: toast,
     reduceMotion: reduceMotion, finePointer: finePointer, reveals: reveals, enhance: enhance, splitIn: splitIn, ready: ready,
-    get lenis() { return lenis; }
+    get lenis() { return lenis; },
+    get motionPaused() { return motionPaused; }
   };
 })();

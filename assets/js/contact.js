@@ -58,15 +58,21 @@
     if (addSel.value) GS.quote.add(addSel.value, 1);
   });
   document.addEventListener('gs:quote', function () {
-    // keep focus inside the list while people adjust quantities
+    // keep focus inside the list while people adjust quantities, and somewhere sensible after a removal
     const active = document.activeElement;
     const li = active && active.closest && active.closest('.item');
     const id = li && li.dataset.id;
+    const idx = li ? Array.from(itemsEl.children).indexOf(li) : -1;
     const which = active && active.dataset && active.dataset.step;
     renderItems();
     if (id) {
       const again = itemsEl.querySelector('.item[data-id="' + id + '"] ' + (which ? '[data-step="' + which + '"]' : 'input'));
-      if (again) again.focus();
+      if (again) { again.focus(); return; }
+      const items = itemsEl.querySelectorAll('.item');
+      const next = items.length ? items[Math.min(idx, items.length - 1)].querySelector('.rm') : addSel;
+      next.focus();
+      const gone = GS.byId[id];
+      if (gone) say((gone.short || gone.name) + ' removed from the list.');
     }
   });
 

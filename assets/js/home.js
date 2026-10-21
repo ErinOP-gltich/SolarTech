@@ -37,11 +37,15 @@
     // phones: the sun sits high and small so the headline below it stays readable
     const place = function (m) { return m ? { center: [0.64, 0.2], radius: 0.34 } : { center: [0.74, 0.5], radius: 0.36 }; };
     let sun = mountSun(canvas, place(mode));
+    const syncMotion = function () { if (sun) { if (GS.motionPaused) sun.pause(); else sun.play(); } };
+    document.addEventListener('gs:motion', syncMotion);
+    syncMotion();
     addEventListener('resize', function () {
       if (portrait() === mode || !sun) return;
       mode = portrait();
       sun.destroy();
       sun = mountSun(canvas, place(mode));
+      syncMotion();
     });
     if (motion) {
       // as the hero scrolls away the sun swells and the headline lifts off
@@ -104,9 +108,14 @@
     const measure = function () { st.forEach(function (s) { s.w = s.el.scrollWidth / 2; }); };
     measure();
     addEventListener('resize', measure);
-    let visible = true, lastY = scrollY, vel = 0, skew = 0;
-    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }).observe(box);
-    (function loop() {
+    let visible = true, lastY = scrollY, vel = 0, skew = 0, raf = 0;
+    // the loop only runs while the marquee is on screen and motion isn't paused
+    const wake = function () { if (!raf && visible && !GS.motionPaused) { lastY = scrollY; raf = requestAnimationFrame(loop); } };
+    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; wake(); }).observe(box);
+    document.addEventListener('gs:motion', wake);
+    function loop() {
+      raf = 0;
+      if (!visible || GS.motionPaused) return;
       const y = scrollY;
       const lv = GS.lenis ? GS.lenis.velocity : (y - lastY);
       lastY = y;
@@ -120,8 +129,9 @@
           s.el.style.transform = 'translate3d(' + s.x.toFixed(1) + 'px,0,0) skewX(' + skew.toFixed(2) + 'deg)';
         });
       }
-      requestAnimationFrame(loop);
-    })();
+      raf = requestAnimationFrame(loop);
+    }
+    wake();
   }
 
   /* ---------- 4. words light up as you read ---------- */
@@ -150,7 +160,8 @@
     let lit = -1;
     function update() {
       const r = el.getBoundingClientRect();
-      const p = clamp((innerHeight * .85 - r.top) / (r.height + innerHeight * .3), 0, 1);
+      // every word is lit by the time the paragraph's bottom reaches 75% of the viewport
+      const p = clamp((innerHeight * .9 - r.top) / (r.height + innerHeight * .15), 0, 1);
       const n = Math.round(p * words.length);
       if (n === lit) return;
       lit = n;
@@ -177,7 +188,13 @@
         })(t0);
       });
     }, { threshold: .6 });
-    els.forEach(function (el) { el.textContent = '0'; io.observe(el); });
+    els.forEach(function (el) {
+      // the rolling digits are decoration; a hidden copy carries the real value for screen readers
+      el.insertAdjacentHTML('afterend', '<span class="sr-only">' + GS.esc(fmt(+el.dataset.count)) + '</span>');
+      el.setAttribute('aria-hidden', 'true');
+      el.textContent = '0';
+      io.observe(el);
+    });
   }
 
   /* ---------- 6. 24 hours, scrubbed by scroll ---------- */
@@ -190,6 +207,8 @@
     const scene = sec.querySelector('[data-scene]');
     const clock = sec.querySelector('[data-clock]');
     const phaseEl = sec.querySelector('[data-phase]');
+    phaseEl.removeAttribute('aria-live');
+    phaseEl.setAttribute('aria-hidden', 'true');
     const dots = sec.querySelectorAll('.day-dots i');
     const bars = {}, outs = {};
     sec.querySelectorAll('[data-m]').forEach(function (b) { bars[b.dataset.m] = b; });
@@ -278,6 +297,9 @@
         dots.forEach(function (d, i) { d.classList.toggle('on', i <= ph); });
       }
     }
+    phaseEl.insertAdjacentHTML('beforebegin', '<ol class="sr-only">' + PHASES.map(function (x) {
+      return '<li><h3>' + GS.esc(x.h) + '</h3><p>' + GS.esc(x.p) + '</p></li>';
+    }).join('') + '</ol>');
     addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(update); }, { passive: true });
     addEventListener('resize', update);
     update();
@@ -303,7 +325,7 @@
           '<h3 class="h3">' + GS.esc(p.name) + '</h3>' +
           '<div class="scope" style="margin:0">' + (p.tags || []).map(function (t) { return '<span class="tag">' + GS.esc(t) + '</span>'; }).join('') + '</div>' +
           '<dl class="specs">' + specs.map(function (s) { return '<div><dt class="label">' + GS.esc(s[0]) + '</dt><dd>' + GS.esc(s[1]) + '</dd></div>'; }).join('') + '</dl>' +
-          '<div class="hero-ctas">' + GS.btn('Enquire', href, 'btn-plasma btn-sm') +
+          '<div class="hero-ctas">' + GS.btn('Enquire', href, 'btn-plasma btn-sm', ' aria-label="Enquire about ' + GS.esc(p.name) + '"') +
             '<button class="icon-btn glass sl" type="button" data-add="' + GS.esc(p.id) + '" aria-pressed="false" aria-label="Add ' + GS.esc(p.short || p.name) + ' to quote list"><span class="state" aria-hidden="true"></span>' + GS.icon.plus + '</button></div>' +
         '</div></article>';
     }).join('') +
@@ -391,6 +413,7 @@
         '<span><b>' + f.label + '</b><small>' + f.sub + '</small></span><span class="radio" aria-hidden="true"></span></button>';
     }).join('');
     const btns = Array.from(opts.querySelectorAll('.fopt'));
+    let why = null, picks = null;
     function choose(id, focus) {
       const f = FINDER.find(function (x) { return x.id === id; });
       btns.forEach(function (b) {
@@ -399,8 +422,10 @@
         b.tabIndex = on ? 0 : -1;
         if (on && focus) b.focus();
       });
-      out.innerHTML = '<p class="finder-why glass">' + f.why + '</p><div class="cards">' +
-        f.picks.map(function (pid) { return GS.byId[pid]; }).filter(Boolean).map(function (p) { return GS.card(p); }).join('') + '</div>';
+      // the reason line is a persistent live region (announced on change); the cards are not read out each time
+      if (!why) { out.innerHTML = '<p class="finder-why glass" aria-live="polite"></p><div class="cards"></div>'; why = out.firstChild; picks = out.lastChild; }
+      why.innerHTML = f.why;
+      picks.innerHTML = f.picks.map(function (pid) { return GS.byId[pid]; }).filter(Boolean).map(function (p) { return GS.card(p); }).join('');
       if (motion) gsap.from(out.querySelectorAll('.card'), { y: 40, opacity: 0, duration: .9, ease: 'expo.out', stagger: .07 });
       if (ST) ST.refresh();
     }
@@ -422,6 +447,11 @@
     const canvas = document.querySelector('[data-cta-canvas]');
     if (!cta || !canvas) return;
     const sun = mountSun(canvas, { center: [0.5, 1.2], radius: innerWidth < 760 ? 0.7 : 0.55, pointer: false });
+    if (sun) {
+      const syncMotion = function () { if (GS.motionPaused) sun.pause(); else sun.play(); };
+      document.addEventListener('gs:motion', syncMotion);
+      syncMotion();
+    }
     if (motion) {
       gsap.fromTo(canvas, { yPercent: 35 }, { yPercent: 0, ease: 'none', scrollTrigger: { trigger: cta, start: 'top bottom', end: 'center center', scrub: true } });
       gsap.fromTo(cta.querySelector('.cta-fallback'), { yPercent: 35 }, { yPercent: 0, ease: 'none', scrollTrigger: { trigger: cta, start: 'top bottom', end: 'center center', scrub: true } });

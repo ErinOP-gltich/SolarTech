@@ -101,7 +101,7 @@
   <header class="phero" aria-labelledby="ph">
     <img class="phero-sun" src="assets/brand/favicon.svg" alt="">
     <div class="wrap">
-      <ol class="crumbs label"><li><a href="index.html">Home</a></li><li>Contact</li></ol>
+      <nav aria-label="Breadcrumb"><ol class="crumbs label"><li><a href="index.html">Home</a></li><li aria-current="page">Contact</li></ol></nav>
       <h1 class="h1" id="ph"><span data-hero-line>Let's light</span> <span class="it grad" data-hero-line>something up.</span></h1>
       <p class="lede rv">Tell us what you're lighting and where. An engineer gets back to you with a sized system and a price — usually the same working day.</p>
     </div>
@@ -178,7 +178,7 @@
         <p>The best way to power up. Solar &amp; LED lighting designed, built and serviced in Guwahati, Assam.</p>
       </div>
       <div>
-        <h4 class="label">Marketplace</h4>
+        <h2 class="label">Marketplace</h2>
         <ul>
           <li><a href="products.html#street">Solar street lights</a></li>
           <li><a href="products.html#mast">High masts &amp; floods</a></li>
@@ -188,7 +188,7 @@
         </ul>
       </div>
       <div>
-        <h4 class="label">Company</h4>
+        <h2 class="label">Company</h2>
         <ul>
           <li><a href="index.html#about">About us</a></li>
           <li><a href="index.html#day">How it works</a></li>
@@ -197,7 +197,7 @@
         </ul>
       </div>
       <div>
-        <h4 class="label">Reach us</h4>
+        <h2 class="label">Reach us</h2>
         <address data-cfg="address">Pub Boragaon, NH-37, Belwali Road<br>Ward No. 10, Guwahati<br>Kamrup Metropolitan, Assam 781035</address>
         <ul style="margin-top:var(--s3)">
           <li><a data-cfg="phone" href="tel:+919920996608">+91 99209 96608</a></li>
@@ -207,6 +207,7 @@
     </div>
     <div class="ftr-base">
       <span class="label">© <span data-year>2026</span> Green Sun Technologies · GSTIN <span data-cfg="gstin">18BPLPS0265L1ZB</span></span>
+      <button class="motion-tog label sl" type="button" aria-pressed="false" data-motion-toggle><span class="state" aria-hidden="true"></span><i aria-hidden="true"></i>Pause motion</button>
       <button class="btn btn-glass glass btn-sm sl" type="button" data-top>Back to top ↑</button>
     </div>
   </div>
