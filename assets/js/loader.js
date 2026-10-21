@@ -138,7 +138,7 @@
     var sun = $('.gsl-sun'), core = $('.gsl-core'), dial = $('.gsl-dial');
     var ember = $('.gsl-ember'), hot = $('.gsl-hot');
     var faceLit = $('.gsl-face:not(.gsl-face--dark)'), faceDark = $('.gsl-face--dark');
-    var flash = $('.gsl-flash'), glow = $('.gsl-glow'), streak = $('.gsl-streak');
+    var flash = $('.gsl-flash'), glow = $('.gsl-glow'), streak = $('.gsl-streak'), shafts = $('.gsl-shafts');
     var fx = $('.gsl-fx');
     var head = $('.gsl-bar b');
     var lines = $$('.gsl-log li').map(function (li) {
@@ -214,7 +214,7 @@
         if (chars !== L.n) { L.n = chars; L.span.textContent = L.text.slice(0, chars); }
         var d = Math.round(clamp((f - 0.62) / 0.3) * 100) / 100;
         if (d !== L.d) { L.d = d; L.li.style.setProperty('--d', d); }
-        var state = f <= 0 ? '' : f < 1 ? 'is-on is-typing' : 'is-on is-ok';
+        var state = f <= 0 ? '' : chars < L.text.length ? 'is-on is-typing' : f < 1 ? 'is-on' : 'is-on is-ok';
         if (state !== L.state) { L.state = state; L.li.className = state; }
         if (f >= 1) okCount++;
       }
@@ -365,13 +365,14 @@
           { duration: 700, delay: 380 + (i % 3) * 160, easing: EXPO, fill: 'both' });
       });
       animate(core, [{ transform: 'scale(.86)' }, { transform: 'none' }], { duration: 1600, easing: EXPO });
+      animate(shafts, [{ transform: 'rotate(0deg)' }, { transform: 'rotate(-360deg)' }], { duration: 90000, iterations: Infinity });
     } else {
       setSpin(0.6);
       hot.style.opacity = '0.25';
     }
 
     /* ---- main loop ----------------------------------------------------- */
-    var MIN = mode === 'full' ? 1.6 : 0.24;    // seconds before progress may reach 100
+    var MIN = mode === 'full' ? 1.6 : 0.2;     // seconds before progress may reach 100
     var p = 0, tgt = 0, clock = 0, last = now(), held = 0;
     var phase = 'load', exitAt = 0, exitFired = false, X = null;
 
@@ -388,7 +389,7 @@
       var forced = wall > HARD_EXIT;
       if (forced) target = 1;
       if (target > tgt) tgt = target;
-      p += (tgt - p) * (1 - Math.exp(-dt * (mode === 'full' ? 9 : 22)));
+      p += (tgt - p) * (1 - Math.exp(-dt * (mode === 'full' ? 9 : 30)));
       if (tgt >= 1 && p > 0.995) p = 1;
       paint(p, dt);
       if (p >= 1 && (sig.dom || forced)) {
@@ -406,6 +407,7 @@
         var k = smooth(0.24, 0.56, pp);
         faceDark.style.opacity = k.toFixed(3);
         faceLit.style.opacity = (1 - k).toFixed(3);
+        shafts.style.opacity = smooth(0.2, 1, pp).toFixed(3);
         streak.style.opacity = (0.85 * smooth(0.3, 1, pp)).toFixed(3);
         streak.style.transform = 'scaleX(' + (0.25 + 0.75 * expoOut(pp)).toFixed(3) + ')';
         var ticks = Math.floor(pp * 72 + 1e-6) / 72;
@@ -439,8 +441,8 @@
       var full = mode === 'full';
       X = {
         full: full,
-        flash: full ? 0.2 : 0.04,
-        wipe: full ? 0.7 : 0.34,
+        flash: full ? 0.2 : 0.02,
+        wipe: full ? 0.7 : 0.3,
         maxR: maxR,
         band: full ? 0.3 : 0.12,
         clip: supportsClipPath()
@@ -459,14 +461,15 @@
         flash.style.opacity = (smooth(0, 1, f) * (1 - smooth(X.flash + 0.15, X.flash + 0.55, te))).toFixed(3);
         flash.style.transform = 'scale(' + (0.6 + 0.9 * expoOut(f)).toFixed(3) + ')';
         glow.style.opacity = '1';
+        shafts.style.opacity = (1 - smooth(0.1, 0.5, te)).toFixed(3);
         streak.style.opacity = (1 - smooth(0.25, 0.75, te)).toFixed(3);
         streak.style.transform = 'scaleX(' + (1 + 1.2 * expoOut(f)).toFixed(3) + ') scaleY(' + (1 + 1.5 * smooth(0, 1, f)).toFixed(3) + ')';
         if (!X.burst && te >= X.flash * 0.85) { X.burst = true; burst(); }
       }
       // 2 · burn-through: a circular hole races out from the sun's centre
       var u = clamp((te - X.flash) / X.wipe);
-      var e = u < 0.5 ? 8 * u * u * u * u : 1 - Math.pow(-2 * u + 2, 4) / 2;   // quart in-out
-      e = 0.35 * u + 0.65 * e;
+      // a quick pop to the size of the core, then a front that keeps accelerating off-screen
+      var e = 0.12 * expoOut(Math.min(1, u * 3)) + 0.88 * Math.pow(u, 1.7);
       var band = 30 + X.maxR * X.band;
       var R = e * (X.maxR + band + 20);
       var sc = 1 + (X.full ? 0.06 * smooth(0, 1, f) : 0) + 1.4 * e * e;
@@ -513,6 +516,8 @@
 
   /* reduced motion: no counter, no typing, no spin — a still frame and a fade */
   function reducedRun(seen) {
+    var n = el.querySelector('.gsl-log-n');
+    if (n) n.textContent = '05/05';
     var minT = seen ? 150 : 450;
     var softCap = seen ? 600 : 1200;
     var fired = false;

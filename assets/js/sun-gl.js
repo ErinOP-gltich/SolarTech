@@ -14,25 +14,32 @@
  *     intensity: 1,            // 0 = dormant ember, 1 = normal, 2 = blazing
  *     pointer:   true,         // corona leans + brightens toward the pointer (window pointermove)
  *     dprMax:    1.5,          // devicePixelRatio cap
- *     quality:   'auto'        // 'auto' | 'high' | 'low'   ('auto' adapts to frame time)
+ *     quality:   'auto',       // 'auto' | 'high' | 'low'   ('auto' adapts to frame time)
+ *     // optional: onReady(sun) after the first frame, seed (number, varies the pattern),
+ *     //           allowSoftware (true = accept a software-rendered WebGL context)
  *   });
  *   sun.setIntensity(v, immediate?) // v 0..2, eased over ~0.3 s unless immediate === true
  *   sun.setPointer(nx, ny)          // -1..1 over the canvas (nx -1 = left, ny -1 = top);
  *                                   // pass null to release. Not needed when opts.pointer is on.
  *   sun.resize()                    // force a re-measure (a ResizeObserver already does this)
  *   sun.destroy()                   // stop, unhook every listener, free GL objects
- *   // extras: sun.setCenter(x, y), sun.setRadius(r), sun.snapshot(seconds) (draws one frame at
- *   // a given clock time, for posters/tests), sun.stats(), sun.gl (false on the no-op controller)
+ *   // extras: sun.setCenter(x, y), sun.setRadius(r)   (live, e.g. scroll-driven)
+ *   //         sun.pause(), sun.play()                 (e.g. while a menu covers the hero)
+ *   //         sun.snapshot(seconds)  pauses and draws one frame at that clock time (posters/tests)
+ *   //         sun.stats(), sun.gl    (false on the no-op controller)
  *
  * Behaviour
  *   - Canvas backing store follows its CSS box (ResizeObserver) × min(devicePixelRatio, dprMax).
+ *   - Shaders compile without blocking the main thread where KHR_parallel_shader_compile exists.
  *   - Rendering pauses while the canvas is off-screen (IntersectionObserver) or the tab is hidden.
- *   - quality 'auto': starts 'low' on small screens; if frames take > 22 ms for a while the
- *     internal resolution / octave count steps down (four levels).
- *   - prefers-reduced-motion: ONE static frame (re-rendered on resize/intensity), no loop.
+ *   - quality 'auto': starts 'low' on small screens; if frames average > 22 ms for ~2 s the
+ *     internal resolution / octave count steps down (four levels, then half-rate as a last resort).
+ *   - prefers-reduced-motion: ONE static frame (re-rendered on resize/intensity), no loop, no
+ *     pointer reaction. Live changes to the OS setting are followed.
  *   - No WebGL / shader failure / context lost: class "no-gl" is added to canvas.parentElement
- *     and a no-op controller is returned (on webglcontextrestored it recovers automatically).
- *   - Once the first frame is on screen the parent gets class "gl-on" (handy for a fade-in).
+ *     and a no-op controller is returned (after webglcontextrestored it recovers by itself).
+ *   - After the first frame: class "gl-on" on the parent and a bubbling "gs:sun-ready" event
+ *     on the canvas (handy for a loader or a fade-in).
  *
  * Recommended CSS (fallback for parents marked .no-gl; vmin values suit a full-viewport hero
  * with the default center / radius):
@@ -47,6 +54,7 @@
  *   }
  *   canvas.gs-sun { opacity: 0; transition: opacity 1.2s cubic-bezier(.16,1,.3,1); }
  *   .gl-on > canvas.gs-sun { opacity: 1; }
+ *   @media (prefers-reduced-motion: reduce) { canvas.gs-sun { transition: none; } }
  *
  * Simplex noise: Ian McEwan, Ashima Arts / Stefan Gustavson (MIT licence).
  */
