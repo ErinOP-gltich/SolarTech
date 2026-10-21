@@ -47,7 +47,8 @@
   function cmix(a, b, t) { return [mix(a[0], b[0], t), mix(a[1], b[1], t), mix(a[2], b[2], t)]; }
 
   var LAMP = [1.0, 0.84, 0.60];        // warm-white LED light
-  var LIT_GAIN = 1.0;                 // street albedo × LAMP × gain = the lit street
+  var LIT_GAIN = 1.0;
+  var KNEE = 0.4;                      // soft shoulder on the lit street: bright paint tops out near L 0.23                 // street albedo × LAMP × gain = the lit street
   var MOON = [0.016, 0.018, 0.026];    // the unlit street: a faint, cool night
   var FOG = [0.0042, 0.0040, 0.0062];  // haze toward the horizon (≈ #101015)
   var KEY = vnorm([-0.55, 0.62, -0.56]); // studio key on the luminaire: upper-left, from the camera side
@@ -57,7 +58,7 @@
   // albedo (linear)
   var A = {
     asphalt: [0.07, 0.066, 0.062], wear: [0.10, 0.096, 0.09], patch: [0.035, 0.034, 0.033],
-    paint: [0.66, 0.63, 0.56], stud: [0.9, 0.55, 0.08],
+    paint: [0.58, 0.56, 0.5], stud: [0.9, 0.55, 0.08],
     kerbY: [0.80, 0.50, 0.02], kerbK: [0.03, 0.03, 0.032],
     paver: [0.13, 0.122, 0.112], joint: [0.035, 0.033, 0.03], soil: [0.05, 0.036, 0.024],
     leaf: [0.035, 0.085, 0.02], leaf2: [0.075, 0.16, 0.035], leafDk: [0.012, 0.03, 0.008],
@@ -200,6 +201,9 @@
     }
     var hasConic = typeof fx.createConicGradient === 'function';
 
+    // areas the pool must stay clear of (the lede, the foot): like a real head, the light has a limited reach
+    var shieldEls = Array.prototype.slice.call(opts.shield ? (typeof opts.shield === 'string' ? host.querySelectorAll(opts.shield) : opts.shield) : host.querySelectorAll('[data-beam-shield]'));
+    var shields = [];
     var lit = opts.lit ? Array.prototype.slice.call(typeof opts.lit === 'string' ? host.querySelectorAll(opts.lit) : opts.lit) : Array.prototype.slice.call(host.querySelectorAll('[data-beam-lit]'));
 
     // state
@@ -223,6 +227,7 @@
     function tone(alb, lit, z) {
       if (lit) {
         var c = cscale(cmul(alb, LAMP), LIT_GAIN);
+        c = [c[0] / (1 + c[0] / KNEE), c[1] / (1 + c[1] / KNEE), c[2] / (1 + c[2] / KNEE)];
         return z > 25 ? cmix(c, FOG, 1 - Math.exp(-(z - 25) / 90)) : c;
       }
       return cmix(cmul(alb, MOON), FOG, 1 - Math.exp(-z / 60));
@@ -828,6 +833,11 @@
     }
     function clampTarget(p) {
       var y = Math.max(p[1], L.minY * H, cam.horizon + 0.07 * H);
+      var mx = 0.07 * W, my = (L.portrait ? 0.075 : 0.1) * H;
+      shields.forEach(function (r) {
+        if (p[0] > r[0] - mx && p[0] < r[2] + mx) y = Math.min(y, r[1] - my);
+      });
+      y = Math.max(y, cam.horizon + 0.07 * H);
       var g = cam.ground(clamp(p[0], -0.05 * W, 1.05 * W), y);
       if (!g) return [p[0], y];
       if (g[2] > L.maxZ) { g[2] = L.maxZ; var q = cam.p(g[0], 0, g[2]); return [q[0], q[1]]; }
@@ -909,7 +919,7 @@
       fx.globalCompositeOperation = 'lighter';
       fx.setTransform(dpr * (pe1[0] - pc[0]), dpr * (pe1[1] - pc[1]), dpr * (pe2[0] - pc[0]), dpr * (pe2[1] - pc[1]), dpr * pc[0], dpr * pc[1]);
       var hs = fx.createRadialGradient(0, 0, 0, 0, 0, 1.1);
-      hs.addColorStop(0, 'rgba(255,214,150,' + (0.14 * kk).toFixed(3) + ')'); hs.addColorStop(0.5, 'rgba(255,190,110,' + (0.06 * kk).toFixed(3) + ')'); hs.addColorStop(1, 'rgba(255,170,80,0)');
+      hs.addColorStop(0, 'rgba(255,214,150,' + (0.08 * kk).toFixed(3) + ')'); hs.addColorStop(0.5, 'rgba(255,190,110,' + (0.035 * kk).toFixed(3) + ')'); hs.addColorStop(1, 'rgba(255,170,80,0)');
       fx.fillStyle = hs; fx.fillRect(-1.1, -1.1, 2.2, 2.2);
       fx.restore();
       fx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1021,9 +1031,9 @@
         if (on < 0.02) return;
         var q = cam.p(fl.x + Math.sin(tt * 0.4 + fl.dx) * 0.4, fl.y + Math.sin(tt * 0.6 + fl.dx) * 0.15, fl.z);
         if (q[1] < cam.horizon) return;
-        var rr = clamp(cam.f * 0.12 / q[2], 3, 12);
+        var rr = clamp(cam.f * 0.09 / q[2], 2.5, 8);
         var g = fx.createRadialGradient(q[0], q[1], 0, q[0], q[1], rr);
-        g.addColorStop(0, 'rgba(232,255,170,' + (0.9 * on).toFixed(3) + ')'); g.addColorStop(0.2, 'rgba(198,255,61,' + (0.45 * on).toFixed(3) + ')'); g.addColorStop(1, 'rgba(198,255,61,0)');
+        g.addColorStop(0, 'rgba(232,255,170,' + (0.75 * on).toFixed(3) + ')'); g.addColorStop(0.2, 'rgba(198,255,61,' + (0.3 * on).toFixed(3) + ')'); g.addColorStop(1, 'rgba(198,255,61,0)');
         fx.fillStyle = g; fx.fillRect(q[0] - rr, q[1] - rr, rr * 2, rr * 2);
       });
       fx.globalCompositeOperation = 'source-over';
@@ -1056,13 +1066,14 @@
 
       // 8 · tell the headline where the light is
       var a0 = Infinity, a1 = -Infinity, axisAng = Math.atan2(pc[1] - apex[1], pc[0] - apex[0]), far = 0;
-      pool.forEach(function (p) {
+      pool.forEach(function (p0) {
+        var p = [pc[0] + (p0[0] - pc[0]) * 1.45, pc[1] + (p0[1] - pc[1]) * 1.45];
         var d = Math.atan2(p[1] - apex[1], p[0] - apex[0]) - axisAng;
         while (d > Math.PI) d -= TAU; while (d < -Math.PI) d += TAU;
         a0 = Math.min(a0, d); a1 = Math.max(a1, d);
         far = Math.max(far, Math.hypot(p[0] - apex[0], p[1] - apex[1]));
       });
-      lastBeam = { apex: apex, pool: pc, a0: axisAng + a0, a1: axisAng + a1, far: far, k: clamp(I, 0, 1), cone: cone, kI: kI };
+      lastBeam = { apex: apex, pool: pc, a0: axisAng + a0, a1: axisAng + a1, far: far, k: clamp(I, 0, 1), cone: cone, kI: kI, near: bs * 0.62 };
       paintCss(lastBeam);
 
       var ms = performance.now() - t0;
@@ -1074,6 +1085,10 @@
 
     function measureOffsets() {
       var hr = host.getBoundingClientRect();
+      shields = shieldEls.filter(function (el) { return el.offsetParent !== null; }).map(function (el) {
+        var r = el.getBoundingClientRect();
+        return [r.left - hr.left, r.top - hr.top, r.right - hr.left, r.bottom - hr.top];
+      });
       lit.forEach(function (el) {
         var r = el.getBoundingClientRect();
         el.style.setProperty('--hb-ox', (r.left - hr.left).toFixed(1));
@@ -1087,14 +1102,14 @@
       // CSS conic angles start at 12 o'clock and run clockwise
       var from = (b.a0 * 180 / Math.PI + 90), span = (b.a1 - b.a0) * 180 / Math.PI;
       var soft = Math.max(4, span * 0.22);
-      var vals = [b.apex[0].toFixed(1), b.apex[1].toFixed(1), (from - soft).toFixed(2), (span + soft * 2).toFixed(2), soft.toFixed(2), b.far.toFixed(0), b.k.toFixed(3)];
+      var vals = [b.apex[0].toFixed(1), b.apex[1].toFixed(1), (from - soft).toFixed(2), (span + soft * 2).toFixed(2), soft.toFixed(2), b.far.toFixed(0), b.k.toFixed(3), b.near.toFixed(0)];
       var key = vals.join('|');
       if (key === cssState) return;
       cssState = key;
       var st = host.style;
       st.setProperty('--hb-ax', vals[0]); st.setProperty('--hb-ay', vals[1]);
       st.setProperty('--hb-a0', vals[2]); st.setProperty('--hb-aw', vals[3]); st.setProperty('--hb-as', vals[4]);
-      st.setProperty('--hb-r', vals[5]); st.setProperty('--hb-k', vals[6]);
+      st.setProperty('--hb-r', vals[5]); st.setProperty('--hb-k', vals[6]); st.setProperty('--hb-nr', vals[7]);
     }
 
     /* ---------------- loop + pausing ---------------- */
@@ -1185,6 +1200,7 @@
 
     build();
     readRect();
+    measureOffsets();
     lastW = W; lastH = H;
     if (reduced) clock = igniteAt + 2;
     sync();
@@ -1208,7 +1224,7 @@
         removeEventListener('orientationchange', onResize);
         document.removeEventListener('visibilitychange', onVis);
         document.removeEventListener('gs:motion', onMotion);
-        ['--hb-ax', '--hb-ay', '--hb-a0', '--hb-aw', '--hb-as', '--hb-r', '--hb-k'].forEach(function (p) { host.style.removeProperty(p); });
+        ['--hb-ax', '--hb-ay', '--hb-a0', '--hb-aw', '--hb-as', '--hb-r', '--hb-k', '--hb-nr'].forEach(function (p) { host.style.removeProperty(p); });
         host.classList.remove('hb-on');
         if (ownStage) stage.remove(); else { cScene.remove(); cFx.remove(); }
       },

@@ -75,14 +75,14 @@
   color: var(--hb-lit); -webkit-text-fill-color: var(--hb-lit);
   background: none; filter: none;
   text-shadow: 0 0 .1em rgba(255, 214, 140, .75), 0 0 .38em rgba(255, 150, 40, .42), 0 0 .8em rgba(255, 110, 0, .22);
-  -webkit-mask-image:
-    conic-gradient(from calc(var(--hb-a0, 0) * 1deg) at var(--x) var(--y), rgb(0 0 0 / 0) 0deg, rgb(0 0 0 / var(--k)) calc(var(--hb-as, 6) * 1deg), rgb(0 0 0 / var(--k)) calc((var(--hb-aw, 20) - var(--hb-as, 6)) * 1deg), rgb(0 0 0 / 0) calc(var(--hb-aw, 20) * 1deg)),
-    radial-gradient(circle at var(--x) var(--y), #000 calc(var(--hb-r, 0) * .7px), rgb(0 0 0 / 0) calc(var(--hb-r, 0) * 1.12px));
-  -webkit-mask-composite: source-in;
-  mask-image:
-    conic-gradient(from calc(var(--hb-a0, 0) * 1deg) at var(--x) var(--y), rgb(0 0 0 / 0) 0deg, rgb(0 0 0 / var(--k)) calc(var(--hb-as, 6) * 1deg), rgb(0 0 0 / var(--k)) calc((var(--hb-aw, 20) - var(--hb-as, 6)) * 1deg), rgb(0 0 0 / 0) calc(var(--hb-aw, 20) * 1deg)),
-    radial-gradient(circle at var(--x) var(--y), #000 calc(var(--hb-r, 0) * .7px), rgb(0 0 0 / 0) calc(var(--hb-r, 0) * 1.12px));
-  mask-composite: intersect;
+  /* lit = (inside the cone ∩ not past the pool) ∪ (close to the source) */
+  --cone: conic-gradient(from calc(var(--hb-a0, 0) * 1deg) at var(--x) var(--y), rgb(0 0 0 / 0) 0deg, rgb(0 0 0 / var(--k)) calc(var(--hb-as, 6) * 1deg), rgb(0 0 0 / var(--k)) calc((var(--hb-aw, 20) - var(--hb-as, 6)) * 1deg), rgb(0 0 0 / 0) calc(var(--hb-aw, 20) * 1deg));
+  --reach: radial-gradient(circle at var(--x) var(--y), #000 calc(var(--hb-r, 0) * .72px), rgb(0 0 0 / 0) calc(var(--hb-r, 0) * 1.1px));
+  --near: radial-gradient(circle at var(--x) var(--y), rgb(0 0 0 / var(--k)) calc(var(--hb-nr, 0) * .55px), rgb(0 0 0 / 0) calc(var(--hb-nr, 0) * 1px));
+  -webkit-mask-image: var(--near), var(--cone), var(--reach);
+  -webkit-mask-composite: source-over, source-in;
+  mask-image: var(--near), var(--cone), var(--reach);
+  mask-composite: add, intersect;
 }
 html:not(.js) .hb-lit::after { content: none; }
 
