@@ -581,7 +581,7 @@
 @media (max-width: 760px) {
   .dial { grid-template-columns: minmax(0, 1fr); }
   .dial-read { display: contents; }
-  .dial > * { grid-column: 1; grid-row: auto; }
+  .dial-inst, .dial-stage, .dr-top, .dr-head, .dr-specs, .dr-night, .dr-actions { grid-column: 1; grid-row: auto; }
   .dr-top { order: 1; margin: 0 16px; padding-top: 16px; }
   .dr-head { order: 2; margin: 14px 16px 18px; }
   .dial-inst { order: 3; padding: 56px 0; border-right: 0; border-top: 1px solid var(--gd-line); }

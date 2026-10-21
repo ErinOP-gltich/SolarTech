@@ -293,7 +293,10 @@
     { scale: 0.5, oct: 3, detail: 0, maxPx: 0.9e6 }
   ];
   var STATIC_T = 41.5; // clock time with prominences on the limb, used for the reduced-motion frame
+  var SLOW_MS = 22;    // 'auto' steps down when typical frames take longer than this
   var UNIFORMS = ['uCenter', 'uRadius', 'uTime', 'uI', 'uPointer', 'uOct', 'uDetail', 'uSeed', 'uMaxR', 'uRot'];
+  // linked programs, per WebGL context: destroy() + mount() on the same canvas reuses it (no recompile, no blank frame)
+  var progCache = typeof WeakMap === 'function' ? new WeakMap() : null;
 
   function noop() {}
   function noopController() {
@@ -328,11 +331,21 @@
     var seed = num(opts.seed, 0.37);
     var onReady = typeof opts.onReady === 'function' ? opts.onReady : null;
 
+    // purely decorative: keep it out of the accessibility tree unless the page decided otherwise
+    if (!canvas.hasAttribute('aria-hidden') && !canvas.hasAttribute('role')) canvas.setAttribute('aria-hidden', 'true');
+
     function parentEl() { return canvas.parentElement; }
+    function emit(name) {
+      try { canvas.dispatchEvent(new CustomEvent(name, { bubbles: true })); } catch (e) { /* old browsers */ }
+    }
     function setNoGL(on) {
       var p = parentEl();
       if (!p) return;
-      if (on) { p.classList.add('no-gl'); p.classList.remove('gl-on'); } else p.classList.remove('no-gl');
+      if (on) {
+        var was = p.classList.contains('no-gl');
+        p.classList.add('no-gl'); p.classList.remove('gl-on');
+        if (!was) emit('gs:sun-fallback');
+      } else p.classList.remove('no-gl');
     }
 
     var attrs = {
@@ -347,8 +360,8 @@
     } catch (e) { gl = null; }
     if (!gl || (gl.isContextLost && gl.isContextLost())) { setNoGL(true); return noopController(); }
 
-    var prog = null, buf = null, U = {}, pending = null, ready = false, failed = false;
-    var destroyed = false, lost = false, paused = false, visible = true, raf = 0, drawnOnce = false;
+    var prog = null, buf = null, U = {}, pending = null, pendingAge = 0, ready = false, failed = false;
+    var destroyed = false, lost = false, paused = false, visible = true, raf = 0, drawnOnce = false, dirty = false;
     var reduced = mqMatches('(prefers-reduced-motion: reduce)');
     var level = qualityOpt === 'low' ? 2 : 0;
     if (qualityOpt === 'auto') {
@@ -358,15 +371,16 @@
                  (navigator.deviceMemory && navigator.deviceMemory <= 2);
       level = small || weak ? 2 : 0;
     }
-    var bw = 0, bh = 0;
+    var bw = 0, bh = 0, dprSeen = 0;
     var clock = 18.0 + seed * 7.0; // start mid-cycle so prominences are already alive
-    var last = 0;
-    var perfAcc = 0, perfN = 0, warm = 20, slowStreak = 0, throttle = false, frameFlip = false;
+    var last = 0, carry = 0;
+    var samples = [], sampleT = 0, warmT = 1.5, slowStreak = 0, frameMs = 0, throttle = false, frameFlip = false;
     var ptr = { has: false, cx: 0, cy: 0, manual: false, nx: 0, ny: 0 };
+    var rect = null, rectAge = 1e9;
     var pdx = -0.7071, pdy = 0.7071, pStr = 0, pStrTarget = 0, pLx = 0, pLy = 0;
     var parallel = gl.getExtension('KHR_parallel_shader_compile');
 
-    // ---------- GL setup (non-blocking when KHR_parallel_shader_compile exists) ----------
+    // ---------- GL setup (never blocks the main thread on the compile) ----------
     function shader(type, src) {
       var sh = gl.createShader(type);
       gl.shaderSource(sh, src);
@@ -382,9 +396,25 @@
       gl.bindAttribLocation(p, 0, 'aPos');
       gl.linkProgram(p);
       pending = { p: p, vs: vs, fs: fs };
+      pendingAge = 0;
     }
     function compileDone() {
-      return !parallel || gl.getProgramParameter(pending.p, parallel.COMPLETION_STATUS_KHR);
+      if (parallel) return gl.getProgramParameter(pending.p, parallel.COMPLETION_STATUS_KHR);
+      // no KHR_parallel_shader_compile: the GPU process still compiles in the background, so give it a
+      // couple of frames before asking for LINK_STATUS (that query blocks until the link is done)
+      return ++pendingAge > 2;
+    }
+    function bindProgram(p, b) {
+      prog = p; buf = b;
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      gl.useProgram(prog);
+      U = {};
+      UNIFORMS.forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
+      gl.disable(gl.DEPTH_TEST);
+      gl.disable(gl.BLEND);
+      gl.clearColor(0, 0, 0, 0);
     }
     function finishCompile() {
       var pd = pending; pending = null;
@@ -396,18 +426,11 @@
       }
       gl.detachShader(pd.p, pd.vs); gl.detachShader(pd.p, pd.fs);
       gl.deleteShader(pd.vs); gl.deleteShader(pd.fs);
-      prog = pd.p;
-      buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      var b = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, b);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(0);
-      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-      gl.useProgram(prog);
-      U = {};
-      UNIFORMS.forEach(function (n) { U[n] = gl.getUniformLocation(prog, n); });
-      gl.disable(gl.DEPTH_TEST);
-      gl.disable(gl.BLEND);
-      gl.clearColor(0, 0, 0, 0);
+      bindProgram(pd.p, b);
+      if (progCache) progCache.set(gl, { prog: prog, buf: buf });
       return true;
     }
     // returns true once the program is usable; drives the async compile
@@ -423,19 +446,22 @@
     }
 
     // ---------- sizing ----------
+    // 0 = no size yet, 1 = unchanged, 2 = backing store resized (which clears it)
     function measure() {
-      if (destroyed || lost) return false;
+      if (destroyed || lost) return 0;
       var w = canvas.clientWidth, h = canvas.clientHeight;
       if (!w || !h) { var r = canvas.getBoundingClientRect(); w = r.width; h = r.height; }
-      if (!w || !h) return false;
+      if (!w || !h) return 0;
       var L = LEVELS[level];
-      var ratio = Math.min(window.devicePixelRatio || 1, dprMax) * L.scale;
+      dprSeen = window.devicePixelRatio || 1;
+      var ratio = Math.min(dprSeen, dprMax) * L.scale;
       var tw = w * ratio, th = h * ratio;
       if (tw * th > L.maxPx) { var k = Math.sqrt(L.maxPx / (tw * th)); tw *= k; th *= k; }
       tw = Math.max(1, Math.round(tw));
       th = Math.max(1, Math.round(th));
-      if (tw !== bw || th !== bh) { bw = canvas.width = tw; bh = canvas.height = th; }
-      return true;
+      if (tw === bw && th === bh) return 1;
+      bw = canvas.width = tw; bh = canvas.height = th;
+      return 2;
     }
 
     // ---------- drawing ----------
@@ -469,19 +495,20 @@
       setRot(t);
       gl.uniformMatrix3fv(U.uRot, false, rotM);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+      dirty = false;
       if (!drawnOnce) {
         drawnOnce = true;
         var p = parentEl();
         if (p) p.classList.add('gl-on');
-        try { canvas.dispatchEvent(new CustomEvent('gs:sun-ready', { bubbles: true })); } catch (e) { /* old browsers */ }
+        emit('gs:sun-ready');
         if (onReady) { try { onReady(api); } catch (e) { warn('onReady threw', e); } }
       }
       return true;
     }
-    function staticTime() { return STATIC_T + seed * 3.0; }
+    function frameTime() { return reduced ? STATIC_T + seed * 3.0 : clock; }
     function drawNow() {
       // one frame at the current state (used when not animating)
-      if (measure()) draw(reduced ? staticTime() : clock);
+      if (measure()) draw(frameTime());
     }
 
     // ---------- pointer ----------
@@ -489,10 +516,12 @@
       var tx = null, ty = null;
       if (ptr.manual) { tx = ptr.nx; ty = ptr.ny; }
       else if (ptr.has) {
-        var r = canvas.getBoundingClientRect();
-        if (r.width && r.height) {
-          tx = ((ptr.cx - r.left) / r.width) * 2 - 1;
-          ty = ((ptr.cy - r.top) / r.height) * 2 - 1;
+        // the canvas box is re-read only after a scroll / resize or every ~0.5 s, never every frame
+        rectAge += dt;
+        if (!rect || rectAge > 0.5) { rect = canvas.getBoundingClientRect(); rectAge = 0; }
+        if (rect.width && rect.height) {
+          tx = ((ptr.cx - rect.left) / rect.width) * 2 - 1;
+          ty = ((ptr.cy - rect.top) / rect.height) * 2 - 1;
         }
       }
       var k = 1 - Math.exp(-dt * 3.2);
@@ -521,6 +550,7 @@
     function onPointerOut(e) { if (!e.relatedTarget) ptr.has = false; }
     function onPointerEnd(e) { if (e.pointerType === 'touch') ptr.has = false; }
     function onBlur() { ptr.has = false; }
+    function onScroll() { rectAge = 1e9; }
 
     // ---------- loop ----------
     function running() {
@@ -534,49 +564,65 @@
       var raw = last ? (now - last) / 1000 : 1 / 60;
       last = now;
       monitor(Math.min(raw, 0.5));
+      carry += raw > 0.25 ? 1 / 60 : raw; // after a stall, don't jump the clock
       if (throttle) { frameFlip = !frameFlip; if (frameFlip) return; }
-      var step = Math.min(raw > 0.25 ? 1 / 60 : raw, 0.1); // after a stall, don't jump the clock
+      var step = Math.min(carry, 0.1);
+      carry = 0;
       clock += step;
       intensity += (intensityTarget - intensity) * (1 - Math.exp(-step * 5.0));
       if (usePointer || ptr.manual) updatePointer(step);
-      if (!bw) measure();
+      if (!bw || (window.devicePixelRatio || 1) !== dprSeen) measure(); // also follows a monitor / zoom change
       draw(clock);
     }
-    // 'auto' quality: judge wall-clock frame time over ~1 s windows; step down when slow
+    // 'auto' quality: judge wall-clock frame time over ~1 s windows. The slowest quarter of each window is
+    // ignored so main-thread hiccups (page load, font swaps, long tasks) don't read as a slow GPU.
     function monitor(dt) {
       if (qualityOpt !== 'auto') return;
-      if (warm > 0) { warm--; return; }
-      perfAcc += dt; perfN++;
-      if (perfAcc < 1.0 || perfN < 8) return;
-      var avg = perfAcc / perfN * 1000;
-      perfAcc = 0; perfN = 0;
-      if (avg <= 22) { slowStreak = 0; return; }
-      slowStreak += avg > 50 ? 2 : 1;
+      if (warmT > 0) { warmT -= dt; return; }
+      samples.push(dt); sampleT += dt;
+      if (sampleT < 1.0 || samples.length < 12) return;
+      samples.sort(function (a, b) { return a - b; });
+      var n = Math.max(1, Math.floor(samples.length * 0.75)), sum = 0;
+      for (var i = 0; i < n; i++) sum += samples[i];
+      frameMs = sum / n * 1000;
+      samples.length = 0; sampleT = 0;
+      if (frameMs <= SLOW_MS) { slowStreak = 0; return; }
+      slowStreak += frameMs > 40 ? 2 : 1;
       if (slowStreak < 2) return;
       slowStreak = 0;
-      if (level < LEVELS.length - 1) { level++; warm = 8; measure(); }
-      else if (avg > 34) throttle = true;
+      if (level < LEVELS.length - 1) { level++; warmT = 0.5; measure(); }
+      else if (frameMs > 34) throttle = true;
     }
     function kick() {
-      if (!raf && running()) { last = 0; raf = requestAnimationFrame(frame); }
+      if (!raf && running()) {
+        last = 0; carry = 0;
+        samples.length = 0; sampleT = 0; warmT = Math.max(warmT, 0.4); // the first frames after a resume are noisy
+        raf = requestAnimationFrame(frame);
+      }
     }
     function stop() {
       if (raf) { cancelAnimationFrame(raf); raf = 0; }
     }
     function refresh() {
       if (destroyed || lost || failed) return;
-      if (running()) kick();          // the loop will pick the change up
-      else if (!ready) kickStatic();  // still compiling: draw once it is
-      else drawNow();
+      if (!ready) { if (running()) kick(); else kickStatic(); return; } // compiling: draw once it is done
+      if (running()) { kick(); return; }                     // the loop will pick the change up
+      if (!visible || document.hidden) { dirty = true; return; } // drawn when it comes back into view
+      drawNow();
     }
-    // reduced motion / paused while the program is still compiling: poll until the one frame is drawn
+    function wake() {
+      if (running()) kick();
+      else if (dirty) refresh();
+    }
+    // not animating (reduced motion, paused, off-screen) while the program compiles: poll until it is ready.
+    // Also runs while a .no-gl parent hides the canvas after a context restore, so it can un-hide itself.
     var staticRaf = 0;
     function kickStatic() {
       if (staticRaf || destroyed) return;
       staticRaf = requestAnimationFrame(function () {
         staticRaf = 0;
         if (destroyed || lost || failed) return;
-        if (ensureReady()) drawNow(); else kickStatic();
+        if (ensureReady()) refresh(); else kickStatic();
       });
     }
 
@@ -584,25 +630,34 @@
     var ro = null, io = null, mql = null;
     function onResize() {
       if (destroyed || lost) return;
-      // resizing the backing store clears it — redraw synchronously (RO callbacks run before paint)
-      if (measure() && ready) draw(reduced ? staticTime() : clock);
+      rectAge = 1e9;
+      // resizing the backing store clears it: redraw synchronously (RO callbacks run before paint)
+      if (measure() !== 2 || !ready) return;
+      if (visible && !document.hidden) draw(frameTime()); else dirty = true;
+    }
+    function onWinResize() {
+      if (destroyed || lost) return;
+      rectAge = 1e9;
+      // 'resize' fires before this frame's rAF: while animating, just size the buffer and let the loop draw
+      if (running()) measure(); else onResize();
     }
     if (typeof ResizeObserver === 'function') { ro = new ResizeObserver(onResize); ro.observe(canvas); }
-    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('resize', onWinResize, { passive: true });
 
     if (typeof IntersectionObserver === 'function') {
       io = new IntersectionObserver(function (entries) {
         visible = entries[entries.length - 1].isIntersecting;
-        if (visible) kick(); else stop();
+        if (visible) wake(); else stop();
       }, { rootMargin: '120px 0px' });
       io.observe(canvas);
     }
-    function onVis() { if (document.hidden) stop(); else kick(); }
+    function onVis() { if (document.hidden) stop(); else wake(); }
     document.addEventListener('visibilitychange', onVis);
 
     function onMotionPref() {
       reduced = mqMatches('(prefers-reduced-motion: reduce)');
-      if (reduced) { stop(); refresh(); } else kick();
+      if (reduced) stop();
+      refresh();
     }
     try {
       mql = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -616,13 +671,16 @@
       window.addEventListener('pointercancel', onPointerEnd, { passive: true });
       document.addEventListener('pointerout', onPointerOut, { passive: true });
       window.addEventListener('blur', onBlur);
+      window.addEventListener('scroll', onScroll, { passive: true, capture: true });
     }
 
     function onLost(e) {
       e.preventDefault(); // signal that we want webglcontextrestored
       lost = true;
       ready = false; prog = null; buf = null; pending = null;
+      if (progCache) progCache.delete(gl);
       stop();
+      if (staticRaf) { cancelAnimationFrame(staticRaf); staticRaf = 0; }
       setNoGL(true);
     }
     function onRestored() {
@@ -630,7 +688,7 @@
       lost = false; failed = false; drawnOnce = false;
       bw = bh = 0;
       parallel = gl.getExtension('KHR_parallel_shader_compile'); // extension objects die with the context
-      startCompile();
+      try { startCompile(); } catch (e) { failed = true; setNoGL(true); return; }
       measure();
       refresh();
     }
@@ -657,7 +715,11 @@
         radius = Math.max(0.01, num(r, radius));
         if (!running()) refresh();
       },
-      resize: function () { bw = bh = 0; onResize(); },
+      resize: function () {
+        if (destroyed || lost) return;
+        bw = bh = 0; rectAge = 1e9;
+        if (measure() && ready) { if (visible && !document.hidden) draw(frameTime()); else dirty = true; }
+      },
       pause: function () { paused = true; stop(); },
       play: function () { paused = false; kick(); },
       snapshot: function (seconds) {
@@ -667,14 +729,15 @@
         if (seconds !== undefined) clock = num(seconds, clock);
         intensity = intensityTarget;
         if (measure()) {
-          if (ready || ensureReady()) draw(clock);
+          if (ready || ensureReady()) draw(frameTime());
           else kickStatic();
         }
       },
       stats: function () {
         return {
           gl: true, ready: ready, level: level, width: bw, height: bh, quality: qualityOpt,
-          reduced: reduced, paused: paused, throttled: throttle, time: clock, parallelCompile: !!parallel
+          reduced: reduced, paused: paused, visible: visible, running: !!raf, throttled: throttle,
+          frameMs: Math.round(frameMs * 10) / 10, time: clock, parallelCompile: !!parallel
         };
       },
       destroy: function () {
@@ -684,7 +747,7 @@
         if (staticRaf) { cancelAnimationFrame(staticRaf); staticRaf = 0; }
         if (ro) ro.disconnect();
         if (io) io.disconnect();
-        window.removeEventListener('resize', onResize);
+        window.removeEventListener('resize', onWinResize);
         document.removeEventListener('visibilitychange', onVis);
         if (mql) {
           if (mql.removeEventListener) mql.removeEventListener('change', onMotionPref);
@@ -695,16 +758,18 @@
         window.removeEventListener('pointercancel', onPointerEnd);
         document.removeEventListener('pointerout', onPointerOut);
         window.removeEventListener('blur', onBlur);
+        window.removeEventListener('scroll', onScroll, { capture: true });
         canvas.removeEventListener('webglcontextlost', onLost, false);
         canvas.removeEventListener('webglcontextrestored', onRestored, false);
         try {
           if (!gl.isContextLost()) {
             if (pending) { gl.deleteProgram(pending.p); gl.deleteShader(pending.vs); gl.deleteShader(pending.fs); }
-            if (prog) gl.deleteProgram(prog);
-            if (buf) gl.deleteBuffer(buf);
+            // the linked program + quad stay cached on this canvas's context for an instant remount
+            if (!progCache) { if (prog) gl.deleteProgram(prog); if (buf) gl.deleteBuffer(buf); }
             gl.clear(gl.COLOR_BUFFER_BIT);
           }
         } catch (e) { /* ignore */ }
+        pending = null;
         var p = parentEl();
         if (p) p.classList.remove('gl-on');
         if (canvas.__gsSun === api) canvas.__gsSun = null;
@@ -713,11 +778,18 @@
     canvas.__gsSun = api;
 
     // ---------- start ----------
-    try { startCompile(); } catch (e) { failed = true; }
-    if (failed || (!parallel && !ensureReady())) { // synchronous path: fail fast
-      api.destroy();
-      setNoGL(true);
-      return noopController();
+    var hit = progCache && progCache.get(gl);
+    if (hit && gl.isProgram(hit.prog) && gl.isBuffer(hit.buf)) {
+      bindProgram(hit.prog, hit.buf); // remount on the same canvas: no compile needed
+      ready = true;
+      setNoGL(false);
+    } else {
+      try { startCompile(); } catch (e) { failed = true; }
+      if (failed) {
+        api.destroy();
+        setNoGL(true);
+        return noopController();
+      }
     }
     measure();
     if (reduced) refresh();
@@ -725,5 +797,5 @@
     return api;
   }
 
-  window.GSSun = { mount: mount, version: '2.0.0' };
+  window.GSSun = { mount: mount, version: '2.1.0' };
 })();

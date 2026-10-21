@@ -291,7 +291,7 @@
     var drag = null, intro = null, raf = 0, last = 0, lastA = null, lastLv = -1;
     var lm = { val: 0, from: 0, to: 0, t0: 0, on: false };
     var imgOn = 0, imgSrc = '', imgToken = 0, swingAnim = null;
-    var wheelAcc = 0, wheelLast = 0, wheelStep = 0, pageScrollAt = 0;
+    var wheelAcc = 0, wheelLast = 0, wheelStep = 0, wheelPass = 0, pageScrollAt = 0;
     var dust = null, visible = false, destroyed = false;
     var cleanups = [];
     function on(t, ev, fn, o) { t.addEventListener(ev, fn, o || false); cleanups.push(function () { t.removeEventListener(ev, fn, o || false); }); }
@@ -628,7 +628,9 @@
       var v = Math.abs(dx) > Math.abs(dy) ? dx : -dy;
       if (!v) return;
       var t = now(), engaged = t - wheelLast < 420;
-      if (!engaged && t - pageScrollAt < 240) return;            // the page is scrolling past us
+      // a page-scroll gesture that carries the knob under the cursor stays a page scroll
+      // until the wheel pauses; only a fresh gesture on the knob turns it
+      if (!engaged && (t - pageScrollAt < 240 || t - wheelPass < 650)) { wheelPass = t; return; }
       var dir = v > 0 ? 1 : -1;
       if ((dir > 0 && target >= n - 1) || (dir < 0 && target <= 0)) {
         if (!engaged) return;                                      // at an end stop: let the page have it
