@@ -273,7 +273,6 @@
     radial-gradient(90% 60% at 50% 100%, rgba(255, 90, 20, .06), transparent 70%),
     linear-gradient(180deg, #07070A 0%, #050507 100%);
   isolation: isolate;
-  container-type: inline-size;
 }
 .ds-light, .ds-light > i, .ds-floor, .ds-dust, .ds-ruler { position: absolute; pointer-events: none; }
 .ds-light { inset: 0; z-index: 0; }
@@ -386,6 +385,7 @@
   transition: opacity .55s var(--gd-ease), transform .9s var(--gd-ease);
 }
 .ds-img.is-on { opacity: 1; transform: none; }
+.ds-img.is-broken { visibility: hidden; }
 .ds-rim {        /* warm light thrown back onto the lamp's underside */
   position: absolute; inset: 0; pointer-events: none;
   background: radial-gradient(46% 34% at 50% 100%, rgba(255, 214, 120, .34), transparent 75%);
@@ -424,11 +424,9 @@
   background-repeat: no-repeat;
 }
 .ds-ruler--r { left: auto; right: 0; transform: scaleX(-1); }
-/* a narrow stage (1180-1250 px desktops, small phones) has no room for both footers:
-   IP66 and dusk-to-dawn are in the readout anyway */
-@container (max-width: 344px) {
-  .ds-ann--br { display: none; }
-}
+/* a narrow stage (1180-1250 px desktops, small phones; class set by dial.js) has no room for
+   both footers: IP66 and dusk-to-dawn are in the readout anyway */
+.dial-stage.is-narrow .ds-ann--br { display: none; }
 
 /* readout --------------------------------------------------------------- */
 .dial-read {
@@ -571,9 +569,9 @@
 .dial .dk-maj, .dial .dk-lab { transition-delay: calc(var(--i, 0) * 40ms); }
 .dial.is-ready .dk-maj, .dial.is-ready .dk-lab { transition-delay: 0s; }
 
+/* power-on stutter: two short flickers then a catch, well under three flashes a second */
 @keyframes gd-strike {
-  0% { opacity: 0; } 8% { opacity: .55; } 13% { opacity: .08; } 22% { opacity: .8; } 27% { opacity: .2; }
-  36% { opacity: .95; } 40% { opacity: .5; } 48%, 100% { opacity: 1; }
+  0% { opacity: 0; } 10% { opacity: .5; } 18% { opacity: .1; } 34% { opacity: .85; } 42% { opacity: .5; } 56%, 100% { opacity: 1; }
 }
 
 /* ======================================================================

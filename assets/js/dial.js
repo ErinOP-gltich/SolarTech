@@ -444,9 +444,10 @@
       if (url === imgSrc) { cur.alt = p.name; return false; }
       imgSrc = url;
       var nxt = imgs[imgOn ^ 1], token = ++imgToken;
-      function reveal() {
+      function reveal(e) {
         if (token !== imgToken || destroyed) return;
         nxt.onload = nxt.onerror = null;
+        nxt.classList.toggle('is-broken', !!(e && e.type === 'error') || !(nxt.complete && nxt.naturalWidth));
         nxt.alt = p.name; cur.alt = '';
         nxt.classList.add('is-on'); cur.classList.remove('is-on');
         imgOn ^= 1;
@@ -629,6 +630,10 @@
       intro = null;
       show(value, 1);
       finishIntro();
+    }
+    function settle() {
+      if (!introArmed && !introTimer && !intro) return;
+      disarm(); cancelIntro(); kick();
     }
     function disarm() {           // the visitor got there first: skip the intro altogether
       if (introTimer) { clearTimeout(introTimer); introTimer = 0; introArmed = true; }
@@ -887,6 +892,12 @@
     on(knob, 'dragstart', function (e) { e.preventDefault(); });
     on(window, 'scroll', function (e) { pageScrollAt = e.timeStamp || now(); }, { passive: true });
     on(el.add, 'click', toggleQuote);
+    // reaching for the actions before (or during) the power-on sweep: settle on the real selection
+    // first, so the link and the quote button always act on the light the slider reports
+    [el.cta, el.add].forEach(function (b) {
+      on(b, 'pointerdown', settle);
+      on(b, 'focus', settle);
+    });
     on(document, 'gs:quote', syncAdd);
     on(document, 'visibilitychange', dustState);
     if (mq) {
@@ -898,11 +909,18 @@
     }
     if (!quoteApi()) on(window, 'load', syncAdd);   // the site script may arrive after us
 
+    // a narrow stage has no room for both footer notes (a class, not a container query: --lv
+    // restyles the stage every frame and must not drag a container's layout along with it)
+    function fit() {
+      stage.classList.toggle('is-narrow', stage.getBoundingClientRect().width < 344);
+      sizeDust();
+      drawArc();
+    }
     setupDust();
-    drawArc();
+    fit();
     var ro = null;
-    if (window.ResizeObserver) { ro = new ResizeObserver(function () { sizeDust(); drawArc(); }); ro.observe(stage); ro.observe(knob); }
-    else on(window, 'resize', function () { sizeDust(); drawArc(); });
+    if (window.ResizeObserver) { ro = new ResizeObserver(fit); ro.observe(stage); ro.observe(knob); }
+    else on(window, 'resize', fit);
 
     // first paint: the committed value is the start stop; for the intro the knob is parked at MIN
     var canIntro = !reduced() && 'IntersectionObserver' in window;
@@ -924,16 +942,22 @@
     if ('IntersectionObserver' in window) {
       // the intro waits until the knob itself is at least half on screen; the dust only drifts
       // while the stage (the beam) is on screen
+      // if the actions come into view while the knob never has (a fling past it), skip the show
+      // and settle on the real selection, so the button never offers a light the slider isn't on
+      var actions = $('.dr-actions'), actionsSeen = false;
       io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
           if (en.target === stage) visible = en.isIntersecting;
+          else if (en.target === actions) actionsSeen = en.isIntersecting;
           else knobSeen = en.isIntersecting && en.intersectionRatio >= 0.5;
         });
         dustState();
         maybeIntro();
+        if (actionsSeen && !knobSeen && introArmed) settle();
       }, { threshold: [0, 0.5, 0.75, 1] });
       io.observe(knob);
       io.observe(stage);
+      if (actions) io.observe(actions);
       on(document, 'gs:loaded', function () { loaderDone = true; setTimeout(maybeIntro, 260); });
     } else {
       visible = true; dustState();
