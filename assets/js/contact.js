@@ -20,11 +20,11 @@
       const p = GS.byId[x.id];
       return '<li class="item" data-id="' + p.id + '">' +
         '<span class="th' + (p.blueprint ? ' blueprint' : '') + '"><img src="' + p.img + '" alt=""></span>' +
-        '<span><b>' + GS.esc(p.name) + '</b><small>' + GS.esc(p.part) + '</small></span>' +
-        '<span class="qty"><button type="button" data-step="-1" aria-label="One fewer">−</button>' +
+        '<span><b>' + GS.esc(p.name) + '</b><span class="label">' + GS.esc(p.part) + '</span></span>' +
+        '<span class="qty"><button type="button" class="sl" data-step="-1" aria-label="One fewer"><span class="state" aria-hidden="true"></span>−</button>' +
         '<input type="number" min="1" max="9999" value="' + x.qty + '" aria-label="Quantity of ' + GS.esc(p.short || p.name) + '">' +
-        '<button type="button" data-step="1" aria-label="One more">+</button></span>' +
-        '<button class="rm" type="button" aria-label="Remove ' + GS.esc(p.short || p.name) + '">×</button></li>';
+        '<button type="button" class="sl" data-step="1" aria-label="One more"><span class="state" aria-hidden="true"></span>+</button></span>' +
+        '<button class="rm sl" type="button" aria-label="Remove ' + GS.esc(p.short || p.name) + '"><span class="state" aria-hidden="true"></span>×</button></li>';
     }).join('');
     emptyEl.hidden = list.length > 0;
 
@@ -153,11 +153,11 @@
 
   /* ---------- areas + map ---------- */
   const areas = document.querySelector('[data-areas]');
-  if (areas) areas.innerHTML = (CFG.serviceAreas || []).map(function (a) { return '<li>' + GS.esc(a) + '</li>'; }).join('');
+  if (areas) areas.innerHTML = (CFG.serviceAreas || []).map(function (a, i) { return '<li class="chip' + (i ? '' : ' is-on') + '">' + GS.esc(a) + '</li>'; }).join('');
   const map = document.querySelector('[data-map]');
   if (map && CFG.mapQuery) {
     map.innerHTML = '<iframe title="Map: Green Sun Technologies, ' + GS.esc(CFG.address ? CFG.address.join(', ') : '') + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=' + encodeURIComponent(CFG.mapQuery) + '&output=embed"></iframe>' +
-      '<a href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(CFG.mapQuery) + '" target="_blank" rel="noopener">Open in Google Maps ↗</a>';
+      GS.btn('Open in Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(CFG.mapQuery), 'btn-glass glass btn-sm', ' target="_blank" rel="noopener"');
   }
 
   renderItems();

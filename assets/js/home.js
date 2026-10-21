@@ -1,16 +1,66 @@
-/* Home page: live sun status, the sun's face and cable, lit-up text, the 24-hour scroll story,
-   catalogue teaser, light finder, sector peeks and the closing sunrise. */
+/* Home page: the plasma sun, hero intro, velocity marquee, lit-up manifesto, count-ups, the 24-hour
+   scroll story, the pinned showroom, product-family previews, the light finder and the closing sunrise. */
 (function () {
   const GS = window.GS;
   const CFG = GS.config;
+  const gsap = window.gsap;
+  const ST = window.ScrollTrigger;
+  const motion = !GS.reduceMotion && !!gsap && !!ST;
   const clamp = function (v, a, b) { return Math.min(b, Math.max(a, v)); };
   const pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  const isDesktop = function () { return innerWidth > 1020; };
 
-  /* ---------- 1. Is the sun up in Guwahati right now? (NOAA approximation) ---------- */
+  /* ---------- 1. the plasma sun (WebGL) ---------- */
+  function mountSun(canvas, opts) {
+    if (!canvas || !window.GSSun) {
+      if (canvas) canvas.parentElement.classList.add('no-gl');
+      return null;
+    }
+    try { return window.GSSun.mount(canvas, opts); } catch (e) { canvas.parentElement.classList.add('no-gl'); return null; }
+  }
+
+  function heroSun() {
+    const hero = document.querySelector('[data-hero]');
+    const canvas = document.querySelector('[data-sun-canvas]');
+    if (!hero || !canvas) return;
+    const portrait = function () { return innerWidth < 760 || innerHeight > innerWidth * 1.15; };
+    let mode = portrait();
+    let sun = mountSun(canvas, mode ? { center: [0.66, 0.3], radius: 0.4 } : { center: [0.74, 0.5], radius: 0.36 });
+    if (sun && !hero.classList.contains('no-gl')) hero.querySelector('.hero-fallback').style.opacity = 0;
+    addEventListener('resize', function () {
+      if (portrait() === mode || !sun) return;
+      mode = portrait();
+      sun.destroy();
+      sun = mountSun(canvas, mode ? { center: [0.66, 0.3], radius: 0.4 } : { center: [0.74, 0.5], radius: 0.36 });
+    });
+    if (sun && GS.finePointer) {
+      addEventListener('pointermove', function (e) {
+        if (sun) sun.setPointer(e.clientX / innerWidth * 2 - 1, e.clientY / innerHeight * 2 - 1);
+      }, { passive: true });
+    }
+
+    if (motion) {
+      // as the hero scrolls away the sun swells and the headline lifts off
+      gsap.to(canvas, { yPercent: 18, scale: 1.18, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+      gsap.to(hero.querySelector('.hero-mid'), { yPercent: -22, opacity: 0, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+    }
+  }
+
+  function heroIntro() {
+    const lines = document.querySelectorAll('[data-hero-line]');
+    const extras = document.querySelectorAll('.hero-top, .hero-row, .hero-foot');
+    if (!motion) { lines.forEach(function (l) { l.style.opacity = 1; }); return; }
+    gsap.set(extras, { opacity: 0, y: 24 });
+    GS.ready(function () {
+      lines.forEach(function (l, i) { GS.splitIn(l, .15 + i * .12); });
+      gsap.to(extras, { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: .1, delay: .55 });
+    });
+  }
+
+  /* ---------- 2. is the sun up in Guwahati right now? (NOAA approximation) ---------- */
   function sunTimesUTC(date, lat, lng) {
     const rad = Math.PI / 180;
-    const start = Date.UTC(date.getUTCFullYear(), 0, 0);
-    const day = Math.floor((date.getTime() - start) / 864e5);
+    const day = Math.floor((date.getTime() - Date.UTC(date.getUTCFullYear(), 0, 0)) / 864e5);
     const g = 2 * Math.PI / 365 * (day - 1);
     const eq = 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
     const decl = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g) - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);
@@ -22,80 +72,55 @@
     const el = document.querySelector('[data-live]');
     if (!el || !CFG.geo) return;
     const IST = 330;
-    function fmt(min) { min = ((Math.round(min) % 1440) + 1440) % 1440; return pad(Math.floor(min / 60)) + ':' + pad(min % 60); }
+    const fmt = function (min) { min = ((Math.round(min) % 1440) + 1440) % 1440; return pad(Math.floor(min / 60)) + ':' + pad(min % 60); };
     function paint() {
       const now = new Date();
       const t = sunTimesUTC(now, CFG.geo.lat, CFG.geo.lng);
-      const nowIST = ((now.getUTCHours() * 60 + now.getUTCMinutes() + IST) % 1440);
+      const nowIST = (now.getUTCHours() * 60 + now.getUTCMinutes() + IST) % 1440;
       const rise = t.rise + IST, set = t.set + IST;
       let msg, night = true;
-      if (nowIST >= rise && nowIST < set) {
-        night = false;
-        msg = 'It’s ' + fmt(nowIST) + ' in Guwahati — sun’s up, every Green Sun panel is charging. Sunset ' + fmt(set) + '.';
-      } else if (nowIST >= set && nowIST < set + 360) {
-        msg = 'It’s ' + fmt(nowIST) + ' in Guwahati — sun’s down, Green Sun lights are on at full power.';
-      } else {
-        msg = 'It’s ' + fmt(nowIST) + ' in Guwahati — lights dimmed to 50% to save charge. Sunrise ' + fmt(rise) + '.';
-      }
+      if (nowIST >= rise && nowIST < set) { night = false; msg = 'Sun’s up in Guwahati — every Green Sun panel is charging. Sunset ' + fmt(set) + '.'; }
+      else if (nowIST >= set && nowIST < set + 360) msg = 'Sun’s down in Guwahati — Green Sun lights are on at full power.';
+      else msg = 'Late night in Guwahati — lights dimmed to 50% to save charge. Sunrise ' + fmt(rise) + '.';
       el.classList.toggle('is-night', night);
-      el.querySelector('span').textContent = msg;
+      el.lastElementChild.textContent = msg;
     }
     paint();
     setInterval(paint, 30000);
   }
 
-  /* ---------- 2. The sun watches your cursor, and its cable plugs into the button ---------- */
-  function heroSun() {
-    const hero = document.querySelector('.hero');
-    const sun = document.querySelector('[data-sun]');
-    if (!hero || !sun) return;
-    const eyes = sun.querySelector('.eyes');
-
-    if (GS.finePointer && !GS.reduceMotion) {
-      addEventListener('pointermove', function (e) {
-        const r = sun.getBoundingClientRect();
-        const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-        const a = Math.atan2(e.clientY - cy, e.clientX - cx);
-        const d = Math.min(1, Math.hypot(e.clientX - cx, e.clientY - cy) / 400);
-        eyes.style.transform = 'translate(' + (Math.cos(a) * 9 * d).toFixed(1) + 'px,' + (Math.sin(a) * 7 * d).toFixed(1) + 'px)';
-      }, { passive: true });
-    }
-
-    const svg = hero.querySelector('[data-cable]');
-    const btn = hero.querySelector('[data-plug]');
-    if (!svg || !btn) return;
-    const cable = svg.querySelector('.cable'), pulse = svg.querySelector('.cable-pulse'), plug = svg.querySelector('.plug');
-
-    function route() {
-      if (getComputedStyle(svg).display === 'none') return;
-      const h = hero.getBoundingClientRect();
-      const s = sun.getBoundingClientRect();
-      const b = btn.getBoundingClientRect();
-      const k = s.width / 520;
-      const sx = s.left - h.left + s.width / 2, sy = s.top - h.top + s.height / 2 + 64 * k;
-      // plug in from underneath the button, prongs pointing up
-      const ex = b.left - h.left + b.width * .5, ey = b.bottom - h.top + 16;
-      const sag = Math.max(90, h.bottom - h.top - ey - 60);
-      const d = 'M' + sx.toFixed(1) + ' ' + sy.toFixed(1) +
-        ' C' + sx.toFixed(1) + ' ' + (sy + Math.max(160, ey - sy + sag)).toFixed(1) + ' ' + ex.toFixed(1) + ' ' + (ey + sag).toFixed(1) + ' ' + ex.toFixed(1) + ' ' + (ey + 24).toFixed(1);
-      cable.setAttribute('d', d);
-      pulse.setAttribute('d', d);
-      plug.setAttribute('transform', 'translate(' + ex.toFixed(1) + ' ' + (ey + 2).toFixed(1) + ') rotate(-90)');
-    }
-    route();
-    addEventListener('resize', route);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(route);
-    sun.addEventListener('animationend', route);
-    setTimeout(route, 2000);
-    btn.addEventListener('pointerenter', function () { svg.classList.add('is-hot'); });
-    btn.addEventListener('pointerleave', function () { svg.classList.remove('is-hot'); setTimeout(route, 450); });
-    btn.addEventListener('focus', function () { svg.classList.add('is-hot'); });
-    btn.addEventListener('blur', function () { svg.classList.remove('is-hot'); });
-    // the magnetic button moves, so the plug follows it
-    btn.addEventListener('pointermove', function () { requestAnimationFrame(route); });
+  /* ---------- 3. marquee whose speed and skew follow scroll velocity ---------- */
+  function marquee() {
+    const box = document.querySelector('[data-mq]');
+    if (!box) return;
+    const tracks = Array.from(box.querySelectorAll('.mq-track'));
+    tracks.forEach(function (t) { t.innerHTML += t.innerHTML; });
+    if (GS.reduceMotion) return;
+    const st = tracks.map(function (t) { return { el: t, x: 0, dir: +t.dataset.dir || -1, w: 0 }; });
+    const measure = function () { st.forEach(function (s) { s.w = s.el.scrollWidth / 2; }); };
+    measure();
+    addEventListener('resize', measure);
+    let visible = true, lastY = scrollY, vel = 0, skew = 0;
+    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; }).observe(box);
+    (function loop() {
+      const y = scrollY;
+      const lv = GS.lenis ? GS.lenis.velocity : (y - lastY);
+      lastY = y;
+      vel += (lv - vel) * .12;
+      skew += (clamp(vel * -.35, -12, 12) - skew) * .1;
+      if (visible) {
+        st.forEach(function (s) {
+          s.x += s.dir * (1.1 + Math.abs(vel) * .55);
+          if (s.x <= -s.w) s.x += s.w;
+          if (s.x > 0) s.x -= s.w;
+          s.el.style.transform = 'translate3d(' + s.x.toFixed(1) + 'px,0,0) skewX(' + skew.toFixed(2) + 'deg)';
+        });
+      }
+      requestAnimationFrame(loop);
+    })();
   }
 
-  /* ---------- 3. Words light up as you read ---------- */
+  /* ---------- 4. words light up as you read ---------- */
   function litUp() {
     const el = document.querySelector('[data-litup]');
     if (!el) return;
@@ -121,7 +146,7 @@
     let lit = -1;
     function update() {
       const r = el.getBoundingClientRect();
-      const p = clamp((innerHeight * .85 - r.top) / (r.height + innerHeight * .35), 0, 1);
+      const p = clamp((innerHeight * .85 - r.top) / (r.height + innerHeight * .3), 0, 1);
       const n = Math.round(p * words.length);
       if (n === lit) return;
       lit = n;
@@ -131,7 +156,27 @@
     update();
   }
 
-  /* ---------- 4. 24 hours, scrubbed by scroll ---------- */
+  /* ---------- 5. numbers count up when they arrive ---------- */
+  function countUps() {
+    const els = document.querySelectorAll('[data-count]');
+    const fmt = function (v) { return Math.round(v).toLocaleString('en-US'); };
+    if (GS.reduceMotion || !('IntersectionObserver' in window)) return;
+    const io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        io.unobserve(en.target);
+        const to = +en.target.dataset.count, t0 = performance.now(), dur = 1800;
+        (function tick(t) {
+          const k = Math.min(1, (t - t0) / dur);
+          en.target.textContent = fmt(to * (1 - Math.pow(2, -10 * k)));
+          if (k < 1) requestAnimationFrame(tick); else en.target.textContent = fmt(to);
+        })(t0);
+      });
+    }, { threshold: .6 });
+    els.forEach(function (el) { el.textContent = '0'; io.observe(el); });
+  }
+
+  /* ---------- 6. 24 hours, scrubbed by scroll ---------- */
   function dayCycle() {
     const sec = document.querySelector('[data-day]');
     if (!sec) return;
@@ -148,21 +193,21 @@
 
     // sky colours through the day: [hour, top, bottom]
     const SKY = [
-      [5, '#0E1838', '#3B3F78'], [5.8, '#2B3A6E', '#FF9E6B'], [7, '#6FB7FF', '#FFE2B0'],
-      [12, '#2F8FFF', '#BFE3FF'], [16.5, '#4A8FE0', '#FFD9A0'], [17.8, '#2A2F6B', '#FF7A45'],
-      [19, '#0F1736', '#2C3268'], [24, '#060A18', '#141B38'], [29, '#0E1838', '#3B3F78']
+      [5, '#0A0F26', '#30285E'], [5.8, '#2B2A5E', '#FF7A45'], [7, '#4E8FE0', '#FFD7A0'],
+      [12, '#1F6FE0', '#A9D6FF'], [16.5, '#3A6CC0', '#FFC98A'], [17.8, '#26235C', '#FF5A2A'],
+      [19, '#0B0F2A', '#2A2660'], [24, '#040611', '#121633'], [29, '#0A0F26', '#30285E']
     ];
     // battery state of charge (%) through the day
     const BAT = [[5, 58.75], [5.5, 57.5], [6.5, 57.5], [15.5, 100], [18, 100], [24, 70], [29, 57.5]];
     const PHASES = [
       { h: 'First light — lamp off', p: 'The panel senses the sky brightening and the controller switches the lamp off by itself. No timers, no switchboard, no electricity bill.' },
       { h: 'Harvest the sun', p: 'All day the polycrystalline panel feeds the LiFePO₄ battery through the charge controller, banking every hour of sunshine.' },
-      { h: 'Sunset — lights on at 100%', p: 'Sun down, light up. OSRAM LEDs at 155 lumens per watt run at 100% for the first six hours of the night.' },
+      { h: 'Sunset — lights on at 100%', p: 'Sun down, light up. OSRAM LEDs at 155 lumens per watt run at full power for the first six hours of the night.' },
       { h: 'Midnight — smart dimming', p: 'As the roads empty, the lamp dims to 50% for the next six hours — keeping enough charge in reserve for two cloudy days.' }
     ];
 
-    function hex(c) { return [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)]; }
-    function mix(a, b, t) { a = hex(a); b = hex(b); return 'rgb(' + a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); }).join(',') + ')'; }
+    const hex = function (c) { return [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)]; };
+    const mix = function (a, b, t) { a = hex(a); b = hex(b); return 'rgb(' + a.map(function (v, i) { return Math.round(v + (b[i] - v) * t); }).join(',') + ')'; };
     function interp(table, t, col) {
       for (let i = 0; i < table.length - 1; i++) {
         const a = table[i], b = table[i + 1];
@@ -174,9 +219,9 @@
       return col === undefined ? table[table.length - 1][1] : table[table.length - 1][col];
     }
     const RISE = 5.5, SET = 18;
-    function sunPower(t) { return t > RISE && t < SET ? Math.sin(Math.PI * (t - RISE) / (SET - RISE)) : 0; }
-    function lampLevel(t) { return t < 5.5 ? .5 : t < 18 ? 0 : t < 24 ? 1 : .5; }
-    function phaseOf(t) { return t < 6.5 ? 0 : t < 18 ? 1 : t < 24 ? 2 : 3; }
+    const sunPower = function (t) { return t > RISE && t < SET ? Math.sin(Math.PI * (t - RISE) / (SET - RISE)) : 0; };
+    const lampLevel = function (t) { return t < 5.5 ? .5 : t < 18 ? 0 : t < 24 ? 1 : .5; };
+    const phaseOf = function (t) { return t < 6.5 ? 0 : t < 18 ? 1 : t < 24 ? 2 : 3; };
 
     function fitScene() { scene.setAttribute('viewBox', innerWidth < 760 ? '760 0 480 900' : '0 0 1600 900'); }
     fitScene();
@@ -186,9 +231,8 @@
     function update() {
       raf = 0;
       const r = sec.getBoundingClientRect();
-      const total = sec.offsetHeight - innerHeight;
-      const p = clamp(-r.top / total, 0, 1);
       if (r.bottom < 0 || r.top > innerHeight) return;
+      const p = clamp(-r.top / (sec.offsetHeight - innerHeight), 0, 1);
       const t = 5 + 24 * p;
       const sp = sunPower(t);
       const dark = clamp(1 - sp * 2.4, 0, 1);
@@ -199,7 +243,7 @@
       stick.style.setProperty('--top', interp(SKY, t, 1));
       stick.style.setProperty('--bot', interp(SKY, t, 2));
       stick.style.setProperty('--night', dark.toFixed(3));
-      stick.style.setProperty('--shade', (dark * .72).toFixed(3));
+      stick.style.setProperty('--shade', (dark * .75).toFixed(3));
       stick.style.setProperty('--lamp', lamp);
       stick.style.setProperty('--sunpow', clamp(sp * 3, 0, 1).toFixed(3));
       stick.style.setProperty('--charging', t > 6 && t < 15.5 ? 1 : 0);
@@ -214,8 +258,7 @@
       const my = mu > 0 && mu < 1 ? H * (.7 - .48 * Math.sin(Math.PI * mu)) : H * .95;
       moon.style.transform = 'translate(' + mx.toFixed(1) + 'px,' + my.toFixed(1) + 'px)';
 
-      const hh = Math.floor(t) % 24, mm = Math.floor((t % 1) * 60);
-      clock.firstChild.nodeValue = pad(hh) + ':' + pad(mm);
+      clock.firstChild.nodeValue = pad(Math.floor(t) % 24) + ':' + pad(Math.floor((t % 1) * 60));
       bars.bat.style.setProperty('--v', (bat / 100).toFixed(3));
       bars.sun.style.setProperty('--v', sp.toFixed(3));
       bars.lamp.style.setProperty('--v', lamp);
@@ -236,49 +279,72 @@
     update();
   }
 
-  /* ---------- 5. Catalogue teaser ---------- */
-  function catalogue() {
-    const cats = document.querySelector('[data-cats]');
-    if (cats) {
-      cats.innerHTML = window.GS_CATEGORIES.map(function (c, i) {
-        const n = GS.products.filter(function (p) { return p.cat === c.id; }).length;
-        return '<a class="cat rv" style="--d:' + (i * .06) + 's" href="products.html#' + c.id + '">' +
-          '<span class="n">' + pad(i + 1) + ' / ' + pad(window.GS_CATEGORIES.length) + ' · ' + n + (n === 1 ? ' product' : ' products') + '</span>' +
-          '<h3>' + GS.esc(c.name) + '</h3><p>' + GS.esc(c.blurb) + '</p>' +
-          '<img src="' + c.img + '" alt="" loading="lazy">' +
-          '<span class="go">' + GS.icon.arrow + '</span></a>';
-      }).join('');
+  /* ---------- 7. the showroom: vertical scroll drives a horizontal run of products ---------- */
+  function showroom() {
+    const sec = document.querySelector('[data-show]');
+    const track = document.querySelector('[data-show-track]');
+    if (!sec || !track) return;
+    const picks = ['si-60w', 'si-40w-rms', 'aio-20w', 'high-mast-12m', 'flood-60w', 'blinker-20w', 'battery-100ah', 'deco-pole-5m'];
+    const items = picks.map(function (id) { return GS.byId[id]; }).filter(Boolean);
+    track.innerHTML = items.map(function (p, i) {
+      const href = 'contact.html?p=' + encodeURIComponent(p.id);
+      const big = p.big || (p.watt ? p.watt + 'W' : '');
+      const cat = window.GS_CATEGORIES.find(function (c) { return c.id === p.cat; });
+      const specs = (p.key || [['Battery', p.battery], ['Panel', p.panel], ['Backup', p.autonomy]]).concat([['Protection', p.ip || '—']]).slice(0, 4);
+      return '<article class="show-card glass glass-edge">' +
+        '<a class="sc-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true" data-cursor="Enquire">' +
+          (big ? '<span class="sc-watt cond">' + GS.esc(big) + '</span>' : '') + '<img src="' + p.img + '" alt="" loading="lazy"></a>' +
+        '<div class="sc-body">' +
+          '<span class="label">№ ' + pad(i + 1) + ' / ' + pad(items.length) + ' · ' + GS.esc(cat ? cat.name : '') + '</span>' +
+          '<h3 class="h3">' + GS.esc(p.name) + '</h3>' +
+          '<div class="scope" style="margin:0">' + (p.tags || []).map(function (t) { return '<span class="chip">' + GS.esc(t) + '</span>'; }).join('') + '</div>' +
+          '<dl class="specs">' + specs.map(function (s) { return '<div><dt class="label">' + GS.esc(s[0]) + '</dt><dd>' + GS.esc(s[1]) + '</dd></div>'; }).join('') + '</dl>' +
+          '<div class="hero-ctas">' + GS.btn('Enquire', href, 'btn-plasma btn-sm') +
+            '<button class="icon-btn glass sl" type="button" data-add="' + p.id + '" aria-pressed="false" aria-label="Add ' + GS.esc(p.short || p.name) + ' to quote list"><span class="state" aria-hidden="true"></span>' + GS.icon.plus + '</button></div>' +
+        '</div></article>';
+    }).join('') +
+      '<div class="show-end glass glass-edge"><div><p class="label">18 products · 5 families</p><p class="h3">The whole <span class="it grad">catalogue</span></p>' +
+      GS.btn('Enter the marketplace', 'products.html', 'btn-plasma') + '</div></div>';
+    document.dispatchEvent(new CustomEvent('gs:quote'));
+
+    const bar = sec.querySelector('[data-show-progress]');
+    if (motion && isDesktop()) {
+      const dist = function () { return Math.max(0, track.scrollWidth - innerWidth); };
+      gsap.to(track, {
+        x: function () { return -dist(); },
+        ease: 'none',
+        scrollTrigger: {
+          trigger: sec, start: 'top top', end: function () { return '+=' + dist(); }, pin: true, scrub: 1, invalidateOnRefresh: true,
+          onUpdate: function (self) { bar.style.setProperty('--p', self.progress.toFixed(3)); }
+        }
+      });
+    } else {
+      sec.classList.add('is-native');
+      track.addEventListener('scroll', function () {
+        bar.style.setProperty('--p', (track.scrollLeft / Math.max(1, track.scrollWidth - track.clientWidth)).toFixed(3));
+      }, { passive: true });
     }
-    const rail = document.querySelector('[data-featured]');
-    if (rail) {
-      rail.innerHTML = GS.products.filter(function (p) { return p.featured; }).map(GS.card).join('');
-      dragScroll(rail);
-    }
-    GS.reveals();
   }
 
-  function dragScroll(el) {
-    if (!GS.finePointer) return;
-    let down = false, moved = false, x0 = 0, s0 = 0;
-    el.addEventListener('pointerdown', function (e) {
-      if (e.button !== 0 || e.target.closest('button')) return;
-      down = true; moved = false; x0 = e.clientX; s0 = el.scrollLeft;
+  /* ---------- 8. hovering a family or sector floats its product next to the cursor ---------- */
+  function peeks() {
+    const peek = document.querySelector('[data-peek-el]');
+    if (!peek || !GS.finePointer || GS.reduceMotion) return;
+    const img = peek.querySelector('img');
+    let x = 0, y = 0, px = 0, py = 0, on = false;
+    document.querySelectorAll('[data-peek-list] [data-peek]').forEach(function (row) {
+      row.addEventListener('pointerenter', function () { img.src = row.dataset.peek; on = true; peek.classList.add('is-on'); });
+      row.addEventListener('pointerleave', function () { on = false; peek.classList.remove('is-on'); });
     });
-    addEventListener('pointermove', function (e) {
-      if (!down) return;
-      const dx = e.clientX - x0;
-      if (!moved && Math.abs(dx) > 6) { moved = true; el.classList.add('is-drag'); }
-      if (moved) el.scrollLeft = s0 - dx;
-    });
-    addEventListener('pointerup', function () {
-      if (!down) return;
-      down = false;
-      setTimeout(function () { el.classList.remove('is-drag'); }, 0);
-    });
-    el.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    addEventListener('pointermove', function (e) { x = e.clientX + 150; y = e.clientY; }, { passive: true });
+    (function loop() {
+      px += (x - px) * .14; py += (y - py) * .14;
+      if (on || peek.classList.contains('is-on')) peek.style.translate = px.toFixed(1) + 'px ' + py.toFixed(1) + 'px';
+      requestAnimationFrame(loop);
+    })();
   }
 
-  /* ---------- 6. Light finder ---------- */
+  /* ---------- 9. light finder ---------- */
   const FINDER = [
     { id: 'lane', label: 'Village lane or pathway', sub: 'Narrow, light traffic', picks: ['si-9w', 'aio-20w', 'si-15w'],
       why: 'Narrow lanes and paths usually need just <b>9–20 W</b>. The all-in-one model needs nothing but a pole.',
@@ -305,9 +371,10 @@
     const out = document.querySelector('[data-finder-out]');
     if (!opts || !out) return;
     opts.innerHTML = FINDER.map(function (f, i) {
-      return '<button class="fopt" type="button" role="radio" aria-checked="false" tabindex="' + (i ? -1 : 0) + '" data-f="' + f.id + '">' +
-        '<svg viewBox="0 0 38 40" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + f.icon + '</svg>' +
-        '<span>' + f.label + '<small>' + f.sub + '</small></span></button>';
+      return '<button class="fopt sl" type="button" role="radio" aria-checked="false" tabindex="' + (i ? -1 : 0) + '" data-f="' + f.id + '">' +
+        '<span class="state" aria-hidden="true"></span>' +
+        '<svg viewBox="0 0 38 40" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + f.icon + '</svg>' +
+        '<span><b>' + f.label + '</b><small>' + f.sub + '</small></span><span class="radio" aria-hidden="true"></span></button>';
     }).join('');
     const btns = Array.from(opts.querySelectorAll('.fopt'));
     function choose(id, focus) {
@@ -318,8 +385,10 @@
         b.tabIndex = on ? 0 : -1;
         if (on && focus) b.focus();
       });
-      out.innerHTML = '<p class="finder-why">' + f.why + '</p><div class="cards">' +
-        f.picks.map(function (pid) { return GS.byId[pid]; }).filter(Boolean).map(GS.card).join('') + '</div>';
+      out.innerHTML = '<p class="finder-why glass">' + f.why + '</p><div class="cards">' +
+        f.picks.map(function (pid) { return GS.byId[pid]; }).filter(Boolean).map(function (p) { return GS.card(p); }).join('') + '</div>';
+      if (motion) gsap.from(out.querySelectorAll('.card'), { y: 40, opacity: 0, duration: .9, ease: 'expo.out', stagger: .07 });
+      if (ST) ST.refresh();
     }
     opts.addEventListener('click', function (e) { const b = e.target.closest('.fopt'); if (b) choose(b.dataset.f); });
     opts.addEventListener('keydown', function (e) {
@@ -333,42 +402,30 @@
     choose('colony');
   }
 
-  /* ---------- 7. Sector rows show a product that follows the cursor ---------- */
-  function sectors() {
-    const list = document.querySelector('[data-sectors]');
-    const peek = document.querySelector('[data-peek-el]');
-    if (!list || !peek || !GS.finePointer || GS.reduceMotion) return;
-    const img = peek.querySelector('img');
-    list.querySelectorAll('[data-peek]').forEach(function (li) {
-      li.addEventListener('pointerenter', function () { img.src = li.dataset.peek; peek.classList.add('is-on'); });
-      li.addEventListener('pointerleave', function () { peek.classList.remove('is-on'); });
-    });
-    addEventListener('pointermove', function (e) {
-      if (!peek.classList.contains('is-on')) return;
-      peek.style.left = e.clientX + 'px';
-      peek.style.top = e.clientY + 'px';
-    }, { passive: true });
-  }
-
-  /* ---------- 8. The sun rises again at the bottom of the page ---------- */
-  function sunrise() {
+  /* ---------- 10. the sun rises again over the call to action ---------- */
+  function ctaSun() {
     const cta = document.querySelector('[data-cta]');
-    if (!cta) return;
-    const orb = cta.querySelector('.cta-sun div');
-    function update() {
-      const r = cta.getBoundingClientRect();
-      orb.style.setProperty('--rise', clamp((innerHeight - r.top) / r.height, 0, 1).toFixed(3));
+    const canvas = document.querySelector('[data-cta-canvas]');
+    if (!cta || !canvas) return;
+    const sun = mountSun(canvas, { center: [0.5, 1.2], radius: innerWidth < 760 ? 0.7 : 0.55, pointer: false });
+    if (sun && !cta.classList.contains('no-gl')) cta.querySelector('.cta-fallback').style.opacity = 0;
+    if (motion) {
+      gsap.fromTo(canvas, { yPercent: 35 }, { yPercent: 0, ease: 'none', scrollTrigger: { trigger: cta, start: 'top bottom', end: 'center center', scrub: true } });
+      gsap.fromTo(cta.querySelector('.cta-fallback'), { yPercent: 35 }, { yPercent: 0, ease: 'none', scrollTrigger: { trigger: cta, start: 'top bottom', end: 'center center', scrub: true } });
     }
-    addEventListener('scroll', function () { requestAnimationFrame(update); }, { passive: true });
-    update();
   }
 
-  liveStatus();
   heroSun();
+  heroIntro();
+  liveStatus();
+  marquee();
   litUp();
+  countUps();
   dayCycle();
-  catalogue();
+  showroom();
+  peeks();
   finder();
-  sectors();
-  sunrise();
+  ctaSun();
+  GS.reveals();
+  if (ST) { addEventListener('load', function () { ST.refresh(); }); if (document.fonts) document.fonts.ready.then(function () { ST.refresh(); }); }
 })();

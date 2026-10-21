@@ -2,125 +2,152 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Products — Solar street lights, high masts, traffic &amp; batteries | Green Sun Technologies</title>
-  <meta name="description" content="Shop the Green Sun Technologies catalogue: 9 W to 80 W solar street lights, 12 m solar high masts, flood lights, traffic blinkers, pedestrian crossings, LiFePO₄ battery packs and decorative poles. Enquire for a quote.">
-  <meta name="theme-color" content="#0A1020">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Marketplace — Solar street lights, high masts, traffic &amp; batteries | Green Sun Technologies</title>
+  <meta name="description" content="The Green Sun Technologies marketplace: 9 W to 80 W solar street lights, 12 m solar high masts, flood lights, traffic blinkers, pedestrian crossings, LiFePO₄ battery packs and decorative poles. Every datasheet, one quote.">
+  <meta name="theme-color" content="#050507">
+  <meta property="og:title" content="Marketplace — Green Sun Technologies">
+  <meta property="og:image" content="https://erinop-gltich.github.io/SolarTech/assets/brand/og-image.png">
   <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;800;900&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@300..800&amp;family=Geist+Mono:wght@400..600&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/loader.css">
   <link rel="stylesheet" href="assets/css/gs.css">
+  <link rel="stylesheet" href="assets/css/dial.css">
   <script>document.documentElement.classList.add('js')</script>
 </head>
-<body class="t-dark" style="background:var(--ink)">
+<body>
+<!--LOADER-->
 <a class="skip" href="#main">Skip to content</a>
+<div class="aura" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="grain" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="lg-refract" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.006 0.014" numOctaves="2" seed="7" result="n"/>
+    <feGaussianBlur in="n" stdDeviation="2.5" result="nb"/>
+    <feDisplacementMap in="SourceGraphic" in2="nb" scale="22" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
 
-<header class="hdr is-dark" data-hdr>
-  <a class="hdr-logo" href="index.html" aria-label="Green Sun Technologies home">
-    <img src="assets/brand/favicon.svg" alt="" width="40" height="40">
-    <span class="hdr-word"><b>GREEN SUN</b><small>TECHNOLOGIES</small></span>
+<header class="nav glass refract" data-nav>
+  <a class="nav-logo" href="index.html" aria-label="Green Sun Technologies home">
+    <img src="assets/brand/favicon.svg" alt="" width="38" height="38">
+    <span>GREEN SUN<small>TECHNOLOGIES</small></span>
   </a>
-  <nav class="hdr-nav" aria-label="Main">
+  <nav class="nav-links" aria-label="Main">
     <a href="index.html#about">About</a>
-    <a href="products.html" aria-current="page">Products</a>
+    <a href="products.html" aria-current="page">Marketplace</a>
     <a href="index.html#day">How it works</a>
-    <a href="index.html#certified">Certifications</a>
+    <a href="index.html#certified">Certified</a>
     <a href="contact.html">Contact</a>
   </nav>
-  <div class="hdr-actions">
-    <div class="charge" title="Scroll to charge"><span class="charge-cell"><i></i></span><span class="charge-pct">0%</span></div>
-    <a class="hdr-quote" href="contact.html">Quote list <span class="badge" data-quote-count>0</span></a>
-    <button class="hdr-burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><span></span><span></span><span></span></button>
+  <div class="nav-right">
+    <span class="nav-clock label">GHY <b data-ist>--:--</b> IST</span>
+    <a class="btn btn-plasma nav-quote sl" href="contact.html" aria-label="Quote list"><span class="t">Quote</span><span class="badge" data-quote-count>0</span></a>
+    <button class="nav-burger glass sl" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><i></i><i></i></button>
   </div>
 </header>
 <nav class="menu" id="menu" aria-label="Mobile">
-  <a href="index.html#about">About</a>
-  <a href="products.html">Products</a>
-  <a href="index.html#day">How it works</a>
-  <a href="index.html#certified">Certifications</a>
-  <a href="contact.html">Contact</a>
-  <p>Guwahati, Assam · <a data-cfg="phone" href="tel:+919920996608" style="font:inherit">+91 99209 96608</a></p>
+  <a href="index.html#about"><span class="label">01</span>About</a>
+  <a href="products.html"><span class="label">02</span>Marketplace</a>
+  <a href="index.html#day"><span class="label">03</span>How it works</a>
+  <a href="index.html#certified"><span class="label">04</span>Certified</a>
+  <a href="contact.html"><span class="label">05</span>Contact</a>
+  <div class="menu-foot label"><span>Guwahati, Assam</span><a data-cfg="phone" href="tel:+919920996608" style="font:inherit;opacity:1;transform:none">+91 99209 96608</a></div>
 </nav>
 
 <main id="main">
-  <header class="page-hero t-dark">
-    <img class="ghost-sun" src="assets/brand/favicon.svg" alt="">
+  <header class="phero" aria-labelledby="ph">
+    <img class="phero-sun" src="assets/brand/favicon.svg" alt="">
     <div class="wrap">
-      <ol class="crumbs"><li><a href="index.html">Home</a></li><li>Products</li></ol>
-      <h1 class="page-title">The <em>catalogue.</em></h1>
-      <p class="lede">Every light we make, with its datasheet. Hit <b>Enquire</b> for a quote, or tap <b>+</b> to build a list and ask about everything at once.</p>
+      <ol class="crumbs label"><li><a href="index.html">Home</a></li><li>Marketplace</li></ol>
+      <h1 class="h1" id="ph"><span data-hero-line>The</span> <span class="it grad" data-hero-line>marketplace.</span></h1>
+      <p class="lede rv">Eighteen products, every datasheet, one quote. Turn the dial to find your street light — or browse everything below.</p>
     </div>
   </header>
 
-  <section class="t-dark" style="padding-bottom:clamp(80px,10vw,140px)" aria-label="Products">
+  <section aria-labelledby="dial-h" data-dial-sec>
     <div class="wrap">
-      <div class="cat-tabs" role="group" aria-label="Category" data-tabs></div>
+      <div class="sec-head rv"><span class="label no">№ 01</span><span class="label" id="dial-h">The wattage dial</span><span class="rule"></span><span class="label">Semi-integrated street lights · 9–80 W</span></div>
+      <div class="dial" id="dial" data-dial></div>
+    </div>
+  </section>
 
-      <div class="shop-layout">
-        <aside class="filters" id="filters" aria-label="Filters" data-filters>
-          <div>
-            <h3><label for="q">Search</label></h3>
-            <div class="search">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-              <input id="q" type="search" placeholder="40W, RMS, battery…" autocomplete="off" data-q>
-            </div>
-          </div>
-          <fieldset style="border:0;margin:0;padding:0">
-            <legend><h3>Power</h3></legend>
-            <div class="checks" data-power></div>
-          </fieldset>
-          <fieldset style="border:0;margin:0;padding:0">
-            <legend><h3>Features</h3></legend>
-            <div class="checks" data-features></div>
-          </fieldset>
-          <button class="reset" type="button" data-reset>Clear all filters</button>
-        </aside>
+  <section class="sec" id="catalogue" aria-labelledby="cat-h" style="padding-top:var(--s9)">
+    <div class="wrap">
+      <div class="sec-head rv"><span class="label no">№ 02</span><span class="label">Everything we make</span><span class="rule"></span><span class="label">Press / to search</span></div>
+      <h2 class="h2 rv" id="cat-h">Every <span class="it grad">light,</span> every spec.</h2>
 
-        <div>
-          <div class="shop-bar">
-            <p aria-live="polite" data-count></p>
-            <div style="display:flex;gap:10px;align-items:center">
-              <button class="btn btn-ghost btn-sm filters-toggle" type="button" aria-expanded="false" aria-controls="filters" data-filters-toggle>Filters</button>
-              <label class="sr-only" for="sort">Sort by</label>
-              <div class="select"><select id="sort" data-sort>
-                <option value="featured">Sort: Recommended</option>
-                <option value="watt-asc">Power: low to high</option>
-                <option value="watt-desc">Power: high to low</option>
-                <option value="name">Name: A to Z</option>
-              </select></div>
-            </div>
+      <div class="cmd glass glass-strong refract" data-cmd>
+        <div class="cmd-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <input id="q" type="search" placeholder="Search 18 products — 40W, RMS, battery…" autocomplete="off" aria-label="Search products" data-q>
+          <kbd aria-hidden="true">/</kbd>
+        </div>
+        <div class="seg" role="group" aria-label="Category" data-seg><span class="seg-ind" aria-hidden="true"></span></div>
+        <div class="cmd-row2">
+          <span class="label">Power</span>
+          <span data-power style="display:contents"></span>
+          <span class="label" style="margin-left:var(--s3)">Features</span>
+          <span data-feat style="display:contents"></span>
+          <span class="grow"></span>
+          <label class="sr-only" for="sort">Sort by</label>
+          <div class="select"><select id="sort" data-sort>
+            <option value="featured">Recommended</option>
+            <option value="watt-asc">Power: low to high</option>
+            <option value="watt-desc">Power: high to low</option>
+            <option value="name">Name: A to Z</option>
+          </select></div>
+          <div class="viewtog" role="group" aria-label="View">
+            <button type="button" class="sl" data-view="grid" aria-pressed="true" aria-label="Grid view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg></button>
+            <button type="button" class="sl" data-view="list" aria-pressed="false" aria-label="List view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
           </div>
-          <div class="cards" data-grid></div>
-          <noscript><p class="empty"><b>The catalogue needs JavaScript.</b>Turn it on, or call <a href="tel:+919920996608" style="color:var(--sun)">+91 99209 96608</a> and we'll send you the PDF.</p></noscript>
-          <div class="empty" hidden data-empty><b>No lights match that.</b>Try fewer filters — or <a href="contact.html" style="color:var(--sun)">tell us what you need</a> and we'll build it.</div>
         </div>
       </div>
 
-      <div class="custom rv" style="margin-top:clamp(70px,9vw,120px)">
+      <div class="result-line">
+        <p class="label" aria-live="polite" data-count></p>
+        <button class="btn btn-text sl" type="button" data-reset hidden>Clear all filters</button>
+      </div>
+      <div class="cards" data-grid></div>
+      <div class="ptable-wrap glass" data-table hidden></div>
+      <div class="empty" data-empty hidden>
+        <p class="h3">No lights match <span class="it grad">that.</span></p>
+        <p>Try fewer filters — or tell us what you need and we'll build it.</p>
+        <a class="btn btn-plasma sl" href="contact.html">Talk to an engineer</a>
+      </div>
+      <noscript><p class="empty">The marketplace needs JavaScript. Turn it on, or call <a href="tel:+919920996608">+91 99209 96608</a> and we'll send you the catalogue.</p></noscript>
+    </div>
+  </section>
+
+  <section class="sec" style="padding-top:0" aria-labelledby="custom-h">
+    <div class="wrap">
+      <div class="custom glass glass-edge rv">
         <div>
-          <h2>Need something that isn't on the shelf?</h2>
-          <p>Our ISO 9001 scope covers design and manufacture of far more than this catalogue. Send us a drawing, a tender spec or just a problem.</p>
-          <a class="btn" href="contact.html">Talk to an engineer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <p class="label"><span style="color:var(--sun)">№ 03</span> — Built to order</p>
+          <h2 class="h2" id="custom-h" style="font-size:clamp(30px,4.4vw,68px)">Not on the <span class="it grad">shelf?</span></h2>
+          <p class="lede" style="margin-bottom:var(--s5)">Our ISO 9001 scope covers design and manufacture of far more than this catalogue. Send us a drawing, a tender spec or just a problem.</p>
+          <a class="btn btn-plasma sl" href="contact.html" data-magnetic>Talk to an engineer <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
         <ul>
-          <li>LED aviation lights</li><li>Airport lighting</li><li>LED traffic lights</li><li>Industrial lights</li><li>Infrastructure lights</li><li>Decorative lights</li><li>Control panels</li><li>Solar mounting structures</li><li>Poles</li><li>Lithium battery packs</li>
+          <li class="chip">LED aviation lights</li><li class="chip">Airport lighting</li><li class="chip">LED traffic lights</li><li class="chip">Industrial lights</li><li class="chip">Infrastructure lights</li><li class="chip">Decorative lights</li><li class="chip">Control panels</li><li class="chip">Solar mounting structures</li><li class="chip">Poles</li><li class="chip">Lithium battery packs</li>
         </ul>
       </div>
     </div>
   </section>
 </main>
 
-<footer class="ftr" style="padding-top:28px">
+<footer class="ftr">
   <div class="wrap">
-    <div class="ftr-box">
+    <div class="ftr-grid">
       <div class="ftr-brand">
-        <img src="assets/brand/gs-lockup-light.svg" alt="Green Sun Technologies" width="250" height="61">
+        <img src="assets/brand/gs-lockup-dark.svg" alt="Green Sun Technologies" width="240">
         <p>The best way to power up. Solar &amp; LED lighting designed, built and serviced in Guwahati, Assam.</p>
       </div>
       <div>
-        <h4>Products</h4>
+        <h4 class="label">Marketplace</h4>
         <ul>
           <li><a href="products.html#street">Solar street lights</a></li>
           <li><a href="products.html#mast">High masts &amp; floods</a></li>
@@ -130,7 +157,7 @@
         </ul>
       </div>
       <div>
-        <h4>Company</h4>
+        <h4 class="label">Company</h4>
         <ul>
           <li><a href="index.html#about">About us</a></li>
           <li><a href="index.html#day">How it works</a></li>
@@ -139,23 +166,30 @@
         </ul>
       </div>
       <div>
-        <h4>Reach us</h4>
+        <h4 class="label">Reach us</h4>
         <address data-cfg="address">Pub Boragaon, NH-37, Belwali Road<br>Ward No. 10, Guwahati<br>Kamrup Metropolitan, Assam 781035</address>
-        <ul style="margin-top:12px">
+        <ul style="margin-top:var(--s3)">
           <li><a data-cfg="phone" href="tel:+919920996608">+91 99209 96608</a></li>
           <li><a data-cfg="email" href="mailto:greensuntechnologies2024@gmail.com">greensuntechnologies2024@gmail.com</a></li>
         </ul>
       </div>
     </div>
     <div class="ftr-base">
-      <span>© <span data-year>2026</span> Green Sun Technologies · <span class="mono">GSTIN <span data-cfg="gstin">18BPLPS0265L1ZB</span></span></span>
-      <button class="to-top" type="button" data-top>Back to top ↑</button>
+      <span class="label">© <span data-year>2026</span> Green Sun Technologies · GSTIN <span data-cfg="gstin">18BPLPS0265L1ZB</span></span>
+      <button class="btn btn-glass glass btn-sm sl" type="button" data-top>Back to top ↑</button>
     </div>
   </div>
+  <span class="ftr-giant xl" aria-hidden="true">Green Sun</span>
 </footer>
 
 <script src="assets/js/config.js"></script>
 <script src="assets/js/products.js"></script>
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/vendor/ScrollTrigger.min.js"></script>
+<script src="assets/vendor/SplitText.min.js"></script>
+<script src="assets/vendor/Flip.min.js"></script>
+<script src="assets/vendor/lenis.min.js"></script>
+<script src="assets/js/dial.js"></script>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/shop.js"></script>
 </body>

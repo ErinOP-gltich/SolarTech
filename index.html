@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Green Sun Technologies — Solar street lights, high masts & LiFePO₄ packs | Guwahati, Assam</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Green Sun Technologies — Solar street lights, high masts &amp; LiFePO₄ packs | Guwahati, Assam</title>
   <meta name="description" content="Green Sun Technologies designs, manufactures, sells and services solar street lights, high masts, flood lights, traffic blinkers, pedestrian crossings and lithium battery packs in Guwahati, Assam. ISO 9001:2015 and ISO 14001:2015 certified.">
-  <meta name="theme-color" content="#FFB000">
+  <meta name="theme-color" content="#050507">
   <meta property="og:title" content="Green Sun Technologies — Daylight, delivered after dark">
-  <meta property="og:description" content="Solar street lights, high masts, flood lights and lithium packs from Guwahati, Assam. ISO 9001 & ISO 14001 certified.">
+  <meta property="og:description" content="Solar street lights, high masts, flood lights and lithium packs from Guwahati, Assam. ISO 9001 &amp; ISO 14001 certified.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://erinop-gltich.github.io/SolarTech/assets/brand/og-image.png">
   <meta property="og:url" content="https://erinop-gltich.github.io/SolarTech/">
@@ -16,183 +16,180 @@
   <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;800;900&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@300..800&amp;family=Geist+Mono:wght@400..600&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/loader.css">
   <link rel="stylesheet" href="assets/css/gs.css">
   <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
+<!--LOADER-->
 <a class="skip" href="#main">Skip to content</a>
+<div class="aura" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="grain" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <filter id="lg-refract" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feTurbulence type="fractalNoise" baseFrequency="0.006 0.014" numOctaves="2" seed="7" result="n"/>
+    <feGaussianBlur in="n" stdDeviation="2.5" result="nb"/>
+    <feDisplacementMap in="SourceGraphic" in2="nb" scale="22" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
 
-<header class="hdr" data-hdr>
-  <a class="hdr-logo" href="index.html" aria-label="Green Sun Technologies home">
-    <img src="assets/brand/favicon.svg" alt="" width="40" height="40">
-    <span class="hdr-word"><b>GREEN SUN</b><small>TECHNOLOGIES</small></span>
+<header class="nav glass refract" data-nav>
+  <a class="nav-logo" href="index.html" aria-label="Green Sun Technologies home">
+    <img src="assets/brand/favicon.svg" alt="" width="38" height="38">
+    <span>GREEN SUN<small>TECHNOLOGIES</small></span>
   </a>
-  <nav class="hdr-nav" aria-label="Main">
+  <nav class="nav-links" aria-label="Main">
     <a href="#about">About</a>
-    <a href="products.html">Products</a>
+    <a href="products.html">Marketplace</a>
     <a href="#day">How it works</a>
-    <a href="#certified">Certifications</a>
+    <a href="#certified">Certified</a>
     <a href="contact.html">Contact</a>
   </nav>
-  <div class="hdr-actions">
-    <div class="charge" title="Scroll to charge"><span class="charge-cell"><i></i></span><span class="charge-pct">0%</span></div>
-    <a class="hdr-quote" href="contact.html">Quote list <span class="badge" data-quote-count>0</span></a>
-    <button class="hdr-burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><span></span><span></span><span></span></button>
+  <div class="nav-right">
+    <span class="nav-clock label">GHY <b data-ist>--:--</b> IST</span>
+    <a class="btn btn-plasma nav-quote sl" href="contact.html" aria-label="Quote list"><span class="t">Quote</span><span class="badge" data-quote-count>0</span></a>
+    <button class="nav-burger glass sl" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><i></i><i></i></button>
   </div>
 </header>
 <nav class="menu" id="menu" aria-label="Mobile">
-  <a href="#about">About</a>
-  <a href="products.html">Products</a>
-  <a href="#day">How it works</a>
-  <a href="#certified">Certifications</a>
-  <a href="contact.html">Contact</a>
-  <p>Guwahati, Assam · <a data-cfg="phone" href="tel:+919920996608" style="font:inherit">+91 99209 96608</a></p>
+  <a href="#about"><span class="label">01</span>About</a>
+  <a href="products.html"><span class="label">02</span>Marketplace</a>
+  <a href="#day"><span class="label">03</span>How it works</a>
+  <a href="#certified"><span class="label">04</span>Certified</a>
+  <a href="contact.html"><span class="label">05</span>Contact</a>
+  <div class="menu-foot label"><span>Guwahati, Assam</span><a data-cfg="phone" href="tel:+919920996608" style="font:inherit;opacity:1;transform:none">+91 99209 96608</a></div>
 </nav>
 
 <main id="main">
 
   <!-- HERO ============================================================ -->
-  <section class="hero t-light" aria-labelledby="hero-title">
-    <div class="hero-sun" data-sun aria-hidden="true">
-      <svg viewBox="-260 -260 520 520">
-        <defs>
-          <radialGradient id="core" cx="40%" cy="35%" r="75%"><stop offset="0" stop-color="#FFE27A"/><stop offset="1" stop-color="#FF8A00"/></radialGradient>
-        </defs>
-        <g class="rays" fill="#FFB000">
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(30)"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(60)"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(90)"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(120)"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(150)"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(180)"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(210)"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(240)"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(270)"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(300)"/>
-          <path d="M-27,-118 C-36,-168 -14,-214 44,-242 C24,-206 22,-166 27,-118 Z" transform="rotate(330)"/>
-        </g>
-        <circle r="112" fill="#FFF8E6"/>
-        <circle r="98" fill="url(#core)"/>
-        <g fill="none" stroke="#12A150" stroke-width="17" stroke-linecap="round">
-          <g class="eyes"><g class="blink"><path d="M-27,-58 V-30 M27,-58 V-30"/></g></g>
-          <path d="M-56,-6 C-56,40 -30,52 0,52 C30,52 56,40 56,-6"/>
-          <path d="M0,52 V66"/>
-        </g>
-      </svg>
+  <section class="hero" aria-labelledby="hero-title" data-hero>
+    <div class="hero-fallback" aria-hidden="true"></div>
+    <canvas class="hero-gl" aria-hidden="true" data-sun-canvas></canvas>
+
+    <div class="wrap hero-top">
+      <p class="live glass" data-live><span class="pulse">LIVE</span><span>Guwahati, Assam — reading the sky…</span></p>
+      <p class="label coords">[ 26.12°N · 91.68°E ] &nbsp;NH-37, Guwahati</p>
     </div>
 
-    <div class="hero-floor" aria-hidden="true"><div class="hero-grid"></div></div>
-    <svg class="hero-cable" data-cable aria-hidden="true">
-      <path class="cable"/><path class="cable-pulse"/>
-      <g class="plug"><rect x="-26" y="-14" width="30" height="28" rx="8"/><rect class="prong" x="2" y="-9" width="14" height="5" rx="2"/><rect class="prong" x="2" y="4" width="14" height="5" rx="2"/></g>
-    </svg>
-
-    <div class="wrap hero-inner">
-      <p class="live" data-live><b>Live</b><span>Guwahati, Assam — checking the sun…</span></p>
-      <h1 class="hero-title" id="hero-title">
-        <span class="ln"><span class="hl">Daylight,</span></span>
-        <span class="ln"><span>delivered</span></span>
-        <span class="ln"><span class="dark">after dark.</span></span>
+    <div class="wrap hero-mid">
+      <h1 class="h1 hero-title" id="hero-title">
+        <span class="ln"><span data-hero-line>Daylight,</span></span>
+        <span class="ln"><span class="it grad" data-hero-line>delivered</span></span>
+        <span class="ln"><span data-hero-line>after dark.</span></span>
       </h1>
-      <p class="hero-lede">Solar street lights, high masts, traffic blinkers and lithium packs — <strong>designed, built and serviced in Guwahati</strong> for the roads, villages and tea estates of the North-East.</p>
-      <div class="hero-ctas">
-        <a class="btn" href="products.html" data-plug data-magnetic>Shop the catalogue <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <a class="btn btn-ghost" href="contact.html" data-magnetic>Get a quote</a>
+      <div class="hero-row">
+        <p class="lede">Solar street lights, high masts, traffic systems and LiFePO₄ packs — <b>designed, built and serviced in Guwahati</b> for the roads, villages and tea estates of the North-East.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-plasma sl" href="products.html" data-magnetic>Enter the marketplace <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="btn btn-glass glass sl" href="contact.html" data-magnetic>Get a quote</a>
+        </div>
       </div>
     </div>
 
-    <ul class="proof" aria-label="Credentials">
-      <li>ISO 9001:2015</li><li>ISO 14001:2015</li><li>Udyam MSME</li><li>OSRAM LEDs</li><li>IP66 rated</li><li>LiFePO₄ batteries</li>
-    </ul>
+    <div class="wrap hero-foot">
+      <div class="ticker label" aria-label="Credentials"><div class="ticker-track">
+        <span>ISO 9001:2015</span><span>ISO 14001:2015</span><span>Udyam MSME</span><span>OSRAM LEDs · 155 lm/W</span><span>IP66</span><span>LiFePO₄ 12.8 V</span><span>Dusk-to-dawn</span><span>Made in Assam</span>
+        <span aria-hidden="true">ISO 9001:2015</span><span aria-hidden="true">ISO 14001:2015</span><span aria-hidden="true">Udyam MSME</span><span aria-hidden="true">OSRAM LEDs · 155 lm/W</span><span aria-hidden="true">IP66</span><span aria-hidden="true">LiFePO₄ 12.8 V</span><span aria-hidden="true">Dusk-to-dawn</span><span aria-hidden="true">Made in Assam</span>
+      </div></div>
+      <a class="scroll-cue label" href="#about"><i></i>Scroll</a>
+    </div>
   </section>
 
-  <!-- TAPES ============================================================ -->
-  <div class="tapes t-light" aria-hidden="true">
-    <div class="tape tape-leaf"><div class="tape-track">
-      <span>Dusk to dawn<i>●</i>No grid<i>●</i>No bill<i>●</i>2-day backup<i>●</i>155 lm/W<i>●</i>50,000-hour LEDs<i>●</i>5,000-cycle batteries<i>●</i></span>
-      <span>Dusk to dawn<i>●</i>No grid<i>●</i>No bill<i>●</i>2-day backup<i>●</i>155 lm/W<i>●</i>50,000-hour LEDs<i>●</i>5,000-cycle batteries<i>●</i></span>
-    </div></div>
-    <div class="tape tape-sun"><div class="tape-track">
-      <span>Solar street lights<i>✺</i>High masts<i>✺</i>Flood lights<i>✺</i>Traffic blinkers<i>✺</i>Pedestrian crossings<i>✺</i>Lithium packs<i>✺</i>Decorative poles<i>✺</i></span>
-      <span>Solar street lights<i>✺</i>High masts<i>✺</i>Flood lights<i>✺</i>Traffic blinkers<i>✺</i>Pedestrian crossings<i>✺</i>Lithium packs<i>✺</i>Decorative poles<i>✺</i></span>
-    </div></div>
+  <!-- VELOCITY MARQUEE ================================================= -->
+  <div class="mq" aria-hidden="true" data-mq>
+    <div class="mq-row"><div class="mq-track xl" data-dir="-1"><span class="f">Solar street lights</span><svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg><span class="o">High masts</span><svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg><span class="f">Flood lights</span><svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg><span class="o">Traffic blinkers</span><svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg></div></div>
+    <div class="mq-row"><div class="mq-track xl" data-dir="1"><span class="o">Lithium packs</span><svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg><span class="f">Pedestrian crossings</span><svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg><span class="o">Decorative poles</span><svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg><span class="f">Made in Assam</span><svg class="star" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg></div></div>
   </div>
 
   <!-- ABOUT ============================================================ -->
-  <section class="sec t-light" id="about" aria-labelledby="about-h">
-    <div class="wrap">
-      <p class="kicker rv" id="about-h"><span>01</span> Who we are</p>
-      <p class="statement" data-litup>Green Sun Technologies is a <em class="gold">Guwahati-born</em> engineering company. We <em class="green">design</em>, <em class="green">manufacture</em>, <em class="green">sell</em> and <em class="green">service</em> solar and LED lighting — from a <em class="gold">9-watt</em> village-lane light to a <em class="gold">12-metre</em> high mast — and stand behind every one of them.</p>
+  <section class="sec" id="about" aria-labelledby="about-h">
+    <div class="wrap about">
+      <aside class="about-side">
+        <p class="label rv" id="about-h"><span class="no" style="color:var(--sun)">№ 01</span> — Who we are</p>
+      </aside>
+      <div>
+        <p class="statement" data-litup>Green Sun Technologies is a <em class="hl">Guwahati-born</em> engineering company. We <em class="gr">design,</em> <em class="gr">manufacture,</em> <em class="gr">sell</em> and <em class="gr">service</em> solar &amp; LED lighting — from a <em class="hl">9-watt</em> village-lane light to a <em class="hl">12-metre</em> high mast — and we stand behind <em class="it">every single one.</em></p>
 
-      <div class="about-grid">
-        <article class="about-card rv">
-          <span class="ix">A — Design</span>
-          <svg viewBox="0 0 72 72" fill="none" stroke="currentColor" stroke-width="5" aria-hidden="true"><circle cx="36" cy="36" r="14"/><path d="M36 4v12M36 56v12M4 36h12M56 36h12M13 13l8 8M51 51l8 8M59 13l-8 8M21 51l-8 8" stroke-linecap="round"/></svg>
-          <h3>We size it</h3>
-          <p>Every road is different. We match wattage, battery and panel to your site, your hours and your weather — not to a brochure.</p>
-        </article>
-        <article class="about-card rv" style="--d:.1s">
-          <span class="ix">B — Manufacture</span>
-          <svg viewBox="0 0 72 72" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="56" height="56" rx="10"/><path d="M8 27h56M8 45h56M27 8v56M45 8v56"/></svg>
-          <h3>We build it</h3>
-          <p>Aluminium housings, OSRAM LEDs at 155 lm/W, LiFePO₄ packs and IP66 sealing — assembled by a registered manufacturing MSME.</p>
-        </article>
-        <article class="about-card rv" style="--d:.2s">
-          <span class="ix">C — Install &amp; service</span>
-          <svg viewBox="0 0 72 72" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M36 64c15-10 24-21 24-34a24 24 0 0 0-48 0c0 13 9 24 24 34z"/><circle cx="36" cy="30" r="8"/></svg>
-          <h3>We stay on it</h3>
-          <p>Our team is a phone call away on NH-37. Installation, maintenance, battery swaps and remote monitoring when you need it.</p>
-        </article>
+        <div class="pillars">
+          <article class="pillar glass glass-edge rv">
+            <span class="big">01</span>
+            <h3 class="h3">We size it</h3>
+            <p>Every road is different. We match wattage, battery and panel to your site, your hours and your weather — not to a brochure.</p>
+          </article>
+          <article class="pillar glass glass-edge rv" style="--d:.08s">
+            <span class="big">02</span>
+            <h3 class="h3">We build it</h3>
+            <p>Aluminium housings, OSRAM LEDs at 155 lm/W, LiFePO₄ packs and IP66 sealing — assembled by a registered manufacturing MSME.</p>
+          </article>
+          <article class="pillar glass glass-edge rv" style="--d:.16s">
+            <span class="big">03</span>
+            <h3 class="h3">We stay on it</h3>
+            <p>Our team is a phone call away on NH-37: installation, maintenance, battery swaps and remote monitoring when you need it.</p>
+          </article>
+        </div>
+
+        <dl class="facts rv">
+          <div><dt class="label">Founded</dt><dd>23 October 2024</dd></div>
+          <div><dt class="label">Headquarters</dt><dd>NH-37, Belwali Road, Guwahati</dd></div>
+          <div><dt class="label">Enterprise</dt><dd>Udyam-registered MSME, manufacturing</dd></div>
+          <div><dt class="label">Certified</dt><dd>ISO 9001:2015 · ISO 14001:2015</dd></div>
+        </dl>
+
+        <div class="scope rv">
+          <span class="label">Also built to order</span>
+          <span class="chip">LED aviation lights</span>
+          <span class="chip">Airport lighting</span>
+          <span class="chip">LED traffic lights</span>
+          <span class="chip">Industrial &amp; infrastructure lights</span>
+          <span class="chip">Control panels</span>
+          <span class="chip">Solar mounting structures</span>
+          <span class="chip">Poles</span>
+        </div>
       </div>
+    </div>
+  </section>
 
-      <dl class="facts rv">
-        <div><dt>Founded</dt><dd>23 October 2024</dd></div>
-        <div><dt>Headquarters</dt><dd>NH-37, Belwali Road, Guwahati</dd></div>
-        <div><dt>Enterprise</dt><dd>Udyam-registered MSME, manufacturing</dd></div>
-        <div><dt>Certified</dt><dd>ISO 9001:2015 · ISO 14001:2015</dd></div>
-      </dl>
-
-      <div class="scope rv">
-        <p>Also built to order:</p>
-        <span class="chip">LED aviation lights</span>
-        <span class="chip">Airport lighting</span>
-        <span class="chip">LED traffic lights</span>
-        <span class="chip">Industrial &amp; infrastructure lights</span>
-        <span class="chip">Control panels</span>
-        <span class="chip">Solar mounting structures</span>
-        <span class="chip">Poles</span>
+  <!-- NUMBERS ========================================================== -->
+  <section class="sec" id="numbers" aria-labelledby="num-h" style="padding-top:0">
+    <div class="wrap">
+      <div class="sec-head rv"><span class="label no">№ 02</span><span class="label" id="num-h">By the numbers</span><span class="rule"></span><span class="label">From our datasheets</span></div>
+      <div class="stats">
+        <div class="stat rv"><div class="stat-n cond"><span data-count="155">155</span><small>lm/W</small></div><div class="stat-l"><span class="label">LED efficacy</span><p>OSRAM chips that turn every watt into 155 lumens.</p></div></div>
+        <div class="stat rv"><div class="stat-n cond"><span data-count="50000">50,000</span><small>hrs</small></div><div class="stat-l"><span class="label">LED life</span><p>About eleven years of dusk-to-dawn nights.</p></div></div>
+        <div class="stat rv"><div class="stat-n cond">IP66</div><div class="stat-l"><span class="label">Ingress protection</span><p>Dust-tight, and sealed against powerful water jets.</p></div></div>
+        <div class="stat rv"><div class="stat-n cond"><span data-count="2">2</span><small>days</small></div><div class="stat-l"><span class="label">Autonomy</span><p>Stored charge to ride out cloudy days.</p></div></div>
+        <div class="stat rv"><div class="stat-n cond"><span data-count="5000">5,000</span><small>cycles</small></div><div class="stat-l"><span class="label">LiFePO₄ cycle life</span><p>Rated at 80% depth of discharge on our 100 Ah pack.</p></div></div>
       </div>
     </div>
   </section>
 
   <!-- DAY CYCLE ======================================================= -->
-  <section class="day t-dark" id="day" aria-labelledby="day-h" data-day>
+  <section class="day" id="day" aria-labelledby="day-h" data-day>
     <div class="day-stick">
       <div class="day-sky"></div>
       <div class="day-stars" aria-hidden="true"></div>
       <div class="day-orb day-sun" data-orb="sun" aria-hidden="true"></div>
       <div class="day-orb day-moon" data-orb="moon" aria-hidden="true"></div>
-
       <svg class="day-scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true" data-scene>
         <defs>
-          <pattern id="tea" width="60" height="20" patternUnits="userSpaceOnUse"><path d="M0 15 Q15 5 30 15 T60 15" stroke="#3E9963" stroke-width="6" fill="none"/></pattern>
+          <pattern id="tea" width="60" height="20" patternUnits="userSpaceOnUse"><path d="M0 15 Q15 5 30 15 T60 15" stroke="#2C6E49" stroke-width="6" fill="none"/></pattern>
           <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8" stop-opacity=".95"/><stop offset="1" stop-color="#FFD36B" stop-opacity="0"/></linearGradient>
           <linearGradient id="shadeg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050A18" stop-opacity="0"/><stop offset=".22" stop-color="#050A18"/></linearGradient>
           <radialGradient id="pool"><stop offset="0" stop-color="#FFE9A8" stop-opacity=".75"/><stop offset="1" stop-color="#FFD36B" stop-opacity="0"/></radialGradient>
         </defs>
-        <path d="M0 520 C150 470 260 440 400 470 C520 495 600 430 760 420 C900 410 1000 470 1120 460 C1260 450 1380 400 1600 440 L1600 900 L0 900 Z" fill="#5AA374"/>
-        <g fill="none" stroke="#2F6E48" stroke-width="7" stroke-linecap="round">
+        <path d="M0 520 C150 470 260 440 400 470 C520 495 600 430 760 420 C900 410 1000 470 1120 460 C1260 450 1380 400 1600 440 L1600 900 L0 900 Z" fill="#3C7A55"/>
+        <g fill="none" stroke="#24583A" stroke-width="7" stroke-linecap="round">
           <path d="M300 470 V380 M300 382 l-30 14 M300 382 l30 14 M300 382 l-20 -18 M300 382 l20 -18"/>
           <path d="M340 478 V400 M340 402 l-26 12 M340 402 l26 12 M340 402 l-16 -16 M340 402 l16 -16"/>
           <path d="M1260 452 V350 M1260 352 l-32 14 M1260 352 l32 14 M1260 352 l-20 -20 M1260 352 l20 -20"/>
           <path d="M1310 446 V372 M1310 374 l-26 12 M1310 374 l26 12 M1310 374 l-16 -16 M1310 374 l16 -16"/>
         </g>
-        <path d="M0 600 C200 560 380 580 560 600 C760 622 920 560 1120 570 C1300 580 1450 610 1600 590 L1600 900 L0 900 Z" fill="#2E7D4F"/>
+        <path d="M0 600 C200 560 380 580 560 600 C760 622 920 560 1120 570 C1300 580 1450 610 1600 590 L1600 900 L0 900 Z" fill="#205A3B"/>
         <path d="M0 600 C200 560 380 580 560 600 C760 622 920 560 1120 570 C1300 580 1450 610 1600 590 L1600 900 L0 900 Z" fill="url(#tea)"/>
-        <path d="M0 720 C300 690 700 700 1000 715 C1250 728 1450 700 1600 705 L1600 900 L0 900 Z" fill="#1D5A39"/>
-        <path d="M180 900 L640 712 L700 712 L960 900 Z" fill="#2B303B"/>
+        <path d="M0 720 C300 690 700 700 1000 715 C1250 728 1450 700 1600 705 L1600 900 L0 900 Z" fill="#0F3524"/>
+        <path d="M180 900 L640 712 L700 712 L960 900 Z" fill="#191B22"/>
         <path d="M670 716 L570 900" stroke="#E8E1C8" stroke-width="6" stroke-dasharray="22 26"/>
         <!-- the Green Sun light -->
         <g>
@@ -204,7 +201,7 @@
           <path d="M940 300 L1070 300 L1090 262 L960 262 Z" fill="#14336E" stroke="#9FB8E6" stroke-width="2"/>
           <path d="M972 262 L959 300 M1004 262 L992 300 M1036 262 L1025 300 M1068 262 L1058 300 M950 281 L1080 281" stroke="#9FB8E6" stroke-width="1.5"/>
           <rect x="1008" y="560" width="44" height="68" rx="6" fill="#4A5470"/>
-          <rect x="1016" y="574" width="28" height="6" rx="2" fill="#3BD37A"/>
+          <rect x="1016" y="574" width="28" height="6" rx="2" fill="#C6FF3D"/>
         </g>
         <rect class="shade" x="0" y="340" width="1600" height="560" fill="url(#shadeg)"/>
         <g class="cone" style="mix-blend-mode:screen">
@@ -215,12 +212,11 @@
         <path class="flow flow-down" d="M1016 302 V556" stroke="#FFD34D" stroke-width="4" fill="none" stroke-linecap="round"/>
         <path class="panel-glint" d="M1040 254 l4 -14 l4 14 l14 4 l-14 4 l-4 14 l-4 -14 l-14 -4 z" fill="#fff"/>
       </svg>
-
       <div class="wrap day-hud">
-        <div class="day-card">
-          <p class="kicker"><span>02</span> How it works</p>
-          <h2 id="day-h">24 hours in the life of a Green Sun light</h2>
-          <div class="clock" data-clock aria-hidden="true">05:00<small>IST</small></div>
+        <div class="day-card glass glass-strong">
+          <p class="label"><span style="color:var(--sun)">№ 03</span> — How it works</p>
+          <h2 class="h3" id="day-h">24 hours in the life of a Green Sun light</h2>
+          <div class="clock cond" data-clock aria-hidden="true">05:00<small>IST</small></div>
           <div class="phase" aria-live="polite" data-phase>
             <h3>First light — lamp off</h3>
             <p>The panel senses the sky brightening and the controller switches the lamp off by itself. No timers, no switchboard, no electricity bill.</p>
@@ -231,83 +227,103 @@
             <div class="meter lampm"><span>Lamp</span><span class="bar"><i data-m="lamp"></i></span><output data-o="lamp">50%</output></div>
           </div>
           <div class="day-dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-          <p class="day-note">Illustrative cycle based on our street-light datasheets: dusk-to-dawn operation, 6 h at 100% + 6 h at 50%, 2-day autonomy.</p>
+          <p class="day-note">Illustrative cycle based on our street-light datasheets: dusk-to-dawn, 6 h at 100% + 6 h at 50%, 2-day autonomy.</p>
         </div>
       </div>
-      <p class="day-scroll" aria-hidden="true">Scroll to move the sun ↓</p>
+      <p class="day-scroll label" aria-hidden="true">Scroll to move the sun ↓</p>
     </div>
   </section>
 
-  <!-- CATALOGUE ======================================================= -->
-  <section class="sec t-dark" id="products" aria-labelledby="cat-h">
+  <!-- SHOWROOM ======================================================== -->
+  <section class="show" id="showroom" aria-labelledby="show-h" data-show>
+    <div class="show-pin">
+      <div class="wrap show-head">
+        <div>
+          <div class="sec-head" style="margin-bottom:var(--s4)"><span class="label no">№ 04</span><span class="label">The showroom</span></div>
+          <h2 class="h2" id="show-h">Pick your <span class="it grad">light.</span></h2>
+        </div>
+        <a class="btn btn-glass glass sl" href="products.html" data-magnetic>All 18 products <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="show-track" data-show-track></div>
+      <div class="show-progress" aria-hidden="true"><i data-show-progress></i></div>
+    </div>
+  </section>
+
+  <!-- FAMILIES ======================================================== -->
+  <section class="sec" id="families" aria-labelledby="fam-h">
     <div class="wrap">
-      <p class="kicker rv"><span>03</span> The catalogue</p>
-      <h2 class="h2 rv" id="cat-h">Pick your light.<br><em>We'll do the rest.</em></h2>
-      <p class="lede rv" style="margin-bottom:48px">Eighteen products across five families — every one with a datasheet, every one a click away from a quote.</p>
-      <div class="cat-grid" data-cats></div>
-      <div class="rail-head rv"><h3>Most asked for</h3><a href="products.html">See all products →</a></div>
-      <div class="rail" data-featured></div>
+      <div class="sec-head rv"><span class="label no">№ 05</span><span class="label" id="fam-h">Product families</span><span class="rule"></span><span class="label">5 families · 18 products</span></div>
+      <ul class="fam" data-peek-list>
+        <li class="rv"><a href="products.html#street" data-peek="assets/img/products/si-50w.webp"><span class="label n">01</span><span class="h3">Solar street <span class="it">lights</span></span><span class="label cnt">12 products</span></a></li>
+        <li class="rv"><a href="products.html#mast" data-peek="assets/img/products/flood-60w.webp"><span class="label n">02</span><span class="h3">High masts &amp; <span class="it">floods</span></span><span class="label cnt">2 products</span></a></li>
+        <li class="rv"><a href="products.html#traffic" data-peek="assets/img/products/blinker-20w.webp"><span class="label n">03</span><span class="h3">Traffic &amp; <span class="it">safety</span></span><span class="label cnt">2 products</span></a></li>
+        <li class="rv"><a href="products.html#storage" data-peek="assets/img/products/battery-100ah.webp"><span class="label n">04</span><span class="h3">Energy <span class="it">storage</span></span><span class="label cnt">1 product</span></a></li>
+        <li class="rv"><a href="products.html#poles" data-peek="assets/img/products/deco-pole.webp"><span class="label n">05</span><span class="h3">Poles &amp; <span class="it">decorative</span></span><span class="label cnt">1 product</span></a></li>
+      </ul>
     </div>
   </section>
 
   <!-- LIGHT FINDER ==================================================== -->
-  <section class="sec finder t-dark" id="finder" aria-labelledby="finder-h">
-    <div class="wrap finder-inner">
+  <section class="sec" id="finder" aria-labelledby="finder-h" style="padding-top:0">
+    <div class="wrap finder-grid">
       <div class="rv">
-        <p class="kicker"><span>04</span> Light finder</p>
-        <h2 class="h2" id="finder-h">What are you <em>lighting?</em></h2>
+        <div class="sec-head"><span class="label no">№ 06</span><span class="label">Light finder</span></div>
+        <h2 class="h2" id="finder-h">What are you <span class="it grad">lighting?</span></h2>
         <p class="lede">Pick a place and we'll suggest a starting point. Before you buy, our engineers check the site and size the system properly.</p>
       </div>
       <div class="rv" style="--d:.1s">
         <div class="finder-opts" role="radiogroup" aria-label="What are you lighting?" data-finder></div>
-        <div class="finder-out" data-finder-out aria-live="polite"></div>
+        <div data-finder-out aria-live="polite"></div>
       </div>
     </div>
   </section>
 
   <!-- CERTIFICATIONS ================================================== -->
-  <section class="sec t-dark" id="certified" aria-labelledby="cert-h" style="padding-top:clamp(40px,6vw,80px)">
+  <section class="sec" id="certified" aria-labelledby="cert-h" style="padding-top:0">
     <div class="wrap">
-      <p class="kicker rv"><span>05</span> Certified &amp; registered</p>
-      <h2 class="h2 rv" id="cert-h">Paperwork you can <em>actually check.</em></h2>
-      <p class="lede rv" style="margin-bottom:44px">Independent audits of how we build and how we treat the environment, plus our government registrations. Tap an ISO card to see the certificate.</p>
+      <div class="sec-head rv"><span class="label no">№ 07</span><span class="label">Certified &amp; registered</span><span class="rule"></span><span class="label">Tap an ISO card to view it</span></div>
+      <h2 class="h2 rv" id="cert-h">Paperwork you can <span class="it grad">actually check.</span></h2>
       <div class="certs">
-        <button class="cert rv" type="button" data-cert="assets/img/certs/iso9001.webp" data-alt="ISO 9001:2015 certificate of registration for Green Sun Technologies">
-          <svg class="seal" viewBox="0 0 74 74" aria-hidden="true"><circle cx="37" cy="37" r="34" fill="none" stroke="#FFB000" stroke-width="3" stroke-dasharray="4 4"/><circle cx="37" cy="37" r="26" fill="#FFB000"/><text x="37" y="42" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="14" fill="#0A1020">ISO</text></svg>
-          <p class="std">ISO 9001:2015</p>
-          <p class="what">Quality management system</p>
+        <button class="cert glass glass-edge rv" type="button" data-cert="assets/img/certs/iso9001.webp" data-alt="ISO 9001:2015 certificate of registration for Green Sun Technologies" data-cursor="View">
+          <span class="holo" aria-hidden="true"></span>
+          <svg class="seal" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="none" stroke="#FFC400" stroke-width="1.5" stroke-dasharray="3 4"/><circle cx="32" cy="32" r="23" fill="#FFC400"/><text x="32" y="36.5" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="12" fill="#050507">ISO</text></svg>
+          <span class="std">ISO 9001:2015</span>
+          <span class="what">Quality management</span>
           <dl>
             <div><dt>Certificate</dt><dd>KSRQG2411186716</dd></div>
             <div><dt>Body</dt><dd>KSR Certification LLP</dd></div>
             <div><dt>Valid till</dt><dd>15 Nov 2027</dd></div>
           </dl>
-          <span class="view">View certificate →</span>
+          <span class="view label">View certificate →</span>
         </button>
-        <button class="cert rv" type="button" style="--d:.08s" data-cert="assets/img/certs/iso14001.webp" data-alt="ISO 14001:2015 certificate of registration for Green Sun Technologies">
-          <svg class="seal" viewBox="0 0 74 74" aria-hidden="true"><circle cx="37" cy="37" r="34" fill="none" stroke="#3BD37A" stroke-width="3" stroke-dasharray="4 4"/><circle cx="37" cy="37" r="26" fill="#3BD37A"/><text x="37" y="42" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="14" fill="#0A1020">ISO</text></svg>
-          <p class="std">ISO 14001:2015</p>
-          <p class="what">Environmental management system</p>
+        <button class="cert glass glass-edge rv" type="button" style="--d:.08s" data-cert="assets/img/certs/iso14001.webp" data-alt="ISO 14001:2015 certificate of registration for Green Sun Technologies" data-cursor="View">
+          <span class="holo" aria-hidden="true"></span>
+          <svg class="seal" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="none" stroke="#C6FF3D" stroke-width="1.5" stroke-dasharray="3 4"/><circle cx="32" cy="32" r="23" fill="#C6FF3D"/><text x="32" y="36.5" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="12" fill="#050507">ISO</text></svg>
+          <span class="std">ISO 14001:2015</span>
+          <span class="what">Environmental management</span>
           <dl>
             <div><dt>Certificate</dt><dd>ICIL-GNSU-25-28257805</dd></div>
             <div><dt>Body</dt><dd>ICIL</dd></div>
             <div><dt>Recertify</dt><dd>27 Aug 2028</dd></div>
           </dl>
-          <span class="view">View certificate →</span>
+          <span class="view label">View certificate →</span>
         </button>
-        <div class="cert rv" style="--d:.16s">
-          <svg class="seal" viewBox="0 0 74 74" aria-hidden="true"><circle cx="37" cy="37" r="34" fill="none" stroke="#6FB7FF" stroke-width="3" stroke-dasharray="4 4"/><circle cx="37" cy="37" r="26" fill="#6FB7FF"/><text x="37" y="41" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="11" fill="#0A1020">MSME</text></svg>
-          <p class="std">Udyam MSME</p>
-          <p class="what">Micro enterprise · Manufacturing</p>
+        <div class="cert glass glass-edge rv" style="--d:.16s">
+          <span class="holo" aria-hidden="true"></span>
+          <svg class="seal" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="none" stroke="#FF7A00" stroke-width="1.5" stroke-dasharray="3 4"/><circle cx="32" cy="32" r="23" fill="#FF7A00"/><text x="32" y="36" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="9.5" fill="#050507">MSME</text></svg>
+          <span class="std">Udyam MSME</span>
+          <span class="what">Micro · Manufacturing</span>
           <dl>
             <div><dt>Udyam no.</dt><dd data-cfg="udyam">UDYAM-AS-03-0055919</dd></div>
             <div><dt>Registered</dt><dd>12 Nov 2024</dd></div>
             <div><dt>State</dt><dd>Assam</dd></div>
           </dl>
         </div>
-        <div class="cert rv" style="--d:.24s">
-          <svg class="seal" viewBox="0 0 74 74" aria-hidden="true"><circle cx="37" cy="37" r="34" fill="none" stroke="#FF7A1A" stroke-width="3" stroke-dasharray="4 4"/><circle cx="37" cy="37" r="26" fill="#FF7A1A"/><text x="37" y="42" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="800" font-size="14" fill="#0A1020">GST</text></svg>
-          <p class="std">GST registered</p>
-          <p class="what">Regular taxpayer · Assam</p>
+        <div class="cert glass glass-edge rv" style="--d:.24s">
+          <span class="holo" aria-hidden="true"></span>
+          <svg class="seal" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="none" stroke="#FF3B1F" stroke-width="1.5" stroke-dasharray="3 4"/><circle cx="32" cy="32" r="23" fill="#FF3B1F"/><text x="32" y="36.5" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="12" fill="#050507">GST</text></svg>
+          <span class="std">GST registered</span>
+          <span class="what">Regular taxpayer · Assam</span>
           <dl>
             <div><dt>GSTIN</dt><dd data-cfg="gstin">18BPLPS0265L1ZB</dd></div>
             <div><dt>Since</dt><dd>23 Oct 2024</dd></div>
@@ -319,46 +335,47 @@
   </section>
 
   <!-- SECTORS ========================================================= -->
-  <section class="sec t-dark" id="sectors" aria-labelledby="sec-h" style="padding-top:clamp(40px,6vw,80px)">
+  <section class="sec" id="sectors" aria-labelledby="sec-h" style="padding-top:0">
     <div class="wrap">
-      <p class="kicker rv"><span>06</span> Where our light lands</p>
-      <h2 class="h2 rv" id="sec-h">Built for the <em>North-East.</em></h2>
-      <ul class="sectors" data-sectors>
-        <li class="rv" data-peek="assets/img/products/si-50w.webp"><span class="n">01</span><h3>Highways &amp; NH corridors</h3><p>60–80 W street lights, with remote monitoring for long unlit stretches.</p></li>
-        <li class="rv" data-peek="assets/img/products/si-30w.webp"><span class="n">02</span><h3>City &amp; municipal roads</h3><p>Colony lanes to arterial roads, from one catalogue.</p></li>
-        <li class="rv" data-peek="assets/img/products/aio-20w.webp"><span class="n">03</span><h3>Villages &amp; off-grid</h3><p>All-in-one lights that need nothing but a pole and the sun.</p></li>
-        <li class="rv" data-peek="assets/img/products/flood-60w.webp"><span class="n">04</span><h3>Tea estates &amp; yards</h3><p>Solar flood lights for factories, godowns and loading bays.</p></li>
-        <li class="rv" data-peek="assets/img/products/high-mast.svg"><span class="n">05</span><h3>Junctions &amp; grounds</h3><p>12 m high masts that light a whole crossing from one point.</p></li>
-        <li class="rv" data-peek="assets/img/products/ped-button.webp"><span class="n">06</span><h3>Schools &amp; crossings</h3><p>Solar blinkers and push-button pedestrian signals.</p></li>
-        <li class="rv" data-peek="assets/img/products/deco-pole.webp"><span class="n">07</span><h3>Parks &amp; campuses</h3><p>Decorative poles that look as good by day as by night.</p></li>
+      <div class="sec-head rv"><span class="label no">№ 08</span><span class="label">Where our light lands</span><span class="rule"></span></div>
+      <h2 class="h2 rv" id="sec-h">Built for the <span class="it grad">North-East.</span></h2>
+      <ul class="sectors" data-peek-list>
+        <li class="rv" data-peek="assets/img/products/si-50w.webp"><span class="label">01</span><span class="h3">Highways &amp; <span class="it">NH corridors</span></span><p>60–80 W street lights, with remote monitoring for long unlit stretches.</p></li>
+        <li class="rv" data-peek="assets/img/products/si-30w.webp"><span class="label">02</span><span class="h3">City &amp; <span class="it">municipal roads</span></span><p>Colony lanes to arterial roads, from one catalogue.</p></li>
+        <li class="rv" data-peek="assets/img/products/aio-20w.webp"><span class="label">03</span><span class="h3">Villages &amp; <span class="it">off-grid</span></span><p>All-in-one lights that need nothing but a pole and the sun.</p></li>
+        <li class="rv" data-peek="assets/img/products/flood-60w.webp"><span class="label">04</span><span class="h3">Tea estates &amp; <span class="it">yards</span></span><p>Solar flood lights for factories, godowns and loading bays.</p></li>
+        <li class="rv" data-peek="assets/img/products/high-mast.svg"><span class="label">05</span><span class="h3">Junctions &amp; <span class="it">grounds</span></span><p>12 m high masts that light a whole crossing from one point.</p></li>
+        <li class="rv" data-peek="assets/img/products/ped-button.webp"><span class="label">06</span><span class="h3">Schools &amp; <span class="it">crossings</span></span><p>Solar blinkers and push-button pedestrian signals.</p></li>
+        <li class="rv" data-peek="assets/img/products/deco-pole.webp"><span class="label">07</span><span class="h3">Parks &amp; <span class="it">campuses</span></span><p>Decorative poles that look as good by day as by night.</p></li>
       </ul>
     </div>
-    <div class="sector-peek" aria-hidden="true" data-peek-el><img alt=""></div>
   </section>
 
   <!-- CTA ============================================================= -->
-  <section class="cta t-dark" aria-labelledby="cta-h" data-cta>
+  <section class="cta" aria-labelledby="cta-h" data-cta>
+    <div class="cta-fallback" aria-hidden="true"></div>
+    <canvas class="cta-gl" aria-hidden="true" data-cta-canvas></canvas>
     <div class="wrap">
-      <h2 id="cta-h" class="rv">Tell us the road. We'll light it.</h2>
-      <p class="rv">Send us the site, the length and what you need lit. We'll come back with a sized system and a price.</p>
+      <p class="label rv">№ 09 — Your road, lit</p>
+      <h2 class="h1 rv" id="cta-h">Tell us the road. <span class="it grad">We'll light it.</span></h2>
+      <p class="lede rv">Send us the site, the length and what you need lit. We'll come back with a sized system and a price.</p>
       <div class="row rv">
-        <a class="btn btn-sun" href="contact.html" data-magnetic>Get a quote <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <a class="btn btn-ghost" data-cfg="whatsapp" href="https://wa.me/919920996608" target="_blank" rel="noopener">WhatsApp us</a>
+        <a class="btn btn-plasma sl" href="contact.html" data-magnetic>Get a quote <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-glass glass sl" data-cfg="whatsapp" href="https://wa.me/919920996608" target="_blank" rel="noopener" data-magnetic>WhatsApp us</a>
       </div>
     </div>
-    <div class="cta-sun" aria-hidden="true"><div></div></div>
   </section>
 </main>
 
 <footer class="ftr">
   <div class="wrap">
-    <div class="ftr-box">
+    <div class="ftr-grid">
       <div class="ftr-brand">
-        <img src="assets/brand/gs-lockup-light.svg" alt="Green Sun Technologies" width="250" height="61">
+        <img src="assets/brand/gs-lockup-dark.svg" alt="Green Sun Technologies" width="240">
         <p>The best way to power up. Solar &amp; LED lighting designed, built and serviced in Guwahati, Assam.</p>
       </div>
       <div>
-        <h4>Products</h4>
+        <h4 class="label">Marketplace</h4>
         <ul>
           <li><a href="products.html#street">Solar street lights</a></li>
           <li><a href="products.html#mast">High masts &amp; floods</a></li>
@@ -368,37 +385,44 @@
         </ul>
       </div>
       <div>
-        <h4>Company</h4>
+        <h4 class="label">Company</h4>
         <ul>
-          <li><a href="index.html#about">About us</a></li>
-          <li><a href="index.html#day">How it works</a></li>
-          <li><a href="index.html#certified">Certifications</a></li>
+          <li><a href="#about">About us</a></li>
+          <li><a href="#day">How it works</a></li>
+          <li><a href="#certified">Certifications</a></li>
           <li><a href="contact.html">Contact &amp; quotes</a></li>
         </ul>
       </div>
       <div>
-        <h4>Reach us</h4>
+        <h4 class="label">Reach us</h4>
         <address data-cfg="address">Pub Boragaon, NH-37, Belwali Road<br>Ward No. 10, Guwahati<br>Kamrup Metropolitan, Assam 781035</address>
-        <ul style="margin-top:12px">
+        <ul style="margin-top:var(--s3)">
           <li><a data-cfg="phone" href="tel:+919920996608">+91 99209 96608</a></li>
           <li><a data-cfg="email" href="mailto:greensuntechnologies2024@gmail.com">greensuntechnologies2024@gmail.com</a></li>
         </ul>
       </div>
     </div>
     <div class="ftr-base">
-      <span>© <span data-year>2026</span> Green Sun Technologies · <span class="mono">GSTIN <span data-cfg="gstin">18BPLPS0265L1ZB</span></span></span>
-      <button class="to-top" type="button" data-top>Watch the sunrise ↑</button>
+      <span class="label">© <span data-year>2026</span> Green Sun Technologies · GSTIN <span data-cfg="gstin">18BPLPS0265L1ZB</span></span>
+      <button class="btn btn-glass glass btn-sm sl" type="button" data-top>Back to sunrise ↑</button>
     </div>
   </div>
+  <span class="ftr-giant xl" aria-hidden="true">Green Sun</span>
 </footer>
 
+<div class="peek glass" aria-hidden="true" data-peek-el><img alt=""></div>
 <dialog class="lightbox" data-lightbox aria-label="Certificate">
   <img alt="">
-  <button type="button" aria-label="Close">×</button>
+  <button class="icon-btn sl" type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
 </dialog>
 
 <script src="assets/js/config.js"></script>
 <script src="assets/js/products.js"></script>
+<script src="assets/vendor/gsap.min.js"></script>
+<script src="assets/vendor/ScrollTrigger.min.js"></script>
+<script src="assets/vendor/SplitText.min.js"></script>
+<script src="assets/vendor/lenis.min.js"></script>
+<script src="assets/js/sun-gl.js"></script>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/home.js"></script>
 </body>
