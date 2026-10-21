@@ -3,7 +3,7 @@
 (function () {
   const CFG = window.GS_CONFIG || {};
   const PRODUCTS = window.GS_PRODUCTS || [];
-  const byId = {};
+  const byId = Object.create(null); // no prototype, so ?p=constructor can't match anything
   PRODUCTS.forEach(function (p) { byId[p.id] = p; });
   const root = document.documentElement;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -41,15 +41,22 @@
 
   /* ---------- quote list (kept in this browser only) ---------- */
   const KEY = 'gs-quote';
+  let memList = null; // used when storage is blocked: the list then lasts as long as the page
+  function clampQty(q) { return Math.max(1, Math.min(9999, parseInt(q, 10) || 1)); }
   const quote = {
     list: function () {
-      try {
-        const v = JSON.parse(localStorage.getItem(KEY) || '[]');
-        return Array.isArray(v) ? v.filter(function (x) { return x && byId[x.id]; }) : [];
-      } catch (e) { return []; }
+      let v = memList;
+      try { const raw = localStorage.getItem(KEY); if (raw !== null) v = JSON.parse(raw); } catch (e) { /* blocked or corrupt: keep memList */ }
+      if (!Array.isArray(v)) return [];
+      const seen = Object.create(null);
+      return v.filter(function (x) {
+        if (!x || typeof x.id !== 'string' || !byId[x.id] || seen[x.id]) return false;
+        return (seen[x.id] = true);
+      }).map(function (x) { return { id: x.id, qty: clampQty(x.qty) }; });
     },
     save: function (list) {
-      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) { /* private mode: the list just won't persist */ }
+      memList = list;
+      try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) { /* private mode: memList keeps it for this page */ }
       paintCount(true);
       document.dispatchEvent(new CustomEvent('gs:quote'));
     },
@@ -57,13 +64,13 @@
     add: function (id, qty) {
       const list = quote.list();
       const hit = list.find(function (x) { return x.id === id; });
-      if (hit) hit.qty = Math.max(1, qty || hit.qty); else list.push({ id: id, qty: qty || 1 });
+      if (hit) hit.qty = clampQty(qty || hit.qty); else list.push({ id: id, qty: clampQty(qty) });
       quote.save(list);
     },
     set: function (id, qty) {
       const list = quote.list();
       const hit = list.find(function (x) { return x.id === id; });
-      if (hit) { hit.qty = Math.max(1, Math.min(9999, qty | 0 || 1)); quote.save(list); }
+      if (hit) { hit.qty = clampQty(qty); quote.save(list); }
     },
     remove: function (id) { quote.save(quote.list().filter(function (x) { return x.id !== id; })); }
   };
@@ -152,6 +159,10 @@
     });
   }
   document.addEventListener('gs:quote', syncAddButtons);
+  // another tab changed the list, or this page came back from the back/forward cache
+  function resync() { paintCount(false); document.dispatchEvent(new CustomEvent('gs:quote')); }
+  addEventListener('storage', function (e) { if (e.key === KEY || e.key === null) resync(); });
+  addEventListener('pageshow', function (e) { if (e.persisted) resync(); });
 
   /* ---------- snackbar ---------- */
   let toastEl, toastTimer;
@@ -282,15 +293,20 @@
       (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
     }
     document.addEventListener('click', function (e) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = e.target.closest('a[href*="#"]');
-      if (!a) return;
+      if (!a || a.target === '_blank') return;
       const url = new URL(a.href, location.href);
       if (url.pathname !== location.pathname || !url.hash) return;
-      const target = document.querySelector(url.hash);
+      let target = null;
+      try { target = document.getElementById(decodeURIComponent(url.hash.slice(1))); } catch (err) { /* malformed hash */ }
       if (!target) return;
       e.preventDefault();
       lenis.scrollTo(target, { offset: -20 });
       history.pushState(null, '', url.hash);
+      // move keyboard focus too, as a native jump would (skip link, in-page links)
+      if (!target.matches('a[href], button, input, select, textarea, [tabindex]')) target.setAttribute('tabindex', '-1');
+      target.focus({ preventScroll: true });
     });
   }
   function scrollToTop() {
@@ -320,12 +336,15 @@
     if (!bar) return;
     let lastY = scrollY;
     addEventListener('scroll', function () {
-      const y = scrollY;
+      const y = scrollY, d = y - lastY;
       const menuOpen = document.getElementById('menu') && document.getElementById('menu').classList.contains('is-open');
-      bar.classList.toggle('is-hidden', !menuOpen && y > innerHeight * .6 && y > lastY + 4);
-      if (y < lastY - 4 || y < innerHeight * .6) bar.classList.remove('is-hidden');
+      if (y < innerHeight * .6 || menuOpen) bar.classList.remove('is-hidden');
+      else if (Math.abs(d) < 4) return; // too small to tell a direction (end of a smooth scroll): keep the state and the anchor
+      else bar.classList.toggle('is-hidden', d > 0);
       lastY = y;
     }, { passive: true });
+    // a keyboard user tabbing into the hidden bar brings it back
+    bar.addEventListener('focusin', function () { bar.classList.remove('is-hidden'); });
 
     // Guwahati time in the bar
     const clock = bar.querySelector('[data-ist]');
@@ -352,6 +371,10 @@
       burger.addEventListener('click', function () { setOpen(burger.getAttribute('aria-expanded') !== 'true'); });
       menu.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
       addEventListener('keydown', function (e) { if (e.key === 'Escape' && menu.classList.contains('is-open')) { setOpen(false); burger.focus(); } });
+      // the burger disappears above 1020px: never leave the menu open (and the page locked) behind it
+      const wide = matchMedia('(min-width: 1021px)');
+      const onWide = function () { if (wide.matches && menu.classList.contains('is-open')) setOpen(false); };
+      if (wide.addEventListener) wide.addEventListener('change', onWide); else if (wide.addListener) wide.addListener(onWide);
     }
   }
 

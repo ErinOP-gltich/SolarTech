@@ -123,12 +123,12 @@
         </fieldset>
 
         <div class="fields">
-          <div class="field"><label for="f-name">Your name <i>*</i></label><input id="f-name" name="name" autocomplete="name" required><span class="err">Please tell us your name.</span></div>
-          <div class="field"><label for="f-phone">Phone / WhatsApp <i>*</i></label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required><span class="err">Please enter a phone number we can reach you on.</span></div>
-          <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email"><span class="err">That email doesn't look right.</span></div>
+          <div class="field"><label for="f-name">Your name <i>*</i></label><input id="f-name" name="name" autocomplete="name" required><span class="err" id="f-name-err">Please tell us your name.</span></div>
+          <div class="field"><label for="f-phone">Phone / WhatsApp <i>*</i></label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required><span class="err" id="f-phone-err">Please enter a phone number we can reach you on.</span></div>
+          <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email"><span class="err" id="f-email-err">That email doesn't look right.</span></div>
           <div class="field"><label for="f-org">Organisation</label><input id="f-org" name="org" autocomplete="organization" placeholder="Company, department, panchayat…"></div>
           <div class="field full"><label for="f-site">Where is the site?</label><input id="f-site" name="site" placeholder="Village / town, district, state"></div>
-          <div class="field full"><label for="f-msg">Anything else?</label><textarea id="f-msg" name="message" placeholder="Road length, pole spacing, number of poles, timeline, tender reference…"></textarea></div>
+          <div class="field full"><label for="f-msg">Anything else?</label><textarea id="f-msg" name="message" data-lenis-prevent placeholder="Road length, pole spacing, number of poles, timeline, tender reference…"></textarea></div>
         </div>
 
         <div class="form-actions">
@@ -137,6 +137,7 @@
           <button class="btn btn-glass glass sl" type="submit" data-via="email">Send by email</button>
         </div>
         <p class="form-status" role="status" data-status></p>
+        <noscript><p class="form-status bad">This form needs JavaScript to open WhatsApp or email. Call, WhatsApp or email us directly using the contact cards on this page.</p></noscript>
       </form>
 
       <aside class="reach" aria-label="Other ways to reach us">

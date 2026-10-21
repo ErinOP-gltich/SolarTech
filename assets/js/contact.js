@@ -18,11 +18,11 @@
     const list = GS.quote.list();
     itemsEl.innerHTML = list.map(function (x) {
       const p = GS.byId[x.id];
-      return '<li class="item" data-id="' + p.id + '">' +
-        '<span class="th' + (p.blueprint ? ' blueprint' : '') + '"><img src="' + p.img + '" alt=""></span>' +
+      return '<li class="item" data-id="' + GS.esc(p.id) + '">' +
+        '<span class="th' + (p.blueprint ? ' blueprint' : '') + '"><img src="' + GS.esc(p.img) + '" alt=""></span>' +
         '<span><b>' + GS.esc(p.name) + '</b><span class="label">' + GS.esc(p.part) + '</span></span>' +
         '<span class="qty"><button type="button" class="sl" data-step="-1" aria-label="One fewer"><span class="state" aria-hidden="true"></span>−</button>' +
-        '<input type="number" min="1" max="9999" value="' + x.qty + '" aria-label="Quantity of ' + GS.esc(p.short || p.name) + '">' +
+        '<input type="number" min="1" max="9999" value="' + GS.esc(x.qty) + '" aria-label="Quantity of ' + GS.esc(p.short || p.name) + '">' +
         '<button type="button" class="sl" data-step="1" aria-label="One more"><span class="state" aria-hidden="true"></span>+</button></span>' +
         '<button class="rm sl" type="button" aria-label="Remove ' + GS.esc(p.short || p.name) + '"><span class="state" aria-hidden="true"></span>×</button></li>';
     }).join('');
@@ -33,7 +33,7 @@
     addSel.innerHTML = '<option value="">+ Add a product to this enquiry…</option>' + window.GS_CATEGORIES.map(function (c) {
       const opts = GS.products.filter(function (p) { return p.cat === c.id && !inList[p.id]; });
       return opts.length ? '<optgroup label="' + GS.esc(c.name) + '">' + opts.map(function (p) {
-        return '<option value="' + p.id + '">' + GS.esc(p.name) + '</option>';
+        return '<option value="' + GS.esc(p.id) + '">' + GS.esc(p.name) + '</option>';
       }).join('') + '</optgroup>' : '';
     }).join('');
   }
@@ -72,12 +72,14 @@
 
   /* ---------- validation + sending ---------- */
   function field(name) { return form.elements[name]; }
-  function check() {
+  function check(focus) {
     let ok = true;
     function flag(name, bad) {
       field(name).closest('.field').classList.toggle('bad', bad);
       field(name).setAttribute('aria-invalid', bad);
-      if (bad && ok) field(name).focus();
+      const err = document.getElementById(field(name).id + '-err');
+      if (err) { if (bad) field(name).setAttribute('aria-describedby', err.id); else field(name).removeAttribute('aria-describedby'); }
+      if (bad && ok && focus) field(name).focus(); // only on submit: never pull focus away while someone types
       if (bad) ok = false;
     }
     flag('name', !field('name').value.trim());
@@ -112,12 +114,19 @@
     status.className = 'form-status' + (kind ? ' ' + kind : '');
   }
 
-  if (CFG.formEndpoint) form.querySelector('[data-via="form"]').hidden = false;
+  // the direct "Send enquiry" button only exists when a form backend is configured; otherwise remove it so
+  // pressing Enter in a field can't pick it as the form's default button
+  const formBtn = form.querySelector('[data-via="form"]');
+  if (CFG.formEndpoint) formBtn.hidden = false; else formBtn.remove();
+  let sending = false;
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    if (!check()) { say('Please fix the highlighted fields.', 'bad'); return; }
-    const via = (e.submitter && e.submitter.dataset.via) || 'whatsapp';
+    if (sending) return;
+    if (!check(true)) { say('Please fix the highlighted fields.', 'bad'); return; }
+    const sub = e.submitter && !e.submitter.hidden && e.submitter.dataset.via ? e.submitter : null;
+    let via = sub ? sub.dataset.via : (CFG.formEndpoint ? 'form' : 'whatsapp');
+    if (via === 'form' && !CFG.formEndpoint) via = 'whatsapp';
     const text = message();
     const subject = 'Quote request — ' + field('name').value.trim() + (field('org').value.trim() ? ', ' + field('org').value.trim() : '');
 
@@ -129,6 +138,9 @@
       say('Your email app should open with the enquiry filled in. If nothing happens, write to ' + CFG.email + '.', 'ok');
     } else {
       say('Sending…');
+      sending = true;
+      const busy = Array.from(form.querySelectorAll('button[data-via]'));
+      busy.forEach(function (b) { b.disabled = true; });
       fetch(CFG.formEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -140,15 +152,20 @@
         })
       }).then(function (r) {
         if (!r.ok) throw new Error(r.status);
+        form.reset();
+        GS.quote.save([]);
         say('Thank you — your enquiry is with us. We’ll be in touch soon.', 'ok');
       }).catch(function () {
         say('That didn’t go through. Please try WhatsApp or email instead.', 'bad');
+      }).then(function () {
+        sending = false;
+        busy.forEach(function (b) { b.disabled = false; });
       });
     }
   });
   form.addEventListener('input', function (e) {
     const f = e.target.closest('.field');
-    if (f && f.classList.contains('bad')) check();
+    if (f && f.classList.contains('bad') && check()) say('');
   });
 
   /* ---------- areas + map ---------- */

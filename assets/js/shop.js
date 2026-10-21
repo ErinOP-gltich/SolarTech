@@ -37,16 +37,19 @@
   }
 
   /* ---------- 2. search ---------- */
+  // NFKC folds the catalogue's subscripts and symbols to plain text, so "LiFePO4" finds "LiFePO₄"
+  const norm = function (s) { return String(s || '').normalize ? String(s || '').normalize('NFKC').toLowerCase() : String(s || '').toLowerCase(); };
   ALL.forEach(function (p) {
     const cat = CATS.find(function (c) { return c.id === p.cat; });
     p._hay = [p.name, p.part, p.short, cat && cat.name, (p.tags || []).join(' '),
-      (p.specs || []).map(function (s) { return s.join(' '); }).join(' ')].join(' ').toLowerCase();
+      (p.specs || []).map(function (s) { return s.join(' '); }).join(' ')].join(' ');
+    p._hay = norm(p._hay);
   });
   function matches(p, skip) {
     if (state.cat !== 'all' && p.cat !== state.cat) return false;
     if (state.q) {
       // every word must match the start of a word ("rms" finds RMS, not "arms")
-      const ok = state.q.toLowerCase().split(/\s+/).filter(Boolean).every(function (w) {
+      const ok = norm(state.q).split(/\s+/).filter(Boolean).every(function (w) {
         return new RegExp('(^|[^a-z0-9])' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(p._hay);
       });
       if (!ok) return false;
@@ -187,10 +190,22 @@
     history.replaceState(null, '', location.pathname);
     render(true);
   });
-  addEventListener('hashchange', function () { fromHash(); render(true); });
+  addEventListener('hashchange', function () {
+    fromHash(); render(true);
+    // footer category links change the hash: bring the catalogue into view if it isn't. Wait two frames:
+    // a shorter grid clamps the scroll position, and Lenis must see that before it can aim correctly.
+    const c = $('#catalogue');
+    if (!c) return;
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      const t = c.getBoundingClientRect().top;
+      if (t >= -40 && t <= innerHeight * .6) return;
+      if (GS.lenis) { GS.lenis.resize(); GS.lenis.scrollTo(t + scrollY - 20); } else c.scrollIntoView();
+    }); });
+  });
   addEventListener('resize', function () { moveIndicator(true); });
   addEventListener('keydown', function (e) {
-    if (e.key === '/' && !/input|textarea|select/i.test(document.activeElement.tagName)) { e.preventDefault(); qInput.focus(); }
+    const a = document.activeElement;
+    if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey && !(a && (/input|textarea|select/i.test(a.tagName) || a.isContentEditable || a.closest('[role="slider"]')))) { e.preventDefault(); qInput.focus(); }
   });
 
   const params = new URLSearchParams(location.search);

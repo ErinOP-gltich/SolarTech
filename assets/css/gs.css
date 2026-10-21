@@ -187,6 +187,7 @@ html.lg-refract .refract { backdrop-filter: url(#lg-refract) blur(14px) saturate
 .sl:active > .state { opacity: .14; }
 .ripple { position: absolute; z-index: 1; border-radius: 50%; pointer-events: none; background: currentColor; opacity: .22; transform: scale(0); animation: ripple 650ms var(--ease) forwards; }
 @keyframes ripple { to { transform: scale(1); opacity: 0; } }
+.sl > .ripple { position: absolute; } /* beats the .btn > * / .seg button > * content rules below, so a press never resizes its host */
 
 /* ------------------------------------------------------------------ buttons */
 .btn {
@@ -456,7 +457,8 @@ html.has-cursor input, html.has-cursor textarea, html.has-cursor select { cursor
 .day-scroll { position: absolute; z-index: 2; left: 50%; bottom: 24px; transform: translateX(-50%); opacity: var(--hint, 1); }
 
 /* ---------- showroom (pinned horizontal) */
-.show { position: relative; overflow: hidden; }
+[data-dial-sec] { overflow-x: clip; } /* the dial's light cone and rays never widen the page on phones */
+.show { position: relative; overflow: hidden; overflow: clip; } /* clip: focus can't scroll the pinned track sideways */
 .show-pin { position: relative; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: var(--s6); padding: calc(var(--nav-h) + var(--s6)) 0 var(--s6); }
 .show-head { display: flex; align-items: end; justify-content: space-between; gap: var(--s5); }
 .show-head .h2 { margin: 0; }
@@ -577,7 +579,7 @@ html.has-cursor dialog[open], html.has-cursor dialog[open] * { cursor: auto; }
 /* =====================================================================
    PRODUCT CARDS (home finder + marketplace)
    ===================================================================== */
-.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--s4); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: var(--s4); align-items: start; } /* an open spec drawer grows only its own card */
 .card { position: relative; display: flex; flex-direction: column; border-radius: var(--r-xl); overflow: hidden; transform-style: preserve-3d; transition: transform var(--d-m) var(--ease), box-shadow var(--d-m); will-change: transform; }
 .card-top { position: relative; z-index: 3; display: flex; justify-content: space-between; align-items: center; gap: var(--s2); padding: var(--s4) var(--s4) 0; }
 .card-badge { height: 24px; padding: 0 10px; display: inline-flex; align-items: center; border-radius: var(--r-full); background: var(--volt); color: var(--void); font-family: var(--f-mono); font-size: 10.5px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
@@ -714,8 +716,12 @@ a.reach-card:hover { transform: translateX(6px); }
   .ftr-grid { grid-template-columns: 1fr 1fr; }
   .nav-clock { display: none; }
 }
+@media (min-width: 1021px) {
+  .menu { display: none; }
+}
 @media (max-width: 1020px) {
   .nav-links { display: none; }
+  html:not(.js) .nav-burger { display: none; }
   .nav-burger { display: inline-grid; place-items: center; position: relative; }
   .about { grid-template-columns: 1fr; }
   .about-side { position: static; }

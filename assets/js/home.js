@@ -297,14 +297,14 @@
       const specs = (p.key || [['Battery', p.battery], ['Panel', p.panel], ['Backup', p.autonomy]]).concat([['Protection', p.ip || '—']]).slice(0, 4);
       return '<article class="show-card glass glass-edge">' +
         '<a class="sc-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true" data-cursor="Enquire">' +
-          (big ? '<span class="sc-watt cond">' + GS.esc(big) + '</span>' : '') + '<img src="' + p.img + '" alt="" loading="lazy"></a>' +
+          (big ? '<span class="sc-watt cond">' + GS.esc(big) + '</span>' : '') + '<img src="' + GS.esc(p.img) + '" alt="" loading="lazy"></a>' +
         '<div class="sc-body">' +
           '<span class="label">№ ' + pad(i + 1) + ' / ' + pad(items.length) + ' · ' + GS.esc(cat ? cat.name : '') + '</span>' +
           '<h3 class="h3">' + GS.esc(p.name) + '</h3>' +
-          '<div class="scope" style="margin:0">' + (p.tags || []).map(function (t) { return '<span class="chip">' + GS.esc(t) + '</span>'; }).join('') + '</div>' +
+          '<div class="scope" style="margin:0">' + (p.tags || []).map(function (t) { return '<span class="tag">' + GS.esc(t) + '</span>'; }).join('') + '</div>' +
           '<dl class="specs">' + specs.map(function (s) { return '<div><dt class="label">' + GS.esc(s[0]) + '</dt><dd>' + GS.esc(s[1]) + '</dd></div>'; }).join('') + '</dl>' +
           '<div class="hero-ctas">' + GS.btn('Enquire', href, 'btn-plasma btn-sm') +
-            '<button class="icon-btn glass sl" type="button" data-add="' + p.id + '" aria-pressed="false" aria-label="Add ' + GS.esc(p.short || p.name) + ' to quote list"><span class="state" aria-hidden="true"></span>' + GS.icon.plus + '</button></div>' +
+            '<button class="icon-btn glass sl" type="button" data-add="' + GS.esc(p.id) + '" aria-pressed="false" aria-label="Add ' + GS.esc(p.short || p.name) + ' to quote list"><span class="state" aria-hidden="true"></span>' + GS.icon.plus + '</button></div>' +
         '</div></article>';
     }).join('') +
       '<div class="show-end glass glass-edge"><div><p class="label">18 products · 5 families</p><p class="h3">The whole <span class="it grad">catalogue</span></p>' +
@@ -314,13 +314,23 @@
     const bar = sec.querySelector('[data-show-progress]');
     if (motion && isDesktop()) {
       const dist = function () { return Math.max(0, track.scrollWidth - innerWidth); };
-      gsap.to(track, {
+      const tween = gsap.to(track, {
         x: function () { return -dist(); },
         ease: 'none',
         scrollTrigger: {
           trigger: sec, start: 'top top', end: function () { return '+=' + dist(); }, pin: true, scrub: 1, invalidateOnRefresh: true,
           onUpdate: function (self) { bar.style.setProperty('--p', self.progress.toFixed(3)); }
         }
+      });
+      // keyboard: tabbing to a card scrolls the page to the point where the track shows that card
+      track.addEventListener('focusin', function (e) {
+        const st = tween.scrollTrigger, d = dist();
+        const card = e.target.closest('.show-card, .show-end');
+        if (!st || !card || !d) return;
+        const x = Math.min(d, Math.max(0, card.offsetLeft - innerWidth * .08));
+        const y = st.start + (x / d) * (st.end - st.start);
+        if (GS.lenis) GS.lenis.scrollTo(y, { immediate: true }); else scrollTo(0, y);
+        sec.scrollLeft = 0;
       });
     } else {
       sec.classList.add('is-native');
