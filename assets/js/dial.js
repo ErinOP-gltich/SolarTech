@@ -575,7 +575,7 @@
     function frame(t) {
       raf = 0;
       if (destroyed) return;
-      var dt = clamp((t - last) / 1000, 0.001, 0.05);
+      var dt = clamp((t - last) / 1000, 0.001, 0.1);   // keeps wall-clock pace down to 10 fps (the spring substeps at 240 Hz)
       last = t;
       inFrame = true;
       try { return tick(t, dt); } finally { inFrame = false; }
