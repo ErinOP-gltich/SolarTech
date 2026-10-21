@@ -57,10 +57,10 @@
  *   .no-gl {
  *     background:
  *       radial-gradient(circle at 72% 62%,
- *         #FFF1B8 0, #FFE07A 7vmin, #FFC400 16vmin, #FF7A00 28vmin, #FF3B1F 33.6vmin,
- *         rgba(255,196,0,.50) 34vmin, rgba(255,122,0,.22) 40vmin,
- *         rgba(255,59,31,.07) 58vmin, rgba(5,5,7,0) 85vmin),
- *       #050507;
+ *         #FFF1B8 0, #FFE07A 6vmin, #FFC400 15vmin, #FF9A00 25vmin, #FF7A00 29.5vmin, #FF3B1F 33.6vmin,
+ *         rgba(255,150,30,.6) 34vmin, rgba(255,110,10,.3) 37vmin, rgba(255,80,20,.13) 46vmin,
+ *         rgba(255,59,31,.05) 62vmin, rgba(5,5,7,0) 85vmin),
+ *       #050507;   (orange glow stops: a translucent yellow over #050507 reads olive)
  *   }
  *   canvas.gs-sun { opacity: 0; transition: opacity 1.2s cubic-bezier(.16,1,.3,1); }
  *   .gl-on > canvas.gs-sun { opacity: 1; }

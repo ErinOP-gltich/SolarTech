@@ -354,6 +354,9 @@ html.has-cursor input, html.has-cursor textarea, html.has-cursor select { cursor
 .hero-title .ln > span { display: inline-block; }
 .js [data-hero-line] { opacity: 0; }
 .hero-fallback, .cta-fallback { transition: opacity 1.2s var(--ease); }
+.hero-gl, .cta-gl { opacity: 0; transition: opacity 1.2s var(--ease-expo); }
+.gl-on > .hero-gl, .gl-on > .cta-gl { opacity: 1; }
+.no-gl > .hero-gl, .no-gl > .cta-gl { display: none; }
 .hero-title .it { padding-left: 1.6em; }
 .hero-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: var(--s6); margin-top: var(--s6); }
 .hero-ctas { display: flex; flex-wrap: wrap; gap: var(--s3); }

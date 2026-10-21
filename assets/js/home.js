@@ -11,12 +11,21 @@
   const isDesktop = function () { return innerWidth > 1020; };
 
   /* ---------- 1. the plasma sun (WebGL) ---------- */
+  // The CSS gradient behind each canvas stays until the sun has drawn its first frame, and comes back
+  // if WebGL is missing, software-only or lost (the module fires gs:sun-ready / gs:sun-fallback).
   function mountSun(canvas, opts) {
+    const host = canvas && canvas.parentElement;
+    const fb = host && host.querySelector('.hero-fallback, .cta-fallback');
     if (!canvas || !window.GSSun) {
-      if (canvas) canvas.parentElement.classList.add('no-gl');
+      if (host) host.classList.add('no-gl');
       return null;
     }
-    try { return window.GSSun.mount(canvas, opts); } catch (e) { canvas.parentElement.classList.add('no-gl'); return null; }
+    if (fb && !canvas.dataset.fallbackWired) {
+      canvas.dataset.fallbackWired = '1';
+      canvas.addEventListener('gs:sun-ready', function () { fb.style.opacity = 0; });
+      canvas.addEventListener('gs:sun-fallback', function () { fb.style.opacity = 1; });
+    }
+    try { return window.GSSun.mount(canvas, opts); } catch (e) { host.classList.add('no-gl'); if (fb) fb.style.opacity = 1; return null; }
   }
 
   function heroSun() {
@@ -26,19 +35,12 @@
     const portrait = function () { return innerWidth < 760 || innerHeight > innerWidth * 1.15; };
     let mode = portrait();
     let sun = mountSun(canvas, mode ? { center: [0.66, 0.3], radius: 0.4 } : { center: [0.74, 0.5], radius: 0.36 });
-    if (sun && !hero.classList.contains('no-gl')) hero.querySelector('.hero-fallback').style.opacity = 0;
     addEventListener('resize', function () {
       if (portrait() === mode || !sun) return;
       mode = portrait();
       sun.destroy();
       sun = mountSun(canvas, mode ? { center: [0.66, 0.3], radius: 0.4 } : { center: [0.74, 0.5], radius: 0.36 });
     });
-    if (sun && GS.finePointer) {
-      addEventListener('pointermove', function (e) {
-        if (sun) sun.setPointer(e.clientX / innerWidth * 2 - 1, e.clientY / innerHeight * 2 - 1);
-      }, { passive: true });
-    }
-
     if (motion) {
       // as the hero scrolls away the sun swells and the headline lifts off
       gsap.to(canvas, { yPercent: 18, scale: 1.18, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
@@ -408,7 +410,6 @@
     const canvas = document.querySelector('[data-cta-canvas]');
     if (!cta || !canvas) return;
     const sun = mountSun(canvas, { center: [0.5, 1.2], radius: innerWidth < 760 ? 0.7 : 0.55, pointer: false });
-    if (sun && !cta.classList.contains('no-gl')) cta.querySelector('.cta-fallback').style.opacity = 0;
     if (motion) {
       gsap.fromTo(canvas, { yPercent: 35 }, { yPercent: 0, ease: 'none', scrollTrigger: { trigger: cta, start: 'top bottom', end: 'center center', scrub: true } });
       gsap.fromTo(cta.querySelector('.cta-fallback'), { yPercent: 35 }, { yPercent: 0, ease: 'none', scrollTrigger: { trigger: cta, start: 'top bottom', end: 'center center', scrub: true } });

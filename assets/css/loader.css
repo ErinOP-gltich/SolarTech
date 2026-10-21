@@ -395,3 +395,5 @@ html.js .gsl {
   html.js .gsl { --cy: 36%; --s: min(36vh, 58vw); }
   .gsl-log-h { display: none; }
 }
+
+html.is-loading:not(.is-loaded) body > :not(.gsl) { visibility: hidden; }
