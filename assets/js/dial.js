@@ -203,8 +203,8 @@
             '<span class="dr-night-cap dial-mono"><span>6 h · 100%</span><span>6 h · 50%</span></span>' +
           '</div>' +
           '<div class="dr-actions">' +
-            '<a class="dr-cta" data-cta href="#"><span data-cta-t></span><span class="dr-arrow" aria-hidden="true">→</span></a>' +
-            '<button class="dr-add" type="button" data-add-q aria-pressed="false" hidden><span class="dr-ic" aria-hidden="true"></span><span data-add-t>Add to quote</span><span class="dial-sr" data-add-n></span></button>' +
+            '<a class="dr-cta sl" data-cta href="#"><span class="state" aria-hidden="true"></span><span data-cta-t></span><span class="dr-arrow" aria-hidden="true">→</span></a>' +
+            '<button class="dr-add sl" type="button" data-add-q aria-pressed="false" hidden><span class="state" aria-hidden="true"></span><span class="dr-ic" aria-hidden="true"></span><span data-add-t>Add to quote</span><span class="dial-sr" data-add-n></span></button>' +
           '</div>' +
         '</div>' +
       '</div>';
