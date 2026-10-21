@@ -25,6 +25,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@300..800&amp;family=Geist+Mono:wght@400..600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/loader.css">
   <link rel="stylesheet" href="assets/css/gs.css">
+  <link rel="stylesheet" href="assets/css/hero-beam.css">
   <script>document.documentElement.classList.add('js')</script>
   <script type="application/ld+json">
 {
@@ -137,36 +138,37 @@
 
 <main id="main">
 
-  <!-- HERO ============================================================ -->
-  <section class="hero" aria-labelledby="hero-title" data-hero>
-    <div class="hero-fallback" aria-hidden="true"></div>
-    <canvas class="hero-gl" aria-hidden="true" data-sun-canvas></canvas>
+  <!-- HERO: "Live Beam" — a Green Sun solar street light whose beam follows the pointer ============ -->
+  <section class="hero hb" aria-labelledby="hero-title" data-hero data-beam>
+    <div class="hb-fallback" aria-hidden="true"></div>
 
     <div class="wrap hero-top">
       <p class="live glass" data-live><span class="pulse">LIVE</span><span>Guwahati, Assam — reading the sky…</span></p>
-      <p class="label coords">[ 26.12°N · 91.68°E ] &nbsp;NH-37, Guwahati</p>
     </div>
 
     <div class="wrap hero-mid">
-      <h1 class="h1 hero-title" id="hero-title">
-        <span class="ln"><span data-hero-line>Daylight,</span></span>
-        <span class="ln"><span class="it grad" data-hero-line>delivered</span></span>
-        <span class="ln"><span data-hero-line>after dark.</span></span>
+      <h1 class="h1 hero-title hb-title" id="hero-title">
+        <span class="sr-only" data-sr-copy>Daylight, delivered after dark.</span>
+        <span class="ln" aria-hidden="true"><span class="hb-lit" data-hero-line data-beam-lit data-lit="Daylight,">Daylight,</span></span>
+        <span class="ln" aria-hidden="true"><span class="it grad hb-lit" data-hero-line data-beam-lit data-lit="delivered">delivered</span></span>
+        <span class="ln" aria-hidden="true"><span class="hb-lit" data-hero-line data-beam-lit data-lit="after dark.">after dark.</span></span>
       </h1>
-      <div class="hero-row">
+      <div class="hero-row" data-beam-shield>
         <p class="lede">Solar street lights, high masts, traffic systems and LiFePO₄ packs — <b>designed, built and serviced in Guwahati</b> for the roads, villages and tea estates of the North-East.</p>
         <div class="hero-ctas">
           <a class="btn btn-plasma sl" href="products.html" data-magnetic>Enter the marketplace <svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="btn btn-glass glass sl" href="contact.html" data-magnetic>Get a quote</a>
         </div>
+        <p class="label hb-aim hb-aim--row" aria-hidden="true"><i></i><span class="t-mouse">Move to aim the light</span><span class="t-touch">Tap or drag to aim the light</span></p>
       </div>
     </div>
 
-    <div class="wrap hero-foot">
+    <div class="wrap hero-foot" data-beam-shield>
       <div class="ticker label" aria-label="Credentials"><div class="ticker-track">
         <span>ISO 9001:2015</span><span>ISO 14001:2015</span><span>Udyam MSME</span><span>OSRAM LEDs · 155 lm/W</span><span>IP66</span><span>LiFePO₄ 12.8 V</span><span>Dusk-to-dawn</span><span>Made in Assam</span>
         <span aria-hidden="true">ISO 9001:2015</span><span aria-hidden="true">ISO 14001:2015</span><span aria-hidden="true">Udyam MSME</span><span aria-hidden="true">OSRAM LEDs · 155 lm/W</span><span aria-hidden="true">IP66</span><span aria-hidden="true">LiFePO₄ 12.8 V</span><span aria-hidden="true">Dusk-to-dawn</span><span aria-hidden="true">Made in Assam</span>
       </div></div>
+      <span class="label hb-aim hb-aim--foot" aria-hidden="true"><i></i><span class="t-mouse">Move to aim the light</span><span class="t-touch">Tap or drag to aim the light</span></span>
       <button class="motion-tog label sl" type="button" aria-pressed="false" data-motion-toggle><span class="state" aria-hidden="true"></span><i aria-hidden="true"></i>Pause motion</button>
       <a class="scroll-cue label" href="#about"><i></i>Scroll</a>
     </div>
@@ -428,8 +430,7 @@
 
   <!-- CTA ============================================================= -->
   <section class="cta" aria-labelledby="cta-h" data-cta>
-    <div class="cta-fallback" aria-hidden="true"></div>
-    <canvas class="cta-gl" aria-hidden="true" data-cta-canvas></canvas>
+    <div class="cta-light" aria-hidden="true" data-cta-light><i class="cta-lamp"></i><i class="cta-cone"></i><i class="cta-pool"></i></div>
     <div class="wrap">
       <p class="label rv">№ 09 — Your road, lit</p>
       <h2 class="h1 rv" id="cta-h">Tell us the road. <span class="it grad nw">We'll light it.</span></h2>
@@ -498,7 +499,7 @@
 <script src="assets/vendor/ScrollTrigger.min.js"></script>
 <script src="assets/vendor/SplitText.min.js"></script>
 <script src="assets/vendor/lenis.min.js"></script>
-<script src="assets/js/sun-gl.js"></script>
+<script src="assets/js/hero-beam.js"></script>
 <script src="assets/js/main.js"></script>
 <script src="assets/js/home.js"></script>
 </body>

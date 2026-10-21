@@ -40,14 +40,14 @@
 .hb .hero-top { padding-top: calc(var(--nav-h) + var(--s7)); align-items: center; }
 .hb .hero-mid { align-self: end; padding-bottom: var(--s6); }
 
-.hb-meta { position: absolute; right: var(--gutter); top: 50%; z-index: 1; display: grid; justify-items: end; gap: var(--s2); text-align: right; pointer-events: none; }
-.hb-meta .coords { padding: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; } /* no glass over a canvas that changes every frame */
-.hb-meta .label { color: var(--muted); text-shadow: 0 0 2px rgba(5, 5, 7, .95), 0 0 6px rgba(5, 5, 7, .8); }
-.hb-aim { display: inline-flex; align-items: center; gap: var(--s2); color: var(--text-2) !important; }
+/* how to play: in the foot on wide screens, under the buttons on portrait */
+.hb-aim { display: inline-flex; align-items: center; gap: var(--s2); flex: none; margin: 0; color: var(--text-2); white-space: nowrap; }
 .hb-aim i { position: relative; width: 14px; height: 14px; border-radius: 50%; border: 1px solid currentColor; }
-.hb-aim i::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 8px var(--sun); }
+.hb-aim i::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 8px var(--sun); animation: ping 1.8s infinite; }
 .hb-aim .t-touch { display: none; }
 @media (hover: none) { .hb-aim .t-touch { display: inline; } .hb-aim .t-mouse { display: none; } }
+.hb-aim--row { display: none; }
+.motion-paused .hb-aim i::after { animation-play-state: paused; }
 
 /* ---------- the headline: in the dark, and in the beam ---------- */
 .hb-title {
@@ -99,7 +99,6 @@ html:not(.js) .hb-lit::after { content: none; }
 /* ---------- tablet landscape / small laptop ---------- */
 @media (max-width: 1180px) and (min-aspect-ratio: 4/5) {
   .hb-title { font-size: clamp(40px, 8.6vw, 112px); }
-  .hb-meta { top: 52%; }
 }
 
 /* ---------- portrait: the lamp owns the top third, words stack underneath ---------- */
@@ -112,8 +111,8 @@ html:not(.js) .hb-lit::after { content: none; }
   .hb-title .it { --hb-indent: .9em; }
   .hb .hero-row { grid-template-columns: 1fr; gap: var(--s5); margin-top: var(--s5); }
   .hb .lede { font-size: 16px; }
-  .hb-meta { top: auto; bottom: auto; right: var(--gutter); top: calc(var(--nav-h) + 22px); }
-  .hb-meta .coords { display: none; }
+  .hb-aim--row { display: inline-flex; margin-top: var(--s1); }
+  .hb-aim--foot { display: none; }
   .hb::after {
     background:
       linear-gradient(0deg, rgba(5, 5, 7, .95) 0%, rgba(5, 5, 7, .78) 22%, rgba(5, 5, 7, .2) 46%, rgba(5, 5, 7, 0) 58%),
@@ -140,7 +139,7 @@ html:not(.js) .hb-lit::after { content: none; }
 @media (max-height: 560px) and (orientation: landscape) {
   .hb .hero-top { padding-top: calc(var(--nav-h) + var(--s5)); }
   .hb-title { font-size: clamp(32px, 11vh, 72px); }
-  .hb-meta { display: none; }
+  .hb-aim { display: none !important; }
 }
 
 .motion-paused .hb .ticker-track { animation-play-state: paused; }

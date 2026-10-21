@@ -1116,7 +1116,7 @@
     function frame(now) {
       raf = 0;
       if (!running) return;
-      var dt = lastNow ? Math.min(0.05, (now - lastNow) / 1000) : 0;
+      var dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 0; // keeps wall-clock pace down to 10 fps
       lastNow = now;
       clock += dt;
       render(dt);

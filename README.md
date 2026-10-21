@@ -8,7 +8,7 @@ Plain HTML, CSS and JavaScript. There is nothing to install or build. It is serv
 
 | Page | What's on it |
 |---|---|
-| `index.html` | Loading screen, a real-time WebGL plasma sun behind the hero, live "is the sun up in Guwahati?" status, a marquee driven by scroll speed, the company story, datasheet numbers, a scroll-driven 24-hour day/night demo, a pinned horizontal showroom, product families, a light finder, certifications, sectors and a closing sunrise |
+| `index.html` | A loading screen where a solar street light powers on and its beam reveals the page, a hero in which a Green Sun street light hangs over a night road and its beam follows the pointer and lights up the headline, live "is the sun up in Guwahati?" status, a marquee driven by scroll speed, the company story, datasheet numbers, a scroll-driven 24-hour day/night demo, a pinned horizontal showroom, product families, a light finder, certifications, sectors and a street light switching on over the closing call to action |
 | `products.html` | The marketplace: a rotary **wattage dial** for the street lights, then every product with search, category, power and feature filters, sorting, and a grid or spec-table view. **Enquire** goes to the Contact page with that product filled in, and **+** adds it to a quote list |
 | `contact.html` | The quote list (with quantities), an enquiry form that sends through WhatsApp or email, phone/WhatsApp/email/address cards, the areas served, and a map |
 
@@ -16,7 +16,7 @@ Plain HTML, CSS and JavaScript. There is nothing to install or build. It is serv
 
 "Solar Noir": void black, a plasma gradient (flare red → orange → sun yellow → white-hot) and electric volt green, set in Archivo Expanded, Instrument Serif italic, Geist and Geist Mono. Surfaces are Apple-style liquid glass (frosted, with a specular highlight and rim light that follow the pointer); interaction follows Material 3 (shape scale, state layers, ripples, filter chips, segmented buttons, snackbar, motion tokens). Every colour, radius, spacing step, shadow and duration is a token at the top of `assets/css/gs.css`.
 
-Animation uses GSAP (ScrollTrigger, SplitText, Flip) and Lenis smooth scrolling, both vendored in `assets/vendor/` so the site has no runtime CDN dependency. Everything degrades gracefully: without WebGL the sun becomes a CSS gradient, with *reduce motion* switched on the animations and smooth scrolling are off, and without JavaScript the content is still there.
+Animation uses GSAP (ScrollTrigger, SplitText, Flip) and Lenis smooth scrolling, both vendored in `assets/vendor/` so the site has no runtime CDN dependency. Everything degrades gracefully: without canvas the hero falls back to a painted CSS version of the scene, with *reduce motion* switched on the animations and smooth scrolling are off, and without JavaScript the content is still there.
 
 ## Preview
 
@@ -33,7 +33,7 @@ Then open http://localhost:8000.
 | Phone, WhatsApp, email, address, map location, **areas served**, GSTIN | `assets/js/config.js` |
 | Products, specs, photos, categories | `assets/js/products.js` |
 | Colours, fonts, spacing, motion | `assets/css/gs.css` (all tokens are at the top) |
-| Loading screen, WebGL sun, wattage dial | `assets/js/loader.js` + `assets/css/loader.css`, `assets/js/sun-gl.js`, `assets/js/dial.js` + `assets/css/dial.css` |
+| Loading screen, live-beam hero, wattage dial | `assets/js/loader.js` + `assets/css/loader.css`, `assets/js/hero-beam.js` + `assets/css/hero-beam.css`, `assets/js/dial.js` + `assets/css/dial.css` |
 | Page text | the `.html` files |
 
 The contact details in `config.js` replace the ones written in the HTML when the page loads, so `config.js` is the only place they need changing.

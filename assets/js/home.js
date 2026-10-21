@@ -1,5 +1,5 @@
-/* Home page: the plasma sun, hero intro, velocity marquee, lit-up manifesto, count-ups, the 24-hour
-   scroll story, the pinned showroom, product-family previews, the light finder and the closing sunrise. */
+/* Home page: the live-beam hero, velocity marquee, lit-up manifesto, count-ups, the 24-hour scroll story,
+   the pinned showroom, product-family previews, the light finder and the closing street light. */
 (function () {
   const GS = window.GS;
   const CFG = GS.config;
@@ -10,58 +10,34 @@
   const pad = function (n) { return (n < 10 ? '0' : '') + n; };
   const isDesktop = function () { return innerWidth > 1020; };
 
-  /* ---------- 1. the plasma sun (WebGL) ---------- */
-  // The CSS gradient behind each canvas stays until the sun has drawn its first frame, and comes back
-  // if WebGL is missing, software-only or lost (the module fires gs:sun-ready / gs:sun-fallback).
-  function mountSun(canvas, opts) {
-    const host = canvas && canvas.parentElement;
-    const fb = host && host.querySelector('.hero-fallback, .cta-fallback');
-    if (!canvas || !window.GSSun) {
-      if (host) host.classList.add('no-gl');
-      return null;
-    }
-    if (fb && !canvas.dataset.fallbackWired) {
-      canvas.dataset.fallbackWired = '1';
-      canvas.addEventListener('gs:sun-ready', function () { fb.style.opacity = 0; });
-      canvas.addEventListener('gs:sun-fallback', function () { fb.style.opacity = 1; });
-    }
-    try { return window.GSSun.mount(canvas, opts); } catch (e) { host.classList.add('no-gl'); if (fb) fb.style.opacity = 1; return null; }
-  }
-
-  function heroSun() {
-    const hero = document.querySelector('[data-hero]');
-    const canvas = document.querySelector('[data-sun-canvas]');
-    if (!hero || !canvas) return;
-    const portrait = function () { return innerWidth < 760 || innerHeight > innerWidth * 1.15; };
-    let mode = portrait();
-    // phones: the sun sits high and small so the headline below it stays readable
-    const place = function (m) { return m ? { center: [0.64, 0.2], radius: 0.34 } : { center: [0.74, 0.5], radius: 0.36 }; };
-    let sun = mountSun(canvas, place(mode));
-    const syncMotion = function () { if (sun) { if (GS.motionPaused) sun.pause(); else sun.play(); } };
-    document.addEventListener('gs:motion', syncMotion);
-    syncMotion();
-    addEventListener('resize', function () {
-      if (portrait() === mode || !sun) return;
-      mode = portrait();
-      sun.destroy();
-      sun = mountSun(canvas, place(mode));
-      syncMotion();
+  /* ---------- 1. the live beam: a Green Sun solar street light whose beam follows the pointer ---------- */
+  function heroBeam() {
+    const hero = document.querySelector('[data-beam]');
+    if (!hero || !window.GSHeroBeam) return;
+    // the lamp powers on just after the loading screen hands over (its own light reveals the page)
+    GS.ready(function () {
+      let beam = null;
+      try { beam = window.GSHeroBeam.mount(hero, { igniteDelay: 650 }); GS.heroBeam = beam; } catch (e) { setTimeout(function () { throw e; }); }
+      // scrolling away tilts the lamp and narrows its beam
+      if (beam && motion) ST.create({ trigger: hero, start: 'top top', end: 'bottom top', scrub: true, onUpdate: function (st) { beam.setProgress(st.progress); } });
     });
-    if (motion) {
-      // as the hero scrolls away the sun swells and the headline lifts off
-      gsap.to(canvas, { yPercent: 18, scale: 1.18, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
-      gsap.to(hero.querySelector('.hero-mid'), { yPercent: -22, opacity: 0, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
-    }
+    if (motion) gsap.to(hero.querySelector('.hero-mid'), { yPercent: -18, opacity: 0, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
   }
 
   function heroIntro() {
     const lines = document.querySelectorAll('[data-hero-line]');
+    const title = document.getElementById('hero-title');
     const extras = document.querySelectorAll('.hero-top, .hero-row, .hero-foot');
-    if (!motion) { lines.forEach(function (l) { l.style.opacity = 1; }); return; }
+    if (!motion) { lines.forEach(function (l) { l.style.opacity = 1; }); if (title) title.classList.add('is-in'); return; }
     gsap.set(extras, { opacity: 0, y: 24 });
     GS.ready(function () {
-      lines.forEach(function (l, i) { GS.splitIn(l, .15 + i * .12); });
-      gsap.to(extras, { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: .1, delay: .55 });
+      // whole lines rise out of their masks (each line carries the beam's lit copy, so no per-letter split)
+      lines.forEach(function (l, i) {
+        gsap.set(l, { opacity: 1 });
+        gsap.from(l, { yPercent: 112, duration: 1.15, ease: 'expo.out', delay: .12 + i * .1,
+          onComplete: i === lines.length - 1 && title ? function () { title.classList.add('is-in'); } : null });
+      });
+      gsap.to(extras, { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: .1, delay: .5 });
     });
   }
 
@@ -445,24 +421,18 @@
     choose('colony');
   }
 
-  /* ---------- 10. the sun rises again over the call to action ---------- */
-  function ctaSun() {
-    const cta = document.querySelector('[data-cta]');
-    const canvas = document.querySelector('[data-cta-canvas]');
-    if (!cta || !canvas) return;
-    const sun = mountSun(canvas, { center: [0.5, 1.2], radius: innerWidth < 760 ? 0.7 : 0.55, pointer: false });
-    if (sun) {
-      const syncMotion = function () { if (GS.motionPaused) sun.pause(); else sun.play(); };
-      document.addEventListener('gs:motion', syncMotion);
-      syncMotion();
-    }
-    if (motion) {
-      gsap.fromTo(canvas, { yPercent: 35 }, { yPercent: 0, ease: 'none', scrollTrigger: { trigger: cta, start: 'top bottom', end: 'center center', scrub: true } });
-      gsap.fromTo(cta.querySelector('.cta-fallback'), { yPercent: 35 }, { yPercent: 0, ease: 'none', scrollTrigger: { trigger: cta, start: 'top bottom', end: 'center center', scrub: true } });
-    }
+  /* ---------- 10. a street light switches on over the call to action ---------- */
+  function ctaLight() {
+    const el = document.querySelector('[data-cta-light]');
+    if (!el) return;
+    if (GS.reduceMotion || !('IntersectionObserver' in window)) { el.classList.add('is-on'); return; }
+    const io = new IntersectionObserver(function (en) {
+      if (en[0].isIntersecting) { io.disconnect(); el.classList.add('is-on'); }
+    }, { threshold: .35 });
+    io.observe(el);
   }
 
-  heroSun();
+  heroBeam();
   heroIntro();
   liveStatus();
   marquee();
@@ -472,7 +442,7 @@
   showroom();
   peeks();
   finder();
-  ctaSun();
+  ctaLight();
   GS.reveals();
   if (ST) { addEventListener('load', function () { ST.refresh(); }); if (document.fonts) document.fonts.ready.then(function () { ST.refresh(); }); }
 })();
