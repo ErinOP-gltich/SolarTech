@@ -72,6 +72,7 @@ html.js .gsl {
 }
 
 /* reticle hairlines through the sun's centre, stopping at the dial */
+.gsl-x { position: absolute; inset: 0; }
 .gsl-x i {
   position: absolute; display: block; background: var(--line);
   --gap: calc(var(--s) * .76);

@@ -139,7 +139,7 @@
     var ember = $('.gsl-ember'), hot = $('.gsl-hot');
     var faceLit = $('.gsl-face:not(.gsl-face--dark)'), faceDark = $('.gsl-face--dark');
     var flash = $('.gsl-flash'), glow = $('.gsl-glow');
-    var burn = $('.gsl-burn'), fx = $('.gsl-fx');
+    var fx = $('.gsl-fx');
     var head = $('.gsl-bar b');
     var lines = $$('.gsl-log li').map(function (li) {
       var span = li.querySelector('span');
@@ -286,10 +286,25 @@
         });
       }
     }
-    var dirty = false;
+    var dirty = false, ring = null;
+    function drawRing(r, b) {
+      var g = ctx.createRadialGradient(C.x, C.y, r, C.x, C.y, r + b);
+      g.addColorStop(0, '#FFFFFF');
+      g.addColorStop(0.06, '#FFF1B8');
+      g.addColorStop(0.2, '#FFC400');
+      g.addColorStop(0.42, 'rgba(255,122,0,.85)');
+      g.addColorStop(0.7, 'rgba(255,59,31,.38)');
+      g.addColorStop(1, 'rgba(255,59,31,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(C.x, C.y, r + b, 0, Math.PI * 2);
+      ctx.arc(C.x, C.y, Math.max(r - 1, 0), 0, Math.PI * 2, true);
+      ctx.fill();
+    }
     function drawParts(dt) {
       if (!ctx) return;
       if (dirty) { ctx.clearRect(0, 0, W, H); dirty = false; }
+      if (ring) { drawRing(ring.r, ring.b); dirty = true; }
       if (!parts.length) return;
       dirty = true;
       ctx.globalCompositeOperation = 'lighter';
@@ -461,14 +476,7 @@
           var m = 'radial-gradient(circle at ' + cx + 'px ' + cy + 'px, transparent ' + r + 'px, #000 ' + (r + 1) + 'px)';
           el.style.webkitMaskImage = m; el.style.maskImage = m;
         }
-        var b = band;
-        burn.style.background = 'radial-gradient(circle at ' + cx.toFixed(1) + 'px ' + cy.toFixed(1) + 'px,' +
-          '#fff ' + r.toFixed(1) + 'px,' +
-          '#FFF1B8 ' + (r + b * 0.06).toFixed(1) + 'px,' +
-          '#FFC400 ' + (r + b * 0.2).toFixed(1) + 'px,' +
-          'rgba(255,122,0,.85) ' + (r + b * 0.42).toFixed(1) + 'px,' +
-          'rgba(255,59,31,.4) ' + (r + b * 0.7).toFixed(1) + 'px,' +
-          'rgba(255,59,31,0) ' + (r + b).toFixed(1) + 'px)';
+        ring = { r: r, b: band };
       }
       drawParts(dt);
       if (u >= 1) teardown();
