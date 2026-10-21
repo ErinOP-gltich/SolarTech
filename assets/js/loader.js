@@ -19,14 +19,19 @@
 (function (win, doc) {
   'use strict';
 
+  if (win.GSLoader) return;   // included twice: keep the first instance
+
   var root = doc.documentElement;
   var KEY = 'gs-ignited';
-  var HARD_EXIT = 5000;      // ms after start: the exit begins no later than this…
-  var HARD_REMOVE = 6000;    // …and the loader is gone no later than this, whatever happens
+  var HARD_EXIT = 4700;      // ms: the exit (0.9 s) begins no later than this…
+  var HARD_REMOVE = 5950;    // …and the loader is gone by this, counted from navigation start
   var EXPO = 'cubic-bezier(.16,1,.3,1)';
 
-  var now = (win.performance && performance.now) ? function () { return performance.now(); } : Date.now;
+  var hasPerf = !!(win.performance && performance.now);
+  var now = hasPerf ? function () { return performance.now(); } : Date.now;
   var T0 = now();
+  // ms since navigation start (what the hard limits are measured against)
+  function since() { return hasPerf ? performance.now() : Date.now() - T0; }
   var raf = win.requestAnimationFrame ? win.requestAnimationFrame.bind(win) : function (f) { return setTimeout(function () { f(now()); }, 16); };
 
   var resolveDone, resolveRevealed;
@@ -40,6 +45,7 @@
 
   var el = doc.getElementById('gsl');
   var gone = false;
+  var cleanups = [];
 
   /* exit start: tell the page */
   function signal() {
@@ -47,7 +53,7 @@
     api.loaded = true;
     root.classList.add('is-loaded');
     try { win.sessionStorage.setItem(KEY, '1'); } catch (e) { /* private mode */ }
-    try { doc.dispatchEvent(new CustomEvent('gs:loaded')); } catch (e) { /* listener threw */ }
+    try { doc.dispatchEvent(new CustomEvent('gs:loaded', { detail: { mode: api.mode } })); } catch (e) { /* listener threw */ }
     resolveDone();
   }
 
@@ -57,6 +63,7 @@
     gone = true;
     signal();
     root.classList.remove('is-loading');
+    for (var i = 0; i < cleanups.length; i++) { try { cleanups[i](); } catch (e) { /* ignore */ } }
     if (el && el.parentNode) el.parentNode.removeChild(el);
     el = null;
     resolveRevealed();
@@ -74,7 +81,8 @@
   }
 
   root.classList.add('is-loading');
-  setTimeout(teardown, HARD_REMOVE);   // absolute safety net
+  // absolute safety net (performance.now() counts from navigation start)
+  setTimeout(teardown, Math.max(600, HARD_REMOVE - since()));
 
   try { boot(); } catch (err) { teardown(); }
 
@@ -193,9 +201,9 @@
         for (var c = 0; c < len; c++) {
           var ch = s.text.charAt(c);
           var at = 0.05 + (c / len) * 0.55 + i * 0.06;
-          if (t >= at || ch === ' ' || ch === ' ') out += ch;
+          if (t >= at || ch === ' ' || ch === '\u00a0') out += ch;
           else if (t >= at - 0.35) out += GLYPHS.charAt((Math.random() * GLYPHS.length) | 0);
-          else out += ' ';
+          else out += '\u00a0';
         }
         s.node.textContent = out;
         if (t > 0.05 + 0.55 + i * 0.06 + 0.02) { s.node.textContent = s.text; s.done = true; }
@@ -246,16 +254,20 @@
       fx.width = Math.round(W * DPR); fx.height = Math.round(H * DPR);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     }
-    sizeCanvas();
-    win.addEventListener('resize', sizeCanvas);
-
     var C = { x: 0, y: 0, r: 0 };   // sun centre + mark radius in px
     function measure() {
       var r = sun.getBoundingClientRect();
       C.x = r.left + r.width / 2; C.y = r.top + r.height / 2; C.r = r.width / 2;
     }
-    measure();
-    win.addEventListener('resize', measure);
+    function onResize() { sizeCanvas(); measure(); }
+    onResize();
+    win.addEventListener('resize', onResize);
+    cleanups.push(function () {
+      win.removeEventListener('resize', onResize);
+      if (spin) spin.cancel();
+      if (ctx) { fx.width = fx.height = 0; }   // hand the canvas memory back now
+      parts.length = 0;
+    });
 
     var spinDir = 1;
     function emitEmber(spin) {
@@ -356,7 +368,7 @@
           { transform: 'rotate(-50deg) scale(.15,0)', opacity: 0 },
           { transform: 'rotate(-8deg) scale(1.04,1.08)', opacity: 1, offset: 0.55 },
           { transform: 'none', opacity: 1 }
-        ], { duration: 1100, delay: 120 + i * 55, easing: EXPO, fill: 'both' });
+        ], { duration: 1100, delay: 120 + (i % 6) * 75, easing: EXPO, fill: 'both' });   // opposite blades in pairs
       });
       animate($('.gsl-ring'), [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
         { duration: 1200, delay: 60, easing: EXPO, fill: 'both' });
@@ -374,7 +386,7 @@
     /* ---- main loop ----------------------------------------------------- */
     var MIN = mode === 'full' ? 1.6 : 0.2;     // seconds before progress may reach 100
     var p = 0, tgt = 0, clock = 0, last = now(), held = 0;
-    var phase = 'load', exitAt = 0, exitFired = false, X = null;
+    var phase = 'load', exitAt = 0, X = null;
 
     function loadStep(dt, wall) {
       var target;
@@ -387,14 +399,13 @@
         target = Math.min(clock / MIN, ready ? 1 : 0.85);
       }
       var forced = wall > HARD_EXIT;
-      if (forced) target = 1;
       if (target > tgt) tgt = target;
       p += (tgt - p) * (1 - Math.exp(-dt * (mode === 'full' ? 9 : 30)));
-      if (tgt >= 1 && p > 0.995) p = 1;
+      if ((tgt >= 1 && p > 0.99) || forced) p = tgt = 1;
       paint(p, dt);
       if (p >= 1 && (sig.dom || forced)) {
         held += dt;
-        if (held > (mode === 'full' ? 0.16 : 0.02) || forced) startExit();
+        if (held > (mode === 'full' ? 0.1 : 0) || forced) startExit();
       }
     }
 
@@ -472,8 +483,9 @@
       var e = 0.12 * expoOut(Math.min(1, u * 3)) + 0.88 * Math.pow(u, 1.7);
       var band = 30 + X.maxR * X.band;
       var R = e * (X.maxR + band + 20);
-      var sc = 1 + (X.full ? 0.06 * smooth(0, 1, f) : 0) + 1.4 * e * e;
+      var sc = 1 + (X.full ? 0.06 * smooth(0, 1, f) : 0) + 0.9 * e * e;
       sun.style.transform = 'scale(' + sc.toFixed(4) + ')';
+      if (!X.hid && te > 0.55) { X.hid = true; shafts.style.visibility = streak.style.visibility = dial.style.visibility = 'hidden'; }
       if (u > 0) {
         var r = Math.max(R, 0.01);
         if (X.clip) {
@@ -501,7 +513,7 @@
       last = t;
       clock += dt;
       try {
-        if (phase === 'load') loadStep(dt, t - T0);
+        if (phase === 'load') loadStep(dt, since());
         else exitStep(dt);
       } catch (err) { teardown(); return; }
       raf(frame);
@@ -509,7 +521,7 @@
     raf(frame);
 
     // background tabs pause rAF: make sure the hard limit still applies
-    setTimeout(function () { if (phase === 'load') { startExit(); } }, HARD_EXIT + 50);
+    setTimeout(function () { if (phase === 'load') { startExit(); } }, Math.max(0, HARD_EXIT + 80 - since()));
 
     api.skip = function () { if (phase === 'load') startExit(); else teardown(); };
   }
@@ -535,6 +547,10 @@
     }
     onReady(check);
     var iv = setInterval(function () { if (fired || gone) clearInterval(iv); else check(); }, 50);
-    setTimeout(function () { if (!fired) { doc.readyState === 'loading' ? teardown() : (loaded = true, check()); } }, HARD_EXIT);
+    setTimeout(function () {
+      if (fired) return;
+      if (doc.readyState === 'loading') teardown();
+      else { loaded = true; check(); }
+    }, Math.max(0, HARD_EXIT - since()));
   }
 })(window, document);

@@ -9,8 +9,9 @@
    ========================================================================== */
 
 /* Scroll lock while loading; the reserved gutter avoids a layout shift when
-   the scrollbar comes back. */
-html.is-loading { overflow: hidden; scrollbar-gutter: stable; }
+   the scrollbar comes back. Browsers paint that gutter with the root
+   background, so match it to the loader's (grain-lifted) edge tone. */
+html.is-loading { overflow: hidden; scrollbar-gutter: stable; background-color: #0A0A0C; }
 
 .gsl { display: none; }
 
@@ -38,8 +39,7 @@ html.js .gsl {
 
   display: block;
   position: fixed;
-  top: 0; left: 0; bottom: 0;
-  width: 100vw;   /* also covers the scrollbar gutter reserved while locked */
+  top: 0; right: 0; bottom: 0; left: 0;
   z-index: 2147483000;
   overflow: hidden;
   background: var(--void);
@@ -50,6 +50,8 @@ html.js .gsl {
   text-rendering: optimizeLegibility;
   -webkit-user-select: none;
   user-select: none;
+  touch-action: none;
+  overscroll-behavior: none;
   cursor: progress;
   /* Failsafe: if loader.js never runs, the curtain lifts by itself. */
   animation: gsl-failsafe .5s ease 6.5s forwards;
@@ -112,6 +114,7 @@ html.js .gsl {
   position: absolute; left: 50%; top: var(--cy);
   width: var(--s); height: var(--s);
   margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  will-change: transform;   /* the exit scales it: keep that on the compositor */
 }
 .gsl-sun > * { position: absolute; inset: 0; width: 100%; height: 100%; }
 .gsl-sun svg { overflow: visible; display: block; }
@@ -163,6 +166,13 @@ html.js .gsl {
   -webkit-mask-composite: source-in;
           mask: repeating-conic-gradient(from -.25deg, #000 0 .5deg, transparent .5deg 30deg), radial-gradient(closest-side, transparent calc(100% - 5px), #000 calc(100% - 5px));
           mask-composite: intersect;
+}
+/* the hand: a hot bead riding the lit edge of the dial */
+.gsl-dial em { position: absolute; inset: 0; transform: rotate(calc(var(--p) * 360deg)); will-change: transform; }
+.gsl-dial em::before {
+  content: ''; position: absolute; left: 50%; top: 1px; width: 7px; height: 7px; margin-left: -3.5px; border-radius: 50%;
+  background: #FFF8DF;
+  box-shadow: 0 0 10px 2px rgba(255, 196, 0, .9), 0 0 26px 6px rgba(255, 122, 0, .45);
 }
 .gsl-dial b {
   position: absolute; font: 500 10px/1 var(--mono); letter-spacing: .12em; color: var(--muted);
@@ -348,7 +358,7 @@ html.js .gsl {
 
 /* reduced motion: a still frame, then a plain fade */
 .gsl--reduced .gsl-count, .gsl--reduced .gsl-bar, .gsl--reduced .gsl-fx, .gsl--reduced .gsl-streak, .gsl--reduced .gsl-shafts,
-.gsl--reduced .gsl-dial::after { display: none; }
+.gsl--reduced .gsl-dial::after, .gsl--reduced .gsl-dial em { display: none; }
 .gsl--reduced .gsl-bar, .gsl--reduced .gsl-dial { transform: none; }
 .gsl--reduced .gsl-x i { transform: none; }
 .gsl--reduced .gsl-k, .gsl--reduced .gsl-dial, .gsl--reduced .gsl-core, .gsl--reduced .gsl-face--dark,
@@ -369,12 +379,12 @@ html.js .gsl {
 
 /* ---------- small screens ------------------------------------------------- */
 @media (max-width: 720px) {
-  html.js .gsl { --cy: 41%; --s: min(40vh, 64vw, 440px); }
+  html.js .gsl { --cy: 41%; --s: min(40vh, 64vw, 440px); --fs-m: min(31vw, 17vh); }
   .gsl-city { display: none !important; }
-  .gsl-count { --fs: min(31vw, 17vh); }
-  .gsl-log {
+  .gsl-count { --fs: var(--fs-m); }
+  .gsl-log {   /* stacks above the counter */
     left: var(--pad); right: var(--pad); width: auto;
-    bottom: calc(var(--pad) + var(--fs-m, min(31vw, 17vh)) * .78 + 44px);
+    bottom: calc(var(--pad) + var(--fs-m) * .85 + 36px);
     font-size: 10.5px;
   }
   .gsl-log li { height: 18px; line-height: 18px; }
