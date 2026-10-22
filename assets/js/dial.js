@@ -880,7 +880,7 @@
     }
     function dustState() {
       if (!dust) return;
-      var run = visible && !reduced() && !document.hidden;
+      var run = visible && !reduced() && !document.hidden && !(window.GS && window.GS.motionPaused); // honour Pause motion
       if (run !== dust.run) { dust.run = run; if (run) kick(); else drawDust(); }
     }
 
@@ -903,6 +903,7 @@
     });
     on(document, 'gs:quote', syncAdd);
     on(document, 'visibilitychange', dustState);
+    on(document, 'gs:motion', dustState);
     if (mq) {
       var mqFn = function () {
         if (reduced()) { disarm(); cancelIntro(); pos = target; vel = 0; root.classList.remove('is-armed'); paint(); }

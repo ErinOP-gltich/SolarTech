@@ -114,7 +114,7 @@
     table.innerHTML = '<table class="ptable"><thead><tr><th></th><th>Product</th><th>Power</th><th>Battery</th><th>Panel</th><th>Backup</th><th>Protection</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>' +
       list.map(function (p) {
         const href = 'contact.html?p=' + encodeURIComponent(p.id);
-        return '<tr><td><span class="th' + (p.blueprint ? ' blueprint' : '') + '"><img src="' + p.img + '" alt="" loading="lazy"></span></td>' +
+        return '<tr><td><span class="th' + (p.blueprint ? ' blueprint' : '') + '"><img src="' + GS.esc(p.img) + '" alt="" loading="lazy"></span></td>' +
           '<td class="nm"><b>' + GS.esc(p.name) + '</b><span class="label">' + GS.esc(p.part) + '</span></td>' +
           '<td class="watt">' + (p.watt ? p.watt + 'W' : '—') + '</td><td>' + GS.esc(p.battery) + '</td><td>' + GS.esc(p.panel) + '</td>' +
           '<td>' + GS.esc(p.autonomy || '—') + '</td><td>' + GS.esc(p.ip || '—') + '</td>' +
@@ -192,6 +192,8 @@
     qInput.focus(); // the reset button hides itself, so give focus a home
   });
   addEventListener('hashchange', function () {
+    const id = location.hash.slice(1);
+    if (id && !CATS.some(function (c) { return c.id === id; })) return; // e.g. the skip link's #main: not a filter
     fromHash(); render(true);
     // footer category links change the hash: bring the catalogue into view if it isn't. Wait two frames:
     // a shorter grid clamps the scroll position, and Lenis must see that before it can aim correctly.
@@ -222,11 +224,16 @@
     cmd.before(mark);
     const wide = matchMedia('(min-width: 1181px)');
     const pinAt = function () { return document.querySelector('[data-nav]').offsetHeight + 24; }; // the bar's sticky top: nav height + --s5
+    // send the nav off while the bar is still this far below it: the bar then scrolls straight on to its new pin at
+    // the top instead of stopping under the nav and jumping up once it has gone
+    const LEAD = 64;
     let tucked = false, raf = 0;
+    document.documentElement.classList.add('nav-tuckable');
     const check = function () {
       raf = 0;
-      const want = wide.matches && mark.getBoundingClientRect().top <= pinAt() &&
-        cat.getBoundingClientRect().bottom > cmd.offsetHeight + innerHeight * .35;
+      const t = mark.getBoundingClientRect().top, edge = pinAt() + LEAD;
+      const near = tucked ? t <= edge + 12 : t <= edge; // a little hysteresis: resting on the edge can't flicker
+      const want = wide.matches && near && cat.getBoundingClientRect().bottom > cmd.offsetHeight + innerHeight * .35;
       if (want !== tucked) { tucked = want; document.documentElement.classList.toggle('nav-tucked', want); }
     };
     addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(check); }, { passive: true });

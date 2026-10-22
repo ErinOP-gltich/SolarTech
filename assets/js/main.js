@@ -1,5 +1,5 @@
-/* Shared runtime for every page: smooth scroll, cursor, liquid-glass highlights, Material state
-   layers + ripples, navigation, the quote list, the product card component and reveals. */
+/* Shared runtime for every page: smooth scroll, liquid-glass highlights, Material state layers + ripples,
+   navigation, the quote list, the product card component and reveals. */
 (function () {
   const CFG = window.GS_CONFIG || {};
   const PRODUCTS = window.GS_PRODUCTS || [];
@@ -25,10 +25,13 @@
     });
   }
 
-  // a refresh always starts at the top: the head script turns off the browser's scroll restoration and drops
-  // a #section left in the address; a link to a section (#day, #catalogue…) still lands on that section.
-  // Safari can still put the old position back once the page has loaded, so check again then.
-  function toTop() { if ((window.GS_RELOAD_HASH || !location.hash) && scrollY) scrollTo(0, 0); }
+  // a refresh always starts at the top: head.js turns the browser's scroll restoring off for refreshes only and drops
+  // a #section left in the address. A link to a section (#day, #catalogue…) still lands there, and Back / Forward
+  // return to where the visitor was. Safari can put the old position back once a page has loaded, so check again
+  // then — unless the visitor has already started scrolling.
+  let touched = false;
+  ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(function (t) { addEventListener(t, function () { touched = true; }, { passive: true, once: true }); });
+  function toTop() { if (window.GS_NAV !== 'back_forward' && !touched && (window.GS_RELOAD_HASH || !location.hash) && scrollY) scrollTo(0, 0); }
   toTop();
   if (root.classList.contains('is-loading')) addEventListener('load', toTop);
 
@@ -145,14 +148,14 @@
           (p.badge ? '<span class="card-badge">' + esc(p.badge) + '</span>' : '') + '</div>' +
         '<a class="card-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true">' +
           (big ? '<span class="card-watt cond">' + esc(big) + '</span>' : '') +
-          '<img src="' + esc(p.img) + '" alt="" loading="lazy" decoding="async">' +
+          '<img src="' + esc(p.img) + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async">' + // its link is aria-hidden, so this is for image search only
         '</a>' +
         '<div class="card-body">' +
           '<p class="card-part label">' + esc(p.part) + '</p>' +
           '<h3 class="card-title"><a href="' + href + '">' + esc(p.name) + '</a></h3>' +
           '<ul class="card-tags">' + (p.tags || []).map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>' +
           '<dl class="card-specs">' + keySpecs(p).map(function (s) {
-            return '<div><dt>' + esc(s[0]) + '</dt><dd>' + esc(s[1]) + '</dd></div>';
+            return '<div><dt>' + esc(s[0]) + '</dt><dd>' + esc(s[1]).replace(/(\d) (?=[A-Za-z%°])/g, '$1\u00a0') + '</dd></div>';
           }).join('') + '</dl>' +
         '</div>' +
         '<div class="card-actions">' +
@@ -326,7 +329,10 @@
       try { target = document.getElementById(decodeURIComponent(url.hash.slice(1))); } catch (err) { /* malformed hash */ }
       if (!target) return;
       e.preventDefault();
-      lenis.scrollTo(target, { offset: -20 }); // the address keeps no #section, so a refresh still opens at the top
+      // sections land with their heading clear of the fixed nav; the 24-hour story (not a .sec) starts at its very top
+      const navBar = document.querySelector('[data-nav]');
+      const gap = target.classList.contains('sec') && navBar ? navBar.getBoundingClientRect().bottom + 16 : 20;
+      lenis.scrollTo(target, { offset: -gap }); // the address keeps no #section, so a refresh still opens at the top
       // move keyboard focus too, as a native jump would (skip link, in-page links)
       if (!target.matches('a[href], button, input, select, textarea, [tabindex]')) target.setAttribute('tabindex', '-1');
       target.focus({ preventScroll: true });
@@ -386,8 +392,9 @@
         menu.classList.toggle('is-open', open);
         menu.inert = !open;
         outside().forEach(function (n) { n.inert = open; });
-        if (lenis) { if (open) lenis.stop(); else lenis.start(); }
-        document.body.style.overflow = open ? 'hidden' : '';
+        // lock the page behind the menu: Lenis does it on <html>; without Lenis lock <html> too (never <body>, which
+        // would turn into a scroll box and unstick the 24-hour story)
+        if (lenis) { if (open) lenis.stop(); else lenis.start(); } else root.style.overflow = open ? 'hidden' : '';
         if (open && !was) { const first = menu.querySelector('a'); if (first) setTimeout(function () { first.focus(); }, 60); }
       }
       menu.inert = true;
@@ -438,7 +445,10 @@
       gsap.set(el, { opacity: 1 });
       gsap.from(split.chars, { yPercent: 115, rotate: 6, duration: 1.1, ease: 'expo.out', stagger: .018, delay: delay || 0 });
     };
-    if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(go); else go();
+    // split once the fonts are in (line breaks depend on them), but never leave half a headline missing for long
+    let done = false;
+    const run = function () { if (!done) { done = true; go(); } };
+    if (document.fonts && document.fonts.status !== 'loaded') { document.fonts.ready.then(run); setTimeout(run, 700); } else run();
   }
 
   function magnetic() {
@@ -526,7 +536,8 @@
   /* ---------- "Pause motion": stops the looping animations (tickers, marquee, drifting light, the sun) ---------- */
   let motionPaused = false;
   function motionToggle() {
-    try { motionPaused = localStorage.getItem('gs-motion') === 'paused'; } catch (e) { /* storage blocked */ }
+    const read = function () { try { motionPaused = localStorage.getItem('gs-motion') === 'paused'; } catch (e) { /* storage blocked */ } };
+    read();
     const btns = document.querySelectorAll('[data-motion-toggle]');
     const apply = function () {
       root.classList.toggle('motion-paused', motionPaused);
@@ -541,6 +552,9 @@
       });
     });
     apply();
+    // another tab changed it, or this page came back from the back/forward cache
+    addEventListener('storage', function (e) { if (e.key === 'gs-motion' || e.key === null) { const was = motionPaused; read(); if (was !== motionPaused) apply(); } });
+    addEventListener('pageshow', function (e) { if (e.persisted) { const was = motionPaused; read(); if (was !== motionPaused) apply(); } });
   }
 
   document.querySelectorAll('[data-top]').forEach(function (b) { b.addEventListener('click', scrollToTop); });
@@ -557,6 +571,8 @@
   footerSign();
   tickers();
   motionToggle();
+
+  root.classList.add('gs-up'); // the CSS fail-safe stands down: reveals and headlines are in the runtime's hands
 
   window.GS = {
     config: CFG, products: PRODUCTS, byId: byId, quote: quote, card: card, btn: btn, esc: esc, icon: ICON, toast: toast,

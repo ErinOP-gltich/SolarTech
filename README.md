@@ -36,7 +36,11 @@ Then open http://localhost:8000.
 | Loading screen, live-beam hero, wattage dial | `assets/js/loader.js` + `assets/css/loader.css`, `assets/js/hero-beam.js` + `assets/css/hero-beam.css`, `assets/js/dial.js` + `assets/css/dial.css` |
 | Page text | the `.html` files |
 
-The contact details in `config.js` replace the ones written in the HTML when the page loads, so `config.js` is the only place they need changing.
+The contact details in `config.js` replace the ones written in the HTML when the page loads, so visitors always see the `config.js` values. Search engines and link previews read the HTML itself, though: when the phone, email or address changes, also change it in the HTML of the three pages (the `tel:`, `mailto:` and address copies) and in the LocalBusiness JSON-LD block near the top of `index.html`.
+
+**Product list for search engines.** `products.html` carries a plain list of the 18 product names inside the grid, for crawlers and visitors without JavaScript; the scripts replace it with the cards. Keep it in step with `assets/js/products.js` when products are added, renamed or removed.
+
+**Sitemap.** Update the `<lastmod>` dates in `sitemap.xml` when a page's content changes.
 
 **Enquiries.** Without a server the form opens WhatsApp or the visitor's email app with the enquiry already written out. To receive enquiries directly instead, create a form with Formspree or Getform (both accept the JSON this site sends), put its URL in `formEndpoint` in `config.js`, and add the service's origin (for example `https://formspree.io`) to `connect-src` in the Content-Security-Policy tag of the three pages. A **Send enquiry** button then appears, and the note above the form says that it sends the details through a form service.
 
@@ -64,7 +68,7 @@ The wordmark is set in Archivo Expanded Black with Geist Mono (free, Google Font
 ## Before going live
 
 - Confirm the **areas served** in `config.js` (currently a placeholder list).
-- If the site moves to its own domain, update `og:image` and `og:url` in `index.html` to the new address so link previews keep working.
+- If the site moves to its own domain, search and replace `https://erinop-gltich.github.io/SolarTech/` with the new address in `index.html`, `products.html`, `contact.html`, `404.html` and `sitemap.xml` (canonical links, `og:url`, `og:image`, the JSON-LD `@id`, `url`, `logo` and `image`, and the 404 page's links), and add the new domain as a property in Google Search Console.
 - Check the catalogue points noted below with the client.
 
 ### Catalogue points to confirm

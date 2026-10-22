@@ -7,15 +7,10 @@
 .dial {
   /* the site's design tokens (gs.css); the fallbacks keep the module working on its own */
   --gd-void: var(--void, #050507);
-  --gd-ink: var(--ink-1, #0B0B10);
-  --gd-ink-2: var(--ink-2, #111118);
-  --gd-ink-3: var(--ink-3, #181822);
   --gd-line: var(--line, rgba(243, 239, 230, .10));
   --gd-line-2: var(--line-2, rgba(243, 239, 230, .18));
   --gd-text: var(--text, #F3EFE6);
   --gd-muted: var(--muted, #A9A6B3);
-  --gd-flare: var(--flare, #FF3B1F);
-  --gd-orange: var(--orange, #FF7A00);
   --gd-sun: var(--sun, #FFC400);
   --gd-hot: var(--hot, #FFF1B8);
   --gd-volt: var(--volt, #C6FF3D);
@@ -164,7 +159,6 @@
 }
 .dk-lab.is-lit { fill: rgba(243, 239, 230, .62); }
 .dk-lab.is-cur { fill: var(--gd-hot); font-weight: 600; }
-.dk-lab-w { font-size: .72em; fill: var(--gd-sun); }
 .dk-leg { fill: var(--gd-muted); font-size: 12px; text-anchor: middle; dominant-baseline: central; }
 .dk-leg--hot { fill: var(--gd-text); }
 .dk-focus { fill: none; stroke: var(--gd-sun); stroke-width: 3; stroke-dasharray: 5 6; opacity: 0; transition: opacity .25s; }

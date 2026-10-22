@@ -324,7 +324,7 @@
       const specs = (p.key || [['Battery', p.battery], ['Panel', p.panel], ['Backup', p.autonomy]]).concat([['Protection', p.ip || '—']]).slice(0, 4);
       return '<article class="show-card glass glass-edge">' +
         '<a class="sc-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true">' +
-          (big ? '<span class="sc-watt cond">' + GS.esc(big) + '</span>' : '') + '<img src="' + GS.esc(p.img) + '" alt="" loading="lazy"></a>' +
+          (big ? '<span class="sc-watt cond">' + GS.esc(big) + '</span>' : '') + '<img src="' + GS.esc(p.img) + '" alt="' + GS.esc(p.name) + '" loading="lazy"></a>' +
         '<div class="sc-body">' +
           '<span class="label">№ ' + pad(i + 1) + ' / ' + pad(items.length) + ' · ' + GS.esc(cat ? cat.name : '') + '</span>' +
           '<h3 class="h3">' + GS.esc(p.name) + '</h3>' +
@@ -372,17 +372,22 @@
     const peek = document.querySelector('[data-peek-el]');
     if (!peek || !GS.finePointer || GS.reduceMotion) return;
     const img = peek.querySelector('img');
-    let x = 0, y = 0, px = 0, py = 0, on = false;
+    let x = 0, y = 0, px = 0, py = 0, on = false, raf = 0;
+    // the preview eases after the pointer while it's shown, and the loop sleeps the rest of the visit
+    const loop = function () {
+      px += (x - px) * .14; py += (y - py) * .14;
+      peek.style.translate = px.toFixed(1) + 'px ' + py.toFixed(1) + 'px';
+      raf = on || Math.abs(x - px) + Math.abs(y - py) > .5 ? requestAnimationFrame(loop) : 0;
+    };
+    const wake = function () { if (!raf) raf = requestAnimationFrame(loop); };
     document.querySelectorAll('[data-peek-list] [data-peek]').forEach(function (row) {
-      row.addEventListener('pointerenter', function () { img.src = row.dataset.peek; on = true; peek.classList.add('is-on'); });
+      row.addEventListener('pointerenter', function () {
+        if (!peek.classList.contains('is-on')) { px = x; py = y; } // appear at the pointer, not where it last faded out
+        img.src = row.dataset.peek; on = true; peek.classList.add('is-on'); wake();
+      });
       row.addEventListener('pointerleave', function () { on = false; peek.classList.remove('is-on'); });
     });
-    addEventListener('pointermove', function (e) { x = e.clientX + 150; y = e.clientY; }, { passive: true });
-    (function loop() {
-      px += (x - px) * .14; py += (y - py) * .14;
-      if (on || peek.classList.contains('is-on')) peek.style.translate = px.toFixed(1) + 'px ' + py.toFixed(1) + 'px';
-      requestAnimationFrame(loop);
-    })();
+    addEventListener('pointermove', function (e) { x = e.clientX + 150; y = e.clientY; if (on) wake(); }, { passive: true });
   }
 
   /* ---------- 9. light finder ---------- */
