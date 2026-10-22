@@ -5,6 +5,17 @@
    motion; every component on every page is built from them.
    ===================================================================== */
 
+/* ------------------------------------------------------------------ fonts
+   Self-hosted and trimmed (OFL 1.1; copyright and licence are kept inside each file): only the weights and widths
+   the site uses, the Latin range Google serves, and the № sign on its own (it lives in Google's Cyrillic file).
+   Same family names as before, so nothing else changes. */
+@font-face { font-family: 'Archivo'; font-style: normal; font-weight: 700 900; font-stretch: 62% 125%; font-display: swap; src: url(../fonts/archivo-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Geist'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(../fonts/geist-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Geist'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(../fonts/geist-numero.woff2) format('woff2'); unicode-range: U+2116; }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(../fonts/geistmono-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(../fonts/geistmono-numero.woff2) format('woff2'); unicode-range: U+2116; }
+@font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url(../fonts/instrumentserif-italic-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
 :root {
   /* colour */
   --void: #050507;
@@ -670,11 +681,20 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 /* =====================================================================
    INNER PAGES
    ===================================================================== */
+/* Marketplace and Contact are working pages: about 12% smaller than the home page in type and spacing.
+   The nav and footer stay the same on every page, so the scale applies inside <main> only. */
+.page-tool main { --s1: 3.5px; --s2: 7px; --s3: 10.5px; --s4: 14px; --s5: 21px; --s6: 28px; --s7: 42px; --s8: 56px; --s9: 84px; --s10: 126px; font-size: 15.5px; }
+.page-tool main .h2 { font-size: clamp(28px, 4.8vw, 80px); }
+.page-tool main .h3 { font-size: clamp(19px, 1.9vw, 28px); }
+.page-tool main .lede { font-size: clamp(15.5px, 1.15vw, 18px); }
+.page-tool main .sec { padding: clamp(64px, 8vw, 128px) 0; }
+.page-tool .card-title { font-size: 16.5px; }
+.page-tool .card-specs dd { font-size: 13px; }
 .phero { position: relative; padding: calc(var(--nav-h) + var(--s9)) 0 var(--s7); overflow: hidden; isolation: isolate; }
 .crumbs { display: flex; gap: var(--s2); margin: 0 0 var(--s5); padding: 0; list-style: none; }
 .crumbs li + li::before { content: '/'; margin-right: var(--s2); opacity: .5; }
 .crumbs a:hover { color: var(--sun); }
-.phero .h1 { margin-bottom: var(--s5); font-size: clamp(36px, 7.2vw, 108px); } /* the inner pages' headline, a step below the home hero */
+.phero .h1 { margin-bottom: var(--s5); font-size: clamp(32px, 6.2vw, 94px); } /* the inner pages' headline, a step below the home hero */
 .phero-sun { position: absolute; right: -8vw; top: -12vw; z-index: -1; width: min(48vw, 640px); opacity: .9; animation: spin 80s linear infinite; filter: drop-shadow(0 0 80px rgba(255, 120, 0, .45)); }
 
 /* marketplace */

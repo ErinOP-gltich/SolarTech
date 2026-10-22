@@ -13,6 +13,7 @@
    window.GSHeroBeam.mount(host, opts) → { destroy, pause, play, setProgress(p), stats(), aim(x, y), ignite() }
      opts.lit        elements whose ::after "lit" copy is masked to the beam (default: host [data-beam-lit])
      opts.igniteDelay  ms before the LED flicker starts (default 250)
+     opts.autostart    false: build the street now but keep the lamp dark until play() (default true)
      opts.reduceMotion force the static frame (default: prefers-reduced-motion)
    The host gets .hb-on after the first frame, and CSS variables --hb-ax/ay/a0/aw/r/k describing the beam on screen. */
 (function () {
@@ -218,6 +219,7 @@
     var aimPt = null, aimMode = 'sweep', lastInput = -1e9;
     var clock = 0, lastNow = 0, igniteAt = (opts.igniteDelay != null ? opts.igniteDelay : 250) / 1000;
     var raf = 0, running = false, destroyed = false, userPaused = false, visible = true, motionPaused = !!(GS && GS.motionPaused);
+    var waiting = opts.autostart === false; // mounted early (behind the loading screen): no frames until play()
     var frames = 0, times = [], lastMs = 0, maxMs = 0;
     var cssState = '', offsetsAt = -1;
     var R = rng(7);
@@ -1126,7 +1128,7 @@
       render(dt);
       raf = requestAnimationFrame(frame);
     }
-    function shouldRun() { return !destroyed && !reduced && !userPaused && !motionPaused && visible && !document.hidden; }
+    function shouldRun() { return !waiting && !destroyed && !reduced && !userPaused && !motionPaused && visible && !document.hidden; }
     function sync() {
       var want = shouldRun();
       if (want && !running) { running = true; lastNow = 0; raf = requestAnimationFrame(frame); }
@@ -1136,7 +1138,7 @@
     // one finished frame (reduced motion, motion paused before the light came on, or a resize while paused)
     var stillQueued = 0;
     function still() {
-      if (stillQueued || destroyed || !visible || document.hidden) return; // off-screen: nothing to show, keep the ignition for later
+      if (waiting || stillQueued || destroyed || !visible || document.hidden) return; // off-screen: nothing to show, keep the ignition for later
       stillQueued = requestAnimationFrame(function () {
         stillQueued = 0;
         if (running || destroyed) return;
@@ -1234,7 +1236,7 @@
         if (ownStage) stage.remove(); else { cScene.remove(); cFx.remove(); }
       },
       pause: function () { userPaused = true; sync(); },
-      play: function () { userPaused = false; sync(); },
+      play: function () { waiting = false; userPaused = false; sync(); },
       setProgress: function (p) {
         p = clamp(+p || 0, 0, 1);
         if (Math.abs(p - progress) < 0.0005) return;

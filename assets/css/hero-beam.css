@@ -55,14 +55,18 @@
 
 /* ---------- the headline: in the dark, and in the beam ---------- */
 .hb-title {
-  font-size: clamp(40px, min(6.9vw, 13svh), 112px); /* the height counts too, so a short window isn't all headline */
+  /* two lines: "DAYLIGHT, DELIVERED" in the extra-wide capitals, then "after dark." as one big italic accent.
+     The size is the accent's; the capitals line is a fixed share of it. The height counts too, so a short window
+     isn't all headline */
+  font-size: clamp(42px, min(7.6vw, 14.5svh), 128px); line-height: .9;
   color: var(--hb-unlit);
   text-shadow: 0 0 2px rgba(5, 5, 7, .7), 0 0 18px rgba(5, 5, 7, .75), 0 0 48px rgba(5, 5, 7, .55);
 }
-.hb-title .ln { display: block; overflow: hidden; padding: .02em 0 .07em; margin: -.02em 0 -.07em; }
+.hb-title .ln { display: block; overflow: hidden; padding: .04em 0 .12em; margin: -.04em 0 -.12em; }
+.hb-title .ln.hb-caps { font-size: .46em; } /* sized on the line, so its box is only as tall as the capitals */
 .hb-title.is-in .ln { overflow: visible; } /* the intro mask is done: let the lit glow breathe past the line box */
 .hb-title .ln > span { display: inline-block; white-space: nowrap; }
-.hb-title .it { --hb-indent: 1.45em; padding-left: var(--hb-indent); }
+.hb-title .it { --hb-indent: 0em; padding-left: 0; font-size: 1em; line-height: .9; letter-spacing: -.01em; word-spacing: .04em; }
 /* moonlit silver for the words in the dark (the gradient line keeps its plasma);
    background-clip text + text-shadow paints the shadow over the gradient, so these lines get a filter halo instead */
 .hb-title .hb-lit:not(.grad) { background: linear-gradient(180deg, #F6F3EC 0%, #D9D5E0 48%, #A9A5B8 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -108,7 +112,7 @@ html:not(.js) .hb-lit::after { content: none; }
 
 /* ---------- tablet landscape / small laptop ---------- */
 @media (max-width: 1180px) and (min-aspect-ratio: 4/5) {
-  .hb-title { font-size: clamp(40px, min(8.6vw, 13svh), 112px); }
+  .hb-title { font-size: clamp(42px, min(8.6vw, 14.5svh), 128px); }
 }
 
 /* ---------- portrait: the lamp owns the top third, words stack underneath ---------- */
@@ -118,8 +122,8 @@ html:not(.js) .hb-lit::after { content: none; }
   .hb .hero-mid { order: 1; align-self: end; padding-top: 32svh; padding-bottom: var(--s4); }
   .hb .hero-top { order: 2; padding-top: 0; padding-bottom: var(--s4); }
   .hb .hero-foot { order: 3; }
-  .hb-title { font-size: min(10.4vw, 64px); }
-  .hb-title .it { --hb-indent: .9em; }
+  .hb-title { font-size: min(15vw, 84px); }
+  .hb-title .ln.hb-caps { font-size: .41em; }
   .hb .hero-row { grid-template-columns: 1fr; gap: var(--s5); margin-top: var(--s5); }
   .hb .lede { font-size: 16px; }
   .hb-aim--row { display: inline-flex; margin-top: var(--s1); }
@@ -151,7 +155,7 @@ html:not(.js) .hb-lit::after { content: none; }
   .hb { grid-template-rows: minmax(calc(var(--nav-h) + var(--s5)), 1fr) auto auto minmax(var(--s4), .55fr) auto; }
   .hb .hero-top { padding-bottom: var(--s4); }
   .hb .hero-row { margin-top: var(--s5); }
-  .hb-title { font-size: clamp(32px, 11vh, 72px); }
+  .hb-title { font-size: clamp(34px, 14vh, 80px); }
   .hb-aim { display: none !important; }
 }
 

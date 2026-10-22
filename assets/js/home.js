@@ -14,12 +14,21 @@
   function heroBeam() {
     const hero = document.querySelector('[data-beam]');
     if (!hero || !window.GSHeroBeam) return;
-    // the lamp powers on just after the loading screen hands over (its own light reveals the page)
+    // the street is built behind the loading screen while the browser is idle (it's the heavy part), and the lamp
+    // powers on just after the loading screen hands over (its own light reveals the page)
+    let beam = null;
+    const mountBeam = function () {
+      if (!beam) {
+        try { beam = window.GSHeroBeam.mount(hero, { igniteDelay: 650, autostart: false }); GS.heroBeam = beam; } catch (e) { setTimeout(function () { throw e; }); }
+      }
+      return beam;
+    };
+    (window.requestIdleCallback || function (f) { return setTimeout(f, 1); })(mountBeam, { timeout: 1200 });
     GS.ready(function () {
-      let beam = null;
-      try { beam = window.GSHeroBeam.mount(hero, { igniteDelay: 650 }); GS.heroBeam = beam; } catch (e) { setTimeout(function () { throw e; }); }
+      if (!mountBeam()) return;
+      beam.play();
       // scrolling away tilts the lamp and narrows its beam
-      if (beam && motion) ST.create({ trigger: hero, start: 'top top', end: 'bottom top', scrub: true, onUpdate: function (st) { beam.setProgress(st.progress); } });
+      if (motion) ST.create({ trigger: hero, start: 'top top', end: 'bottom top', scrub: true, onUpdate: function (st) { beam.setProgress(st.progress); } });
     });
     if (motion) gsap.to(hero.querySelector('.hero-mid'), { yPercent: -18, opacity: 0, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: .6 } });
   }
