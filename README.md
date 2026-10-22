@@ -38,7 +38,11 @@ Then open http://localhost:8000.
 
 The contact details in `config.js` replace the ones written in the HTML when the page loads, so `config.js` is the only place they need changing.
 
-**Enquiries.** Without a server the form opens WhatsApp or the visitor's email app with the enquiry already written out. To receive enquiries directly instead, create a form endpoint with a service such as Formspree, Web3Forms or Getform, put its URL in `formEndpoint` in `config.js`, and a **Send enquiry** button appears.
+**Enquiries.** Without a server the form opens WhatsApp or the visitor's email app with the enquiry already written out. To receive enquiries directly instead, create a form with Formspree or Getform (both accept the JSON this site sends), put its URL in `formEndpoint` in `config.js`, and add the service's origin (for example `https://formspree.io`) to `connect-src` in the Content-Security-Policy tag of the three pages. A **Send enquiry** button then appears, and the note above the form says that it sends the details through a form service.
+
+**Security policy.** Each page starts with a Content-Security-Policy `<meta>` tag. Scripts may only come from this site (there are no inline scripts; the small start-up script is `assets/js/head.js`), fonts from Google Fonts and the map from Google. Anything new from another site (analytics, a chat widget, a form service) has to be added to that tag on all three pages, or the browser blocks it.
+
+**Cache-busting.** Every local stylesheet and script is linked with `?v=<date>`. Change that date in all three pages whenever you change a CSS or JS file, so visitors get the new file at once instead of after GitHub Pages' ten-minute cache.
 
 **Quote list.** It is kept in the visitor's own browser (`localStorage`), so nothing is stored anywhere else.
 
@@ -51,7 +55,7 @@ The redesigned logo keeps the original idea (a smiling sun whose face is a plug)
 | `assets/brand/gs-mark.svg` | The sun on its own |
 | `assets/brand/gs-lockup-light.svg` / `gs-lockup-dark.svg` | Sun + wordmark, for light and dark backgrounds |
 | `assets/brand/favicon.svg`, `apple-touch-icon.png` | Browser tab and phone home-screen icons |
-| `assets/brand/og-image.png` | Preview image when the site is shared on social media / WhatsApp |
+| `assets/brand/og-image.jpg` | Preview image when the site is shared on social media / WhatsApp (97 KB; `og-image.png` is the lossless master) |
 
 The wordmark is set in Archivo Expanded Black with Geist Mono (free, Google Fonts) and converted to outlines. To rebuild the SVGs: `pip install fonttools`, download the two static TTFs (links in the script), then `python3 brand-source/build_logo.py Archivo-ExpandedBlack.ttf GeistMono-Medium.ttf`.
 

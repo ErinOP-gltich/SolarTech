@@ -123,7 +123,12 @@
   // the direct "Send enquiry" button only exists when a form backend is configured; otherwise remove it so
   // pressing Enter in a field can't pick it as the form's default button
   const formBtn = form.querySelector('[data-via="form"]');
-  if (CFG.formEndpoint) formBtn.hidden = false; else formBtn.remove();
+  if (CFG.formEndpoint) {
+    formBtn.hidden = false;
+    // the privacy line above the form must stay true once enquiries can go straight to a form service
+    const note = document.querySelector('[data-send-note]');
+    if (note) note.textContent = 'Nothing is sent until you press Send enquiry, WhatsApp or email below. Send enquiry passes your details to us through a form service.';
+  } else formBtn.remove();
   let sending = false;
 
   form.addEventListener('submit', function (e) {
@@ -179,9 +184,25 @@
   if (areas) areas.innerHTML = (CFG.serviceAreas || []).map(function (a) { return '<li class="tag">' + GS.esc(a) + '</li>'; }).join('');
   const map = document.querySelector('[data-map]');
   if (map && CFG.mapQuery) {
-    map.innerHTML = '<iframe title="Map: Green Sun Technologies, ' + GS.esc(CFG.address ? CFG.address.join(', ') : '') + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=' + encodeURIComponent(CFG.mapQuery) + '&output=embed"></iframe>' +
-      GS.btn('Open in Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(CFG.mapQuery), 'btn-glass glass btn-sm', ' target="_blank" rel="noopener"');
+    map.innerHTML = GS.btn('Open in Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(CFG.mapQuery), 'btn-glass glass btn-sm', ' target="_blank" rel="noopener"');
+    // the embed loads Google's own scripts and an iframe holds up window.load, which the loading screen waits for
+    // (loading="lazy" doesn't help: Chrome's lazy distance reaches it anyway). Make it only after load, near the screen.
+    const frame = '<iframe title="Map: Green Sun Technologies, ' + GS.esc(CFG.address ? CFG.address.join(', ') : '') + '" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=' + encodeURIComponent(CFG.mapQuery) + '&output=embed"></iframe>';
+    const put = function () { if (!map.querySelector('iframe')) map.insertAdjacentHTML('afterbegin', frame); };
+    const arm = function () {
+      if (!('IntersectionObserver' in window)) { put(); return; }
+      const io = new IntersectionObserver(function (es) {
+        if (es.some(function (e) { return e.isIntersecting; })) { io.disconnect(); put(); }
+      }, { rootMargin: '300px 0px' });
+      io.observe(map);
+    };
+    if (document.readyState === 'complete') arm(); else addEventListener('load', arm, { once: true });
   }
 
   renderItems();
+
+  // page intro
+  GS.ready(function () {
+    document.querySelectorAll('[data-hero-line]').forEach(function (l, i) { GS.splitIn(l, .1 + i * .12); });
+  });
 })();

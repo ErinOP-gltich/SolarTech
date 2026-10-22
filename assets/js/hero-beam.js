@@ -1200,7 +1200,8 @@
     if ('ResizeObserver' in window) { ro = new ResizeObserver(onResize); ro.observe(host); }
     addEventListener('resize', onResize);
     addEventListener('orientationchange', onResize);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (destroyed) return; offsetsAt = -1; build(); if (!running) still(); });
+    // rebuild once the fonts arrive, unless they already have (a second full street build at hand-off stalls the reveal)
+    if (document.fonts && document.fonts.ready && document.fonts.status !== 'loaded') document.fonts.ready.then(function () { if (destroyed) return; offsetsAt = -1; build(); if (!running) still(); });
 
     build();
     readRect();

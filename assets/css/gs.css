@@ -331,6 +331,9 @@ html.lg-refract .refract { backdrop-filter: url(#lg-refract) blur(14px) saturate
 .nw { white-space: nowrap; }
 .split .ch { display: inline-block; will-change: transform; }
 .line-mask { display: block; overflow: hidden; padding-bottom: .04em; margin-bottom: -.04em; }
+/* page headings break after their first line from the start: the split wraps it in a block .line-mask, and the
+   heading would otherwise grow a line as the page appears and push everything below it down */
+#ph > [data-hero-line]:not(.grad) { display: block; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -385,7 +388,7 @@ html.lg-refract .refract { backdrop-filter: url(#lg-refract) blur(14px) saturate
 .statement .w.on { color: var(--text); }
 .statement .w.on.hl { color: var(--sun); }
 .statement .w.on.gr { color: var(--volt); }
-.statement em { font-style: normal; }
+.statement em:not(.it) { font-style: normal; } /* the italic phrase keeps its italic face before JS runs (no upright serif download) */
 .statement .w.it { font-size: 1.12em; }
 .no-scrub .w { color: var(--text) !important; }
 .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s4); }

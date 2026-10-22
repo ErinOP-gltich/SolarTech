@@ -19,8 +19,10 @@ window.GS_CONFIG = {
   // TODO: replace with the service areas the client confirms
   serviceAreas: ['Guwahati & Kamrup Metro', 'All districts of Assam', 'Arunachal Pradesh', 'Meghalaya', 'Nagaland', 'Manipur', 'Mizoram', 'Tripura', 'Sikkim'],
 
-  // Optional: a form backend (Formspree, Web3Forms, Getform, …) that accepts a JSON POST.
-  // Leave empty and the Contact page sends enquiries through WhatsApp or email instead.
+  // Optional: a form backend that accepts a plain JSON POST, e.g. a Formspree or Getform form URL (Web3Forms needs an
+  // access key in the body, which this site doesn't send). Leave empty and the Contact page sends enquiries through
+  // WhatsApp or email instead. When you set it, add the service's origin to connect-src in the pages'
+  // Content-Security-Policy meta tag, or the browser will block the request.
   formEndpoint: '',
 
   gstin: '18BPLPS0265L1ZB',

@@ -54,7 +54,10 @@
   /* ---------- quote list (kept in this browser only) ---------- */
   const KEY = 'gs-quote';
   let memList = null; // used when storage is blocked: the list then lasts as long as the page
-  function clampQty(q) { return Math.max(1, Math.min(9999, parseInt(q, 10) || 1)); }
+  function clampQty(q) { // numbers and strings only: a tampered object can't throw here and stop every page
+    const n = typeof q === 'number' || typeof q === 'string' ? parseInt(q, 10) : NaN;
+    return Math.max(1, Math.min(9999, n || 1));
+  }
   const quote = {
     list: function () {
       let v = memList;
