@@ -122,22 +122,20 @@
 
   // the direct "Send enquiry" button only exists when a form backend is configured; otherwise remove it so
   // pressing Enter in a field can't pick it as the form's default button
-  // Direct enquiries go to the console's inbox (Supabase table gs_messages), or to a form service if one is set. On a
-  // developer's own computer with neither, they go to the browser's localStorage, which the console's demo mode reads.
-  const DB = (CFG.supabaseUrl || '').replace(/\/+$/, '');
-  const viaDb = !!(DB && CFG.supabaseAnonKey);
-  const viaDemo = !viaDb && !CFG.formEndpoint && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
-  const direct = !!(CFG.formEndpoint || viaDb || viaDemo);
+  // Direct enquiries go to the admin console's inbox through this site's own /api/enquiry (Cloudflare), or to a form
+  // service if formEndpoint is set. The button is only offered where config.js turns liveApi on.
+  const viaApi = !!CFG.liveApi;
+  const direct = !!(viaApi || CFG.formEndpoint);
   const formBtn = form.querySelector('[data-via="form"]');
   if (direct) {
     formBtn.hidden = false;
     // the privacy line above the form must stay true once enquiries can go straight to us
     const note = document.querySelector('[data-send-note]');
-    if (note) note.textContent = 'Nothing is sent until you press Send enquiry, WhatsApp or email below. ' + (CFG.formEndpoint && !viaDb ? 'Send enquiry passes your details to us through a form service.' : 'Send enquiry puts your details in our enquiry inbox.');
+    if (note) note.textContent = 'Nothing is sent until you press Send enquiry, WhatsApp or email below. ' + (viaApi ? 'Send enquiry puts your details in our enquiry inbox.' : 'Send enquiry passes your details to us through a form service.');
   } else formBtn.remove();
 
   // one enquiry as the inbox stores it
-  function enquiry(text) {
+  function enquiry() {
     return {
       name: field('name').value.trim(), phone: field('phone').value.trim(), email: field('email').value.trim() || null,
       org: field('org').value.trim() || null, site: field('site').value.trim() || null, message: field('message').value.trim() || null,
@@ -145,23 +143,11 @@
     };
   }
   function sendDirect(subject, text) {
-    if (viaDb) {
-      const h = { 'Content-Type': 'application/json', apikey: CFG.supabaseAnonKey, Prefer: 'return=minimal' };
-      if (/^eyJ/.test(CFG.supabaseAnonKey)) h.Authorization = 'Bearer ' + CFG.supabaseAnonKey;
-      return fetch(DB + '/rest/v1/gs_messages', { method: 'POST', headers: h, body: JSON.stringify(enquiry(text)) });
-    }
-    if (viaDemo) {
-      const all = JSON.parse(localStorage.getItem('gs-demo-messages') || '[]');
-      all.unshift(Object.assign({ id: 'm' + Date.now(), at: new Date().toISOString(), status: 'new', starred: false }, enquiry(text)));
-      localStorage.setItem('gs-demo-messages', JSON.stringify(all));
-      return Promise.resolve({ ok: true });
-    }
+    if (viaApi) return fetch('/api/enquiry', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(enquiry()) });
     return fetch(CFG.formEndpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(Object.assign({ subject: subject, message: text }, enquiry(text), {
-        organisation: field('org').value.trim(), site: field('site').value.trim(), message: text
-      }))
+      body: JSON.stringify(Object.assign({ subject: subject }, enquiry(), { organisation: field('org').value.trim(), site: field('site').value.trim(), message: text }))
     });
   }
   let sending = false;

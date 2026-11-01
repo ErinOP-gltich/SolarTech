@@ -1,0 +1,13 @@
+// Green Sun website — Cloudflare Pages project "solartech" (see README). Only the three small Functions in functions/
+// use these; the pages themselves are plain files. database_id is filled in during setup.
+{
+  "name": "solartech",
+  "compatibility_date": "2025-09-01",
+  "pages_build_output_dir": ".",
+  "d1_databases": [
+    { "binding": "DB", "database_name": "solartech", "database_id": "00000000-0000-0000-0000-000000000000" }
+  ],
+  "r2_buckets": [
+    { "binding": "MEDIA", "bucket_name": "solartech-media" }
+  ]
+}
