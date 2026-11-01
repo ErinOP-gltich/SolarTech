@@ -24,14 +24,42 @@ Animation uses GSAP (ScrollTrigger, SplitText, Flip) and Lenis smooth scrolling,
 python3 -m http.server 8000
 ```
 
-Then open http://localhost:8000.
+Then open http://localhost:8000. The admin console is at http://localhost:8000/admin/ (see below).
+
+## Admin console (`admin/`)
+
+A login-protected console, in the same spirit as the PCBL and MCML ones, so the owner can change the site without touching code:
+
+| Page | What it does |
+|---|---|
+| **Dashboard** | New enquiries, catalogue counts by category, and a "needs attention" list (no photo, short spec sheet, hidden products, unread enquiries) |
+| **Products** | Search and filter, add, edit every field (name, part number, category, power, battery, panel, tags, key facts, the full spec sheet, photo upload), hide without deleting, star onto the home page, reorder, delete |
+| **Enquiries** | An inbox for what visitors send from the Contact page: call, WhatsApp or email them in one click, see the products and quantities they asked for, star, archive, mark replied |
+| **Site details** | Phone, WhatsApp number, email, address, map search and the areas served |
+
+**Try it now (demo mode).** With `supabaseUrl` blank in `assets/js/config.js`, the console runs on the browser's own storage: any email and password signs in, and saving also updates the website **in the same browser**, so you can edit a product in `/admin/` and watch it change on `/products.html`. On localhost the Contact page's **Send enquiry** button drops into the demo inbox. **Reset demo data** (dashboard) puts everything back. Nothing in demo mode reaches the real site.
+
+**Going live (about 15 minutes, one time).**
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. **SQL Editor → New query**: paste all of `supabase/schema.sql` and **Run** (safe to run again).
+3. **Authentication → Sign In / Providers → Email**: turn **off** "Allow new users to sign up". **Authentication → Users → Add user**: create the owner's account (tick **Auto Confirm User**). Then run the two-line `insert into public.gs_admins …` at the bottom of `schema.sql` with that email. Only accounts on that list can write anything.
+4. **Project Settings → API**: copy the **Project URL** and the **anon / publishable** key into `supabaseUrl` and `supabaseAnonKey` in `assets/js/config.js` (both are safe to publish), then bump the `?v=` date (see Cache-busting) and push.
+5. Open `/admin/`, sign in, and press **Import the catalogue** on the dashboard. That copies the products and contact details written in `products.js` and `config.js` into the database; from then on the console is the place to change them.
+
+**How it works.** The console writes the `gs_products` and `gs_settings` tables. On every page, `assets/js/live.js` runs between `products.js` and `main.js`: it applies the copy it kept from the last visit, fetches the current data with the public key, and reloads once if something changed (the loading screen covers a first visit). Hidden products are never sent to the public (the database refuses them). If Supabase can't be reached the site simply shows `products.js` and `config.js`, so keep those files roughly current. The Contact page's **Send enquiry** button inserts into `gs_messages`; the database allows the public key to *add* a row only (no reading), and refuses more than 5 enquiries an hour from one phone number or 40 an hour overall. The WhatsApp and email buttons still work as before.
+
+**Still in the files.** The five categories (`GS_CATEGORIES` in `products.js`), the HTML copy of the phone, email and address that search engines read (see below), and the plain product list in `products.html`.
+
+**Notes.** `/admin/` is `noindex`, and sessions end 6 hours after sign-in. On a `github.io` address it is publicly reachable but only opens with an admin login; on its own domain you can also put it on a separate subdomain. Product photos uploaded in the console are resized in the browser and kept in the `gs-media` storage bucket (3 MB limit, images only).
 
 ## Editing
 
 | To change… | Edit |
 |---|---|
-| Phone, WhatsApp, email, address, map location, **areas served**, GSTIN | `assets/js/config.js` |
-| Products, specs, photos, categories | `assets/js/products.js` |
+| Phone, WhatsApp, email, address, map location, **areas served**, GSTIN | the console's **Site details** page, or `assets/js/config.js` (the console's values win once saved) |
+| Products, specs, photos | the console's **Products** page, or `assets/js/products.js` (the starting catalogue) |
+| Categories | `GS_CATEGORIES` in `assets/js/products.js` |
 | Colours, fonts, spacing, motion | `assets/css/gs.css` (all tokens are at the top) |
 | Loading screen, live-beam hero, wattage dial | `assets/js/loader.js` + `assets/css/loader.css`, `assets/js/hero-beam.js` + `assets/css/hero-beam.css`, `assets/js/dial.js` + `assets/css/dial.css` |
 | Page text | the `.html` files |
@@ -44,7 +72,9 @@ The contact details in `config.js` replace the ones written in the HTML when the
 
 **Enquiries.** Without a server the form opens WhatsApp or the visitor's email app with the enquiry already written out. To receive enquiries directly instead, create a form with Formspree or Getform (both accept the JSON this site sends), put its URL in `formEndpoint` in `config.js`, and add the service's origin (for example `https://formspree.io`) to `connect-src` in the Content-Security-Policy tag of the three pages. A **Send enquiry** button then appears, and the note above the form says that it sends the details through a form service.
 
-**Security policy.** Each page starts with a Content-Security-Policy `<meta>` tag. Scripts may only come from this site (there are no inline scripts; the small start-up script is `assets/js/head.js`), fonts from Google Fonts and the map from Google. Anything new from another site (analytics, a chat widget, a form service) has to be added to that tag on all three pages, or the browser blocks it.
+**Loading screen length.** `STRETCH` at the top of `assets/js/loader.js` (2.5) sets how long the first visit's loading screen plays (about 4.8 s); the times in `loader.css` under "choreography" are scaled by the same number. Later pages in the same visit use a short 0.7 s version.
+
+**Security policy.** Each page starts with a Content-Security-Policy `<meta>` tag. Scripts may only come from this site (there are no inline scripts; the small start-up script is `assets/js/head.js`), fonts from Google Fonts, the map from Google, and data and photos from `https://*.supabase.co` (the console's database). Anything new from another site (analytics, a chat widget, a form service) has to be added to that tag on all three pages, or the browser blocks it.
 
 **Cache-busting.** Every local stylesheet and script is linked with `?v=<date>`. Change that date in all three pages whenever you change a CSS or JS file, so visitors get the new file at once instead of after GitHub Pages' ten-minute cache.
 
@@ -68,7 +98,7 @@ The wordmark is set in Archivo Expanded Black with Geist Mono (free, Google Font
 ## Before going live
 
 - Confirm the **areas served** in `config.js` (currently a placeholder list).
-- If the site moves to its own domain, search and replace `https://erinop-gltich.github.io/SolarTech/` with the new address in `index.html`, `products.html`, `contact.html`, `404.html` and `sitemap.xml` (canonical links, `og:url`, `og:image`, the JSON-LD `@id`, `url`, `logo` and `image`, and the 404 page's links), and add the new domain as a property in Google Search Console.
+- If the site moves to its own domain, search and replace `https://erinop-gltich.github.io/SolarTech/` with the new address in `index.html`, `products.html`, `contact.html`, `404.html`, `sitemap.xml` and `robots.txt` (canonical links, `og:url`, `og:image`, the JSON-LD `@id`, `url`, `logo` and `image`, and the 404 page's links), and add the new domain as a property in Google Search Console.
 - Check the catalogue points noted below with the client.
 
 ### Catalogue points to confirm

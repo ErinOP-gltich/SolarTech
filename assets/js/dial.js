@@ -967,7 +967,7 @@
       visible = true; dustState();
     }
     // safety net: never leave the dial dark if the loader never reports in
-    var safety = setTimeout(function () { loaderGaveUp = true; maybeIntro(); }, 9000);
+    var safety = setTimeout(function () { loaderGaveUp = true; maybeIntro(); }, 10500);
 
     /* ---------- public API ---------- */
     api.set = function (key) {

@@ -216,7 +216,7 @@
     var head = null;
     var progress = 0;
     var tgt = { x: 0, y: 0, vx: 0, vy: 0, init: false }; // sprung screen target of the beam
-    var aimPt = null, aimMode = 'sweep', lastInput = -1e9;
+    var aimPt = null, aimMode = 'sweep', lastInput = -1e9, inside = false;
     var clock = 0, lastNow = 0, igniteAt = (opts.igniteDelay != null ? opts.igniteDelay : 250) / 1000;
     var raf = 0, running = false, destroyed = false, userPaused = false, visible = true, motionPaused = !!(GS && GS.motionPaused);
     var waiting = opts.autostart === false; // mounted early (behind the loading screen): no frames until play()
@@ -604,7 +604,7 @@
     }
 
     // the head's frame for this moment: it swivels on its bracket toward the target, partly
-    var REST_DOWN = vnorm([-0.22, -1, 0.05]), AIM = 0.42;
+    var REST_DOWN = vnorm([-0.22, -1, 0.05]), AIM = 0.5;
     function headFrame(G0, tilt) {
       var K = knuckle;
       var Fc = vadd(K, [-0.6, -0.1, 0.1]);
@@ -840,8 +840,13 @@
     function clampTarget(p) {
       var y = Math.max(p[1], L.minY * H, cam.horizon + 0.07 * H);
       var mx = 0.07 * W, my = (L.portrait ? 0.075 : 0.1) * H;
+      // over the text blocks the light stays up off the copy, but eases there instead of snapping: the block's
+      // edge fades in over mx, and the light still creeps down a little as the pointer goes deeper, so it never feels stuck
       shields.forEach(function (r) {
-        if (p[0] > r[0] - mx && p[0] < r[2] + mx) y = Math.min(y, r[1] - my);
+        var w = 1 - clamp(Math.max(r[0] - p[0], p[0] - r[2], 0) / mx, 0, 1);
+        if (!w) return;
+        var lim = r[1] - my;
+        if (y > lim) y = mix(y, lim + Math.min((y - lim) * 0.25, 0.05 * H), w * w * (3 - 2 * w));
       });
       y = Math.max(y, cam.horizon + 0.07 * H);
       var g = cam.ground(clamp(p[0], -0.05 * W, 1.05 * W), y);
@@ -861,7 +866,7 @@
       // where the beam wants to be
       var want;
       if (aimPt) want = aimPt;
-      else if ((aimMode === 'pointer' && clock - lastInput < 6) || (aimMode === 'touch' && clock - lastInput < 4)) {
+      else if ((aimMode === 'pointer' && (inside || clock - lastInput < 6)) || (aimMode === 'touch' && clock - lastInput < 4)) {   // a mouse resting over the hero keeps the light; it wanders off only after it leaves
         // the pointer is kept in viewport coordinates: when the page scrolls under a still mouse, the light follows
         want = [tgt.cx - hostRect.left, tgt.cy - hostRect.top];
       }
@@ -869,8 +874,8 @@
       want = clampTarget(want);
       if (reduced || !dt) { tgt.x = want[0]; tgt.y = want[1]; tgt.vx = tgt.vy = 0; }
       else {
-        // underdamped spring: the head swings after the pointer and settles with a little overshoot
-        var k = 38, c = 9.5, steps = Math.ceil(dt / 0.016);
+        // near-critically damped spring: the head follows the pointer closely and settles in ~0.4 s with almost no wobble
+        var k = 86, c = 17.5, steps = Math.ceil(dt / 0.016);
         var h = dt / steps;
         for (var s = 0; s < steps; s++) {
           tgt.vx += (k * (want[0] - tgt.x) - c * tgt.vx) * h; tgt.vy += (k * (want[1] - tgt.y) - c * tgt.vy) * h;
@@ -896,7 +901,7 @@
       var pc = cam.pv(G0), pe1 = cam.pv(vcomb(G0, hd, rPar, pp, 0, [0, 0, 0], 0)), pe2 = cam.pv(vcomb(G0, hd, 0, pp, rPerp, [0, 0, 0], 0));
       var pool = [];
       for (var i = 0; i < 28; i++) { var an = i / 28 * TAU; pool.push(cam.pv(vcomb(G0, hd, Math.cos(an) * rPar, pp, Math.sin(an) * rPerp, [0, 0, 0], 0))); }
-      var kI = clamp(Math.pow((8.5 * 8.5) / (dist * dist), 0.6) * Math.pow(cosI / 0.8, 0.5), 0.45, 1.1) * I;
+      var kI = clamp(Math.pow((8.5 * 8.5) / (dist * dist), 0.6) * Math.pow(cosI / 0.8, 0.5), 0.7, 1.1) * I;   // 0.7 floor: even the far end of the road shows a clear pool under the pointer
 
       // 1 · the pool: the lit street, revealed through a soft elliptical mask
       fx.save();
@@ -925,7 +930,7 @@
       fx.globalCompositeOperation = 'lighter';
       fx.setTransform(dpr * (pe1[0] - pc[0]), dpr * (pe1[1] - pc[1]), dpr * (pe2[0] - pc[0]), dpr * (pe2[1] - pc[1]), dpr * pc[0], dpr * pc[1]);
       var hs = fx.createRadialGradient(0, 0, 0, 0, 0, 1.1);
-      hs.addColorStop(0, 'rgba(255,214,150,' + (0.08 * kk).toFixed(3) + ')'); hs.addColorStop(0.5, 'rgba(255,190,110,' + (0.035 * kk).toFixed(3) + ')'); hs.addColorStop(1, 'rgba(255,170,80,0)');
+      hs.addColorStop(0, 'rgba(255,214,150,' + (0.15 * kk).toFixed(3) + ')'); hs.addColorStop(0.5, 'rgba(255,190,110,' + (0.065 * kk).toFixed(3) + ')'); hs.addColorStop(1, 'rgba(255,170,80,0)');
       fx.fillStyle = hs; fx.fillRect(-1.1, -1.1, 2.2, 2.2);
       fx.restore();
       fx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1157,6 +1162,7 @@
       if (e.pointerType === 'touch' && !tgt.down) return;
       readRect(); tgt.cx = e.clientX; tgt.cy = e.clientY;
       aimMode = e.pointerType === 'touch' ? 'touch' : 'pointer';
+      inside = aimMode === 'pointer';
       lastInput = clock;
     }
     function onDown(e) {
@@ -1166,7 +1172,7 @@
       lastInput = clock;
     }
     function onUp() { tgt.down = false; }
-    function onLeave(e) { if (e.pointerType !== 'touch') lastInput = clock - 4.8; }
+    function onLeave(e) { if (e.pointerType !== 'touch') { inside = false; lastInput = clock - 4.8; } }
     host.addEventListener('pointermove', onMove, { passive: true });
     host.addEventListener('pointerdown', onDown, { passive: true });
     addEventListener('pointerup', onUp, { passive: true });

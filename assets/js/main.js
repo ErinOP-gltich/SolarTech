@@ -52,7 +52,7 @@
   if (window.GSLoader && window.GSLoader.done) window.GSLoader.done.then(fireReady);
   else if (root.classList.contains('is-loaded') || !document.getElementById('gsl')) setTimeout(fireReady, 0);
   document.addEventListener('gs:loaded', fireReady);
-  setTimeout(fireReady, 7000); // never wait forever
+  setTimeout(fireReady, 9500); // never wait forever (after the loader's HARD_REMOVE)
 
   /* ---------- quote list (kept in this browser only) ---------- */
   const KEY = 'gs-quote';

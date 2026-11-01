@@ -26,9 +26,10 @@
 
   var root = doc.documentElement;
   var KEY = 'gs-ignited';
-  var HARD_EXIT = 4700;      // ms: the exit (the cone, 0.9 s) begins no later than this…
-  var HARD_REMOVE = 5950;    // …and the loader is gone by this, counted from navigation start
-  var TOO_LATE = 6300;       // loader.js arrived this late: the CSS failsafe is about to lift the curtain anyway
+  var STRETCH = 2.5;         // first-visit run plays this many times slower (loader.css .gsl--go times are ×2.5 too)
+  var HARD_EXIT = 7200;      // ms: the exit (the cone, 0.9 s) begins no later than this…
+  var HARD_REMOVE = 8450;    // …and the loader is gone by this, counted from navigation start
+  var TOO_LATE = 8800;       // loader.js arrived this late: the CSS failsafe is about to lift the curtain anyway
 
   // drawing geometry (SVG units, viewBox 0 0 520 340) — same numbers as loader.css
   var LENS_X = 424.14, LENS_Y = 168.07;   // LED lens centre
@@ -202,7 +203,7 @@
       raf(function () { if (el) el.classList.add('gsl--go'); });
       var draw = function (sel, delay, dur) {
         $$(sel).forEach(function (n) {
-          animate(n, [{ strokeDashoffset: 1.001 }, { strokeDashoffset: 0 }], { duration: dur, delay: delay, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'both' });
+          animate(n, [{ strokeDashoffset: 1.001 }, { strokeDashoffset: 0 }], { duration: dur * STRETCH, delay: delay * STRETCH, easing: 'cubic-bezier(.65,0,.35,1)', fill: 'both' });
         });
       };
       draw('.gsl-stub', 280, 260);
@@ -231,7 +232,7 @@
 
     /* ---- main loop ----------------------------------------------------- */
     // short run (later page views) has no readout: lamp flicks on, cone opens — ~0.7 s in all
-    var MIN = full ? 1.2 : 0.08;       // seconds before progress may reach 100
+    var MIN = full ? 1.2 * STRETCH : 0.08;       // seconds before progress may reach 100
     var FLICK = full ? 0.3 : 0.11;     // the LED flickering on
     var DUR = full ? 0.9 : 0.42;       // the cone opening the page
     // LED brightness keys [t, level]: two quick flickers, then on (2 flashes: under 3 per second)
@@ -245,7 +246,7 @@
       var target;
       if (full) {
         var pace = inOut(clamp(clock / MIN));
-        var allow = sig.load ? 1 : Math.min(0.94, Math.max(realProgress(), 0.94 * (1 - Math.exp(-clock / 1.25))));
+        var allow = sig.load ? 1 : Math.min(0.94, Math.max(realProgress(), 0.94 * (1 - Math.exp(-clock / (1.25 * STRETCH)))));
         target = Math.min(pace, allow);
       } else {
         var ready = sig.dom && (sig.load || clock > 0.15);

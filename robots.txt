@@ -1,0 +1,7 @@
+# Green Sun Technologies. The admin console is behind a login and marked noindex; this keeps polite crawlers out of it too.
+# robots.txt is only read at the root of a domain: on a github.io project address it has no effect, so after moving the
+# site to its own domain, change the Sitemap line below to match.
+User-agent: *
+Disallow: /admin/
+
+Sitemap: https://erinop-gltich.github.io/SolarTech/sitemap.xml

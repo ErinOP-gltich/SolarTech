@@ -25,6 +25,12 @@ window.GS_CONFIG = {
   // Content-Security-Policy meta tag, or the browser will block the request.
   formEndpoint: '',
 
+  // The admin console's database (Supabase, see supabase/schema.sql and the README). Both values are safe to publish:
+  // the anon key can only do what the database's security rules allow. Leave blank and the site uses only the
+  // products and contact details in the files; the console then runs in demo mode.
+  supabaseUrl: '',        // https://abcdefghijkl.supabase.co
+  supabaseAnonKey: '',    // eyJ… or sb_publishable_…
+
   gstin: '18BPLPS0265L1ZB',
   udyam: 'UDYAM-AS-03-0055919',
   founded: '2024-10-23',

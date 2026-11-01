@@ -61,7 +61,7 @@ html.js .gsl {
   cursor: progress;
   forced-color-adjust: none;   /* decorative, short-lived: keep it intact in Windows high-contrast */
   /* Failsafe: if loader.js never runs, the curtain lifts by itself. */
-  animation: gsl-failsafe .5s ease 6.5s forwards;
+  animation: gsl-failsafe .5s ease 9s forwards;
 }
 @keyframes gsl-failsafe { to { opacity: 0; visibility: hidden; pointer-events: none; } }
 
@@ -199,11 +199,12 @@ html.js .gsl {
 .gsl-on { color: rgba(243, 239, 230, .28); transition: color .2s; }
 
 /* ---------- choreography (full run) --------------------------------------- */
-.gsl--go .gsl-pole { transition: transform .9s var(--ease); transform: none; }
-.gsl--go .gsl-cells { transition: opacity .5s var(--ease) .15s; opacity: .74; }
-.gsl--go .gsl-f { transition: fill-opacity .5s .45s; fill-opacity: 1; }
-.gsl--go .gsl-pin { transition: opacity .4s .75s; opacity: 1; }
-.gsl--go .gsl-lens { transition: opacity .4s .6s; opacity: 1; }
+/* times are ×2.5 to match STRETCH in loader.js */
+.gsl--go .gsl-pole { transition: transform 2.25s var(--ease); transform: none; }
+.gsl--go .gsl-cells { transition: opacity 1.25s var(--ease) .375s; opacity: .74; }
+.gsl--go .gsl-f { transition: fill-opacity 1.25s 1.125s; fill-opacity: 1; }
+.gsl--go .gsl-pin { transition: opacity 1s 1.875s; opacity: 1; }
+.gsl--go .gsl-lens { transition: opacity 1s 1.5s; opacity: 1; }
 .gsl--type .gsl-brand > *, .gsl--type .gsl-geo { transition: opacity .7s var(--ease), transform .9s var(--ease); opacity: 1; transform: none; }
 .gsl--type .gsl-brand small { transition-delay: .06s; }
 .gsl--type .gsl-geo { transition-delay: .1s; }

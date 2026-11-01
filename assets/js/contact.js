@@ -122,13 +122,48 @@
 
   // the direct "Send enquiry" button only exists when a form backend is configured; otherwise remove it so
   // pressing Enter in a field can't pick it as the form's default button
+  // Direct enquiries go to the console's inbox (Supabase table gs_messages), or to a form service if one is set. On a
+  // developer's own computer with neither, they go to the browser's localStorage, which the console's demo mode reads.
+  const DB = (CFG.supabaseUrl || '').replace(/\/+$/, '');
+  const viaDb = !!(DB && CFG.supabaseAnonKey);
+  const viaDemo = !viaDb && !CFG.formEndpoint && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  const direct = !!(CFG.formEndpoint || viaDb || viaDemo);
   const formBtn = form.querySelector('[data-via="form"]');
-  if (CFG.formEndpoint) {
+  if (direct) {
     formBtn.hidden = false;
-    // the privacy line above the form must stay true once enquiries can go straight to a form service
+    // the privacy line above the form must stay true once enquiries can go straight to us
     const note = document.querySelector('[data-send-note]');
-    if (note) note.textContent = 'Nothing is sent until you press Send enquiry, WhatsApp or email below. Send enquiry passes your details to us through a form service.';
+    if (note) note.textContent = 'Nothing is sent until you press Send enquiry, WhatsApp or email below. ' + (CFG.formEndpoint && !viaDb ? 'Send enquiry passes your details to us through a form service.' : 'Send enquiry puts your details in our enquiry inbox.');
   } else formBtn.remove();
+
+  // one enquiry as the inbox stores it
+  function enquiry(text) {
+    return {
+      name: field('name').value.trim(), phone: field('phone').value.trim(), email: field('email').value.trim() || null,
+      org: field('org').value.trim() || null, site: field('site').value.trim() || null, message: field('message').value.trim() || null,
+      products: GS.quote.list().map(function (x) { return { id: x.id, name: GS.byId[x.id].name, part: GS.byId[x.id].part, qty: x.qty }; })
+    };
+  }
+  function sendDirect(subject, text) {
+    if (viaDb) {
+      const h = { 'Content-Type': 'application/json', apikey: CFG.supabaseAnonKey, Prefer: 'return=minimal' };
+      if (/^eyJ/.test(CFG.supabaseAnonKey)) h.Authorization = 'Bearer ' + CFG.supabaseAnonKey;
+      return fetch(DB + '/rest/v1/gs_messages', { method: 'POST', headers: h, body: JSON.stringify(enquiry(text)) });
+    }
+    if (viaDemo) {
+      const all = JSON.parse(localStorage.getItem('gs-demo-messages') || '[]');
+      all.unshift(Object.assign({ id: 'm' + Date.now(), at: new Date().toISOString(), status: 'new', starred: false }, enquiry(text)));
+      localStorage.setItem('gs-demo-messages', JSON.stringify(all));
+      return Promise.resolve({ ok: true });
+    }
+    return fetch(CFG.formEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(Object.assign({ subject: subject, message: text }, enquiry(text), {
+        organisation: field('org').value.trim(), site: field('site').value.trim(), message: text
+      }))
+    });
+  }
   let sending = false;
 
   form.addEventListener('submit', function (e) {
@@ -136,8 +171,8 @@
     if (sending) return;
     if (!check(true)) { say('Please fix the highlighted fields.', 'bad'); return; }
     const sub = e.submitter && !e.submitter.hidden && e.submitter.dataset.via ? e.submitter : null;
-    let via = sub ? sub.dataset.via : (CFG.formEndpoint ? 'form' : 'whatsapp');
-    if (via === 'form' && !CFG.formEndpoint) via = 'whatsapp';
+    let via = sub ? sub.dataset.via : (direct ? 'form' : 'whatsapp');
+    if (via === 'form' && !direct) via = 'whatsapp';
     const text = message();
     const subject = 'Quote request — ' + field('name').value.trim() + (field('org').value.trim() ? ', ' + field('org').value.trim() : '');
 
@@ -152,16 +187,7 @@
       sending = true;
       const busy = Array.from(form.querySelectorAll('button[data-via]'));
       busy.forEach(function (b) { b.disabled = true; });
-      fetch(CFG.formEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          subject: subject, message: text,
-          name: field('name').value.trim(), phone: field('phone').value.trim(), email: field('email').value.trim(),
-          organisation: field('org').value.trim(), site: field('site').value.trim(),
-          products: GS.quote.list().map(function (x) { return { id: x.id, name: GS.byId[x.id].name, qty: x.qty }; })
-        })
-      }).then(function (r) {
+      sendDirect(subject, text).then(function (r) {
         if (!r.ok) throw new Error(r.status);
         form.reset();
         GS.quote.save([]);
