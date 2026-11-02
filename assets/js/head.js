@@ -14,3 +14,6 @@ try {
     history.replaceState(null, '', location.pathname + location.search);
   }
 } catch (e) { /* old browsers: the page still works, a refresh just keeps its place */ }
+
+/* Theme: dark ("Solar Noir") unless the visitor chose light with the nav button. Set here, before first paint, so there is no flash. */
+try { document.documentElement.dataset.theme = localStorage.getItem('gs-theme') === 'light' ? 'light' : 'dark'; } catch (e) { document.documentElement.dataset.theme = 'dark'; }

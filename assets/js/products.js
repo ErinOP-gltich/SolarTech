@@ -57,11 +57,11 @@
   window.GS_PRODUCTS = [
     streetLight(9, '12.8', 6, 40, 'Lens', 'si-9w.webp', { featured: true }),
     streetLight(15, '12.8', 12, 75, 'Glass', 'si-15w.webp'),
-    streetLight(20, '12.8', 15, 80, 'Glass', 'si-15w.webp', { chem: 'Lithium-ion', tags: ['IP66', 'Li-ion', 'Glass optic'] }),
+    streetLight(20, '12.8', 15, 80, 'Glass', 'si-20w.webp', { chem: 'Lithium-ion', tags: ['IP66', 'Li-ion', 'Glass optic'] }),
     streetLight(25, '12.8', 18, 80, 'Glass', 'si-25w.webp'),
     streetLight(30, '12.8', 24, 100, 'Glass', 'si-30w.webp', { featured: true }),
     streetLight(40, '12.8', 30, 100, 'Glass', 'si-30w.webp'),
-    streetLight(50, '12.8', 36, 125, 'Glass', 'si-50w.webp'),
+    streetLight(50, '12.8', 36, 125, 'Glass', 'si-45w.webp'),
     streetLight(60, '12.8', 42, 125, 'Glass', 'si-50w.webp', { featured: true }),
     streetLight(80, '12.8', 48, 165, 'Lens', 'si-50w.webp'),
     {
@@ -117,7 +117,7 @@
     {
       id: 'high-mast-12m', cat: 'mast', featured: true,
       name: '12 m Solar High Mast', short: '12 m Solar High Mast',
-      part: 'Made to site', watt: null, img: IMG + 'high-mast.svg', blueprint: true,
+      part: 'Made to site', watt: null, img: IMG + 'high-mast.webp',
       big: '12m', key: [['Height', '12 m'], ['Optics', 'Flood heads'], ['Backup', '2 days']],
       battery: 'Sized to site', chem: 'LiFePO₄', panel: 'Sized to site', optic: 'Flood optics', ip: 'IP66', autonomy: '2 days',
       tags: ['12 m', 'Junctions', 'Grounds'],

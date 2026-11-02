@@ -18,6 +18,10 @@ Plain HTML, CSS and JavaScript. There is nothing to install or build. It is serv
 
 Animation uses GSAP (ScrollTrigger, SplitText, Flip) and Lenis smooth scrolling, both vendored in `assets/vendor/` so the site has no runtime CDN dependency. Everything degrades gracefully: without canvas the hero falls back to a painted CSS version of the scene, with *reduce motion* switched on the animations and smooth scrolling are off, and without JavaScript the content is still there.
 
+### Light mode
+
+A sun/moon button in the nav switches between the dark "Solar Noir" look and a light, warm-paper one; the choice is kept in `localStorage` and applied by `head.js` before first paint. The light theme is just a second set of tokens, `html[data-theme="light"]` at the bottom of `assets/css/gs.css`. The night-time parts of the page (the nav pill, the hero road, the 24-hour demo, the showroom, the closing call to action, the footer, the wattage dial and the loading screen) re-declare the dark tokens, so they stay dark in either theme. The default is dark.
+
 ## Preview
 
 ```bash
@@ -25,6 +29,10 @@ python3 -m http.server 8000
 ```
 
 Then open http://localhost:8000.
+
+## Deploying
+
+The site is on **Cloudflare Pages** (project `solartech`, `https://greensuntechnologies.com/`), uploaded directly rather than built from GitHub. To publish a change, run `./deploy.sh` in this folder (it needs `npx wrangler login` once). The old GitHub Pages copy at erinop-gltich.github.io/SolarTech/ still exists but is no longer the main site.
 
 ## Admin console and live content
 

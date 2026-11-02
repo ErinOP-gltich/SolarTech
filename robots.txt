@@ -1,7 +1,5 @@
 # Green Sun Technologies. Everything on this site is public.
-# robots.txt is only read at the root of a domain: on a github.io project address it has no effect, so after moving the
-# site to its own domain, change the Sitemap line below to match.
 User-agent: *
 Disallow:
 
-Sitemap: https://erinop-gltich.github.io/SolarTech/sitemap.xml
+Sitemap: https://greensuntechnologies.com/sitemap.xml

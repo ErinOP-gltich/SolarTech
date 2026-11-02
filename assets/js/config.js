@@ -25,9 +25,9 @@ window.GS_CONFIG = {
   // Content-Security-Policy meta tag, or the browser will block the request.
   formEndpoint: '',
 
-  // Live content from the admin console (the solartech-admin project). Leave false while the site is on GitHub Pages;
-  // set true once it is on Cloudflare Pages with the database connected (see README). When true, the site fetches its
-  // products and contact details from /api/public, and the Contact page's "Send enquiry" button saves into the console's inbox.
+  // Live content from the admin console (the solartech-admin project). Leave false until the console's login (Cloudflare Access)
+  // is set up and its first "Import the catalogue" is done: with it on, the Contact page's "Send enquiry" button saves into
+  // the console's inbox, and the site reads its products and contact details from /api/public instead of these files.
   liveApi: false,
 
   gstin: '18BPLPS0265L1ZB',

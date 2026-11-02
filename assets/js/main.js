@@ -580,4 +580,23 @@
     get lenis() { return lenis; },
     get motionPaused() { return motionPaused; }
   };
+
+  /* ---------- light / dark ---------- */
+  const themeBtn = document.querySelector('[data-theme-toggle]');
+  if (themeBtn) {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const paint = function (t) {
+      themeBtn.setAttribute('aria-pressed', t === 'light');
+      themeBtn.setAttribute('aria-label', t === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+      if (meta) meta.setAttribute('content', t === 'light' ? '#F5F1E8' : '#050507');
+    };
+    paint(root.dataset.theme);
+    themeBtn.addEventListener('click', function () {
+      const t = root.dataset.theme === 'light' ? 'dark' : 'light';
+      root.dataset.theme = t;
+      try { localStorage.setItem('gs-theme', t); } catch (e) { /* private mode: it just won't be remembered */ }
+      paint(t);
+      document.dispatchEvent(new CustomEvent('gs:theme', { detail: { theme: t } }));
+    });
+  }
 })();

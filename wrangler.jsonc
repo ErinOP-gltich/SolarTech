@@ -5,7 +5,7 @@
   "compatibility_date": "2025-09-01",
   "pages_build_output_dir": ".",
   "d1_databases": [
-    { "binding": "DB", "database_name": "solartech", "database_id": "00000000-0000-0000-0000-000000000000" }
+    { "binding": "DB", "database_name": "solartech", "database_id": "9c31129d-d6f0-4a2f-b3ea-ce751e2faaae" }
   ],
   "r2_buckets": [
     { "binding": "MEDIA", "bucket_name": "solartech-media" }
