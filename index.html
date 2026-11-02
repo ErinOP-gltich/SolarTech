@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-IN">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; frame-src https://www.google.com https://maps.google.com; connect-src 'self' https://cloudflareinsights.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Solar Street Lights &amp; High Masts, Guwahati | Green Sun</title>
+  <title>Solar Street Lights &amp; High Masts in Guwahati, Assam | Green Sun</title>
   <meta name="description" content="Solar street lights, 12 m high masts, flood lights, traffic blinkers and LiFePO4 battery packs, designed, built and serviced in Guwahati, Assam. ISO certified.">
   <meta name="theme-color" content="#050507">
   <link rel="canonical" href="https://greensuntechnologies.com/">
@@ -20,6 +20,8 @@
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Green Sun Technologies — solar street lights from Guwahati, Assam">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="icon" href="assets/brand/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
   <link rel="stylesheet" href="assets/css/loader.css?v=2026110302">
@@ -28,37 +30,117 @@
   <script src="assets/js/head.js?v=2026110302"></script>
   <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "@id": "https://greensuntechnologies.com/#business",
-  "name": "Green Sun Technologies",
-  "slogan": "The best way to power up",
-  "description": "Designs, manufactures, sells and services solar street lights, high masts, flood lights, solar traffic blinkers, pedestrian crossings and LiFePO4 battery packs.",
-  "url": "https://greensuntechnologies.com/",
-  "logo": "https://greensuntechnologies.com/assets/brand/gs-mark.svg",
-  "image": "https://greensuntechnologies.com/assets/brand/og-image.jpg",
-  "telephone": "+91 99209 96608",
-  "email": "greensuntechnologies2024@gmail.com",
-  "foundingDate": "2024-10-23",
-  "taxID": "18BPLPS0265L1ZB",
-  "address": {
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": [
+    "LocalBusiness",
+    "Organization"
+   ],
+   "@id": "https://greensuntechnologies.com/#business",
+   "name": "Green Sun Technologies",
+   "slogan": "The best way to power up",
+   "description": "Designs, manufactures, sells and services solar street lights, high masts, flood lights, solar traffic blinkers, pedestrian crossings and LiFePO4 battery packs.",
+   "url": "https://greensuntechnologies.com/",
+   "logo": "https://greensuntechnologies.com/assets/brand/gs-mark.svg",
+   "image": "https://greensuntechnologies.com/assets/brand/og-image.jpg",
+   "telephone": "+91 99209 96608",
+   "email": "greensuntechnologies2024@gmail.com",
+   "foundingDate": "2024-10-23",
+   "taxID": "18BPLPS0265L1ZB",
+   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Pub Boragaon, NH-37, Belwali Road, Ward No. 10",
     "addressLocality": "Guwahati",
     "addressRegion": "Assam",
     "postalCode": "781035",
     "addressCountry": "IN"
-  },
-  "hasCredential": [
+   },
+   "hasCredential": [
     {
-      "@type": "EducationalOccupationalCredential",
-      "name": "ISO 9001:2015 — Quality management"
+     "@type": "EducationalOccupationalCredential",
+     "name": "ISO 9001:2015 — Quality management"
     },
     {
-      "@type": "EducationalOccupationalCredential",
-      "name": "ISO 14001:2015 — Environmental management"
+     "@type": "EducationalOccupationalCredential",
+     "name": "ISO 14001:2015 — Environmental management"
     }
-  ]
+   ],
+   "legalName": "Green Sun Technologies",
+   "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 26.12,
+    "longitude": 91.68
+   },
+   "hasMap": "https://www.google.com/maps/search/?api=1&query=Pub+Boragaon%2C+Belwali+Road%2C+Guwahati%2C+Assam+781035",
+   "areaServed": [
+    {
+     "@type": "State",
+     "name": "Assam"
+    },
+    {
+     "@type": "State",
+     "name": "Arunachal Pradesh"
+    },
+    {
+     "@type": "State",
+     "name": "Meghalaya"
+    },
+    {
+     "@type": "State",
+     "name": "Nagaland"
+    },
+    {
+     "@type": "State",
+     "name": "Manipur"
+    },
+    {
+     "@type": "State",
+     "name": "Mizoram"
+    },
+    {
+     "@type": "State",
+     "name": "Tripura"
+    },
+    {
+     "@type": "State",
+     "name": "Sikkim"
+    }
+   ],
+   "knowsAbout": [
+    "Solar street lights",
+    "Solar high masts",
+    "Solar flood lights",
+    "Solar traffic blinkers",
+    "LiFePO4 battery packs",
+    "Decorative street poles"
+   ],
+   "hasOfferCatalog": {
+    "@id": "https://greensuntechnologies.com/products.html#catalogue"
+   },
+   "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+91 99209 96608",
+    "contactType": "sales",
+    "areaServed": "IN",
+    "availableLanguage": [
+     "English",
+     "Hindi",
+     "Assamese"
+    ]
+   }
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://greensuntechnologies.com/#website",
+   "url": "https://greensuntechnologies.com/",
+   "name": "Green Sun Technologies",
+   "inLanguage": "en-IN",
+   "publisher": {
+    "@id": "https://greensuntechnologies.com/#business"
+   }
+  }
+ ]
 }
   </script>
 </head>

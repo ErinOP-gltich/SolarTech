@@ -1,3 +1,5 @@
+/* The old GitHub Pages copy sends people to the real address (search engines already see the canonical links). */
+if (location.hostname === 'erinop-gltich.github.io') location.replace('https://greensuntechnologies.com' + location.pathname.replace(/^\/SolarTech/i, '') + location.search + location.hash);
 /* Runs in <head>, before the page paints (a file rather than an inline script, so the Content-Security-Policy
    can stay script-src 'self'): mark that JS is on, and make a refresh open at the top. A refresh turns the browser's
    scroll restoring off and drops any #section left in the address so the browser doesn't jump there (the marketplace

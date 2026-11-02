@@ -20,7 +20,11 @@ Animation uses GSAP (ScrollTrigger, SplitText, Flip) and Lenis smooth scrolling,
 
 ### Light mode
 
-A sun/moon button in the nav switches between the dark "Solar Noir" look and a light, warm-paper one; the choice is kept in `localStorage` and applied by `head.js` before first paint. The light theme is just a second set of tokens, `html[data-theme="light"]` at the bottom of `assets/css/gs.css`. The night-time parts of the page (the nav pill, the hero road, the 24-hour demo, the showroom, the closing call to action, the footer, the wattage dial and the loading screen) re-declare the dark tokens, so they stay dark in either theme. The default is dark.
+A sun/moon button in the nav switches between the dark "Solar Noir" look and "Daylight": warm white paper, ink-black type, white cards with soft warm shadows, and accents in the brand's deep orange and green. The choice is kept in `localStorage` and applied by `head.js` before first paint; the default is dark. The light theme is a second set of tokens, `html[data-theme="light"]` at the bottom of `assets/css/gs.css`. The night-time scenes (hero road, 24-hour demo, closing call to action with the footer, wattage dial) stay dark as rounded panels set into the page, and the nav turns into dark glass while it floats over one of them (`main.js` sets `.nav-dark`).
+
+### Speed
+
+The animated parts are written to stay off the main thread: the marquee is a CSS animation that scrolling only nudges, the pulse and scroll-cue animate transforms, the hero light redraws at 30 fps while nobody is aiming it, and ScrollTrigger re-measures once (debounced) instead of four times. Phones with little memory or few cores, and Data Saver, get the painted CSS version of the hero instead of the live canvas. `deploy.sh` uploads minified CSS and JS, stamps every `?v=` with the deploy time, and `_headers` lets browsers keep CSS, JS and fonts for a year (photos for a week).
 
 ## Preview
 
@@ -33,6 +37,16 @@ Then open http://localhost:8000.
 ## Deploying
 
 The site is on **Cloudflare Pages** (project `solartech`, `https://greensuntechnologies.com/`), uploaded directly rather than built from GitHub. To publish a change, run `./deploy.sh` in this folder (it needs `npx wrangler login` once). The old GitHub Pages copy at erinop-gltich.github.io/SolarTech/ still exists but is no longer the main site.
+
+## Search engines
+
+Titles and descriptions per page, `lang="en-IN"`, canonical links, Open Graph, and JSON-LD: the business (LocalBusiness with map, area served and contact point) and the website on the home page, the full catalogue (an OfferCatalog of the 18 products with photos, part numbers and specs) and breadcrumbs on the Products page, and the contact page. `seo.mjs` rebuilds the catalogue data and `sitemap.xml` (with the product photos) from `products.js` on every deploy. The old GitHub Pages address forwards visitors to greensuntechnologies.com.
+
+Still to do by the owner: add the site to **Google Search Console** and **Bing Webmaster Tools** (verify with a DNS record in Cloudflare, then submit `https://greensuntechnologies.com/sitemap.xml`), and claim the business on **Google Business Profile** with the same name, address and phone as the site.
+
+## Visitors
+
+Each page view is counted by the site itself (`functions/api/hit.js` → the `hits` table), without cookies: a visitor is a daily hash of a secret salt (`STATS_SALT`, a Pages secret), the day, the IP and the browser, so people can't be followed from one day to the next. Bots are left out. The admin console's **Visitors** page shows visitors, page views, enquiries per 100 visitors, a daily chart, top pages, sources, countries and devices. Turn it off with `countVisits: false` in `config.js`. Cloudflare's own Web Analytics also runs (its script is allowed in the pages' security policy) and shows in the Cloudflare dashboard.
 
 ## Admin console and live content
 

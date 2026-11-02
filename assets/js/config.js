@@ -30,6 +30,9 @@ window.GS_CONFIG = {
   // the console's inbox, and the site reads its products and contact details from /api/public instead of these files.
   liveApi: false,
 
+  // Count page views for the admin console's Visitors page (no cookies; see functions/api/hit.js). Only works on Cloudflare.
+  countVisits: true,
+
   gstin: '18BPLPS0265L1ZB',
   udyam: 'UDYAM-AS-03-0055919',
   founded: '2024-10-23',

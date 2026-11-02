@@ -17,9 +17,11 @@
 @font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url(../fonts/instrumentserif-italic-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 /* Colour, glass and elevation tokens. The page is dark ("Solar Noir"); html[data-theme="light"] (further down) flips them, and
-   the night-time parts of the page re-declare these dark values so they stay dark in either theme. */
+   the night-time parts (hero road, 24-hour demo, closing call to action, footer, wattage dial, menu, loader) re-declare these
+   dark values so they stay dark in either theme. The nav joins them while it floats over one of them (main.js sets .nav-dark). */
 :root,
-html[data-theme="light"] :is(.nav, .menu, .hero, .day, .show, .cta, .ftr, .lightbox, .gsl, [data-dial-sec]) {
+html[data-theme="light"] :is(.menu, .hero, .day-stick, .cta, .ftr, .lightbox, .gsl, .dial),
+html[data-theme="light"].nav-dark .nav {
   /* colour */
   --ink-rgb: 243 239 230;      /* text-coloured ink, for hairlines and outlines */
   --fx-rgb: 255 255 255;       /* the tint laid over a surface to lift it */
@@ -385,11 +387,12 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .hero::after { /* vignette so type always reads */ content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, rgba(5, 5, 7, .78) 0%, rgba(5, 5, 7, .2) 55%, transparent 75%), linear-gradient(0deg, rgba(5, 5, 7, .9) 0%, transparent 35%); }
 .hero-top { display: flex; justify-content: space-between; gap: var(--s4); padding-top: calc(var(--nav-h) + var(--s8)); }
 .live { --glass-tint: rgba(10, 10, 14, .74); display: inline-flex; align-items: center; gap: var(--s3); height: 40px; padding: 0 var(--s4) 0 var(--s2); border-radius: var(--r-full); font-size: 13.5px; color: var(--text-2); max-width: 100%; }
-.live .pulse { display: inline-flex; align-items: center; gap: 8px; height: 26px; padding: 0 10px; border-radius: var(--r-full); background: rgba(198, 255, 61, .14); color: var(--volt); font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .14em; }
-.live .pulse::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 0 currentColor; animation: ping 1.8s infinite; }
+.live .pulse { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 26px; padding: 0 10px; border-radius: var(--r-full); background: rgba(198, 255, 61, .14); color: var(--volt); font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .14em; }
+.live .pulse::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.live .pulse::after { content: ''; position: absolute; left: 10px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: currentColor; animation: ping 1.8s infinite; } /* the ring: transform + opacity only, so it never repaints */
 .live.is-night .pulse { background: rgba(255, 196, 0, .14); color: var(--sun); }
 .live span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@keyframes ping { 70% { box-shadow: 0 0 0 9px rgba(0, 0, 0, 0); } }
+@keyframes ping { 0% { transform: scale(1); opacity: .55; } 70%, 100% { transform: scale(3.6); opacity: 0; } }
 .hero-mid { align-self: end; padding-bottom: var(--s7); }
 .hero-title .ln { display: block; overflow: hidden; padding: .02em 0 .06em; margin: -.02em 0 -.06em; }
 .hero-title .ln > span { display: inline-block; }
@@ -405,8 +408,8 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .ticker-track span::before { content: '✺'; margin-right: var(--s3); color: var(--sun); }
 .scroll-cue { display: flex; align-items: center; gap: var(--s3); flex: none; }
 .scroll-cue i { position: relative; width: 1px; height: 36px; background: var(--line-2); overflow: hidden; }
-.scroll-cue i::after { content: ''; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--sun); animation: drip 1.8s var(--ease) infinite; }
-@keyframes drip { to { top: 100%; } }
+.scroll-cue i::after { content: ''; position: absolute; left: 0; top: 0; width: 1px; height: 40%; background: var(--sun); transform: translateY(-100%); animation: drip 1.8s var(--ease) infinite; }
+@keyframes drip { to { transform: translateY(250%); } }
 @keyframes marquee { to { transform: translateX(-50%); } }
 
 /* ---------- velocity marquee */
@@ -414,9 +417,14 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .mq-row { display: flex; white-space: nowrap; }
 .mq-row + .mq-row { margin-top: var(--s2); }
 .mq-track { display: inline-flex; flex: none; align-items: center; gap: .4em; padding-right: .4em; font-size: clamp(44px, 8.6vw, 148px); line-height: 1; will-change: transform; }
-.mq-track .o { color: transparent; -webkit-text-stroke: 1.5px rgb(var(--ink-rgb) / .35); }
+.mq-track .o { color: transparent; -webkit-text-stroke: 1.5px rgb(var(--ink-rgb) / .55); }
 .mq-track .f { background: var(--plasma); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .mq-track .star { width: .5em; height: .5em; flex: none; color: var(--sun); }
+.mq.is-css .mq-row { transform: skewX(var(--mq-skew, 0deg)); }
+.mq.is-css .mq-track { animation: mq-drift 20s linear infinite; }
+.mq.is-css .mq-track[data-dir="1"] { animation-direction: reverse; }
+@keyframes mq-drift { to { transform: translate3d(-50%, 0, 0); } }
+.motion-paused .mq.is-css .mq-track { animation-play-state: paused; }
 
 /* ---------- about */
 .about { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: var(--s6); }
@@ -897,7 +905,7 @@ a.reach-card:hover { transform: translateX(6px); }
 .motion-tog[aria-pressed="true"] { color: var(--volt); border-color: rgba(198, 255, 61, .5); }
 .motion-tog[aria-pressed="true"] i::before { left: 1px; width: 0; height: 0; border-radius: 0; background: none; border-style: solid; border-width: 5px 0 5px 9px; border-color: transparent transparent transparent currentColor; }
 .motion-tog[aria-pressed="true"] i::after { display: none; }
-.motion-paused .aura i, .motion-paused .grain, .motion-paused .nav-logo img, .motion-paused .ticker-track, .motion-paused .phero-sun, .motion-paused .live .pulse::before, .motion-paused .scroll-cue i::after, .motion-paused .day-scene .flow { animation-play-state: paused; }
+.motion-paused .aura i, .motion-paused .grain, .motion-paused .nav-logo img, .motion-paused .ticker-track, .motion-paused .phero-sun, .motion-paused .live .pulse::after, .motion-paused .scroll-cue i::after, .motion-paused .day-scene .flow { animation-play-state: paused; }
 .ticker:hover .ticker-track { animation-play-state: paused; }
 .hero-foot .motion-tog { flex: none; }
 
@@ -908,50 +916,73 @@ a.reach-card:hover { transform: translateX(6px); }
 }
 
 
-/* ------------------------------------------------------------------ light theme
-   Chosen with the sun/moon button in the nav (kept in localStorage, set before first paint by head.js). Warm paper, ink-dark
-   text, deeper amber and green so accents still read on cream. The night-time parts (nav pill, hero road, 24-hour demo,
-   showroom, closing call to action, footer, wattage dial, lightbox, loading screen) are always dark, by the scope list above. */
+/* ------------------------------------------------------------------ light theme ("Daylight")
+   Chosen with the sun/moon button in the nav (kept in localStorage, set before first paint by head.js). Warm white paper,
+   ink-black type, clean white cards with soft warm shadows, accents in the brand's deep orange and green. The night-time
+   parts become rounded dark panels set into the page, so the two moods read as one design rather than stripes. */
 html[data-theme="light"] {
   color-scheme: light;
-  --ink-rgb: 23 19 14;
-  --fx-rgb: 23 19 14;
-  --void: #F5F1E8; --ink-1: #FBF8F1; --ink-2: #FFFFFF; --ink-3: #EDE8DC; --ink-4: #E2DCCD;
-  --text: #17130E; --text-2: #3D372E; --muted: #5C5548; --dim: #8F8878;
-  --line: rgb(23 19 14 / .12); --line-2: rgb(23 19 14 / .22);
-  --flare: #D92D0B; --orange: #D85E00; --sun: #A86A00; --hot: #8A4B00; --volt: #3F8A00;
-  --plasma: linear-gradient(100deg, #E0310F 0%, #F26A00 45%, #EBA400 100%);
-  --plasma-v: linear-gradient(180deg, #EBA400 0%, #F26A00 55%, #E0310F 100%);
-  --glass-fill: linear-gradient(155deg, rgba(255, 255, 255, .92) 0%, rgba(255, 255, 255, .62) 40%, rgba(255, 255, 255, .5) 100%);
-  --glass-fill-strong: linear-gradient(155deg, rgba(255, 255, 255, .97) 0%, rgba(255, 255, 255, .78) 40%, rgba(255, 255, 255, .68) 100%);
-  --glass-tint: rgba(255, 255, 255, .35);
-  --glass-base: rgba(255, 255, 255, .5);
-  --glass-base-strong: rgba(255, 255, 255, .9);
-  --glass-edge: rgba(23, 19, 14, .12);
-  --glass-blur: blur(22px) saturate(160%);
-  --glass-inner: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 0 0 1px rgba(255, 255, 255, .55), inset 0 -14px 24px -22px rgba(23, 19, 14, .1);
-  --inset: rgba(23, 19, 14, .045); --inset-2: rgba(23, 19, 14, .07);
-  --e1: 0 1px 2px rgba(60, 40, 10, .12), 0 1px 3px 1px rgba(60, 40, 10, .06);
-  --e2: 0 1px 2px rgba(60, 40, 10, .14), 0 2px 6px 2px rgba(60, 40, 10, .08);
-  --e3: 0 4px 8px 3px rgba(60, 40, 10, .1), 0 1px 3px rgba(60, 40, 10, .14);
-  --e4: 0 10px 30px -6px rgba(60, 40, 10, .22), 0 2px 4px rgba(60, 40, 10, .12);
-  --e5: 0 30px 80px -20px rgba(60, 40, 10, .35), 0 6px 16px -6px rgba(60, 40, 10, .2);
+  --paper: #FAF8F4;
+  --ink-rgb: 20 17 16;
+  --fx-rgb: 20 17 16;
+  --void: #FAF8F4; --ink-1: #FFFFFF; --ink-2: #FFFFFF; --ink-3: #F2EEE7; --ink-4: #E8E3DA;
+  --text: #141110; --text-2: #403A33; --muted: #69635A; --dim: #9C968C;
+  --line: rgb(20 17 16 / .09); --line-2: rgb(20 17 16 / .16);
+  --flare: #E8360F; --orange: #EA580C; --sun: #D9480F; --hot: #C2410C; --volt: #2B8A3E;
+  --plasma: linear-gradient(100deg, #FF4A1C 0%, #FF7A00 42%, #FFB300 100%);
+  --plasma-v: linear-gradient(180deg, #FFB300 0%, #FF7A00 55%, #FF4A1C 100%);
+  --glass-fill: linear-gradient(180deg, rgba(255, 255, 255, .97), rgba(255, 255, 255, .9));
+  --glass-fill-strong: linear-gradient(180deg, #FFFFFF, rgba(255, 255, 255, .97));
+  --glass-tint: rgba(255, 255, 255, .55);
+  --glass-base: rgba(255, 255, 255, .85);
+  --glass-base-strong: #FFFFFF;
+  --glass-edge: rgb(20 17 16 / .08);
+  --glass-blur: blur(18px) saturate(140%);
+  --glass-inner: inset 0 1px 0 #FFFFFF;
+  --inset: rgb(20 17 16 / .035); --inset-2: rgb(20 17 16 / .055);
+  --e1: 0 1px 2px rgb(40 28 10 / .06);
+  --e2: 0 1px 2px rgb(40 28 10 / .06), 0 4px 14px -6px rgb(40 28 10 / .12);
+  --e3: 0 1px 3px rgb(40 28 10 / .05), 0 12px 30px -14px rgb(40 28 10 / .2);
+  --e4: 0 1px 3px rgb(40 28 10 / .05), 0 18px 40px -22px rgb(40 28 10 / .24);
+  --e5: 0 4px 10px rgb(40 28 10 / .06), 0 40px 80px -30px rgb(40 28 10 / .3);
 }
-/* the dark parts need their own ground, because the page behind them is now cream */
-html[data-theme="light"] :is(.hero, .day, .show, .cta, .ftr, [data-dial-sec]) { background-color: var(--void); color: var(--text); }
-html[data-theme="light"] .btn-volt { background: #B8F03A; color: #0B1500; }
-html[data-theme="light"] .nav .btn-volt, html[data-theme="light"] :is(.hero, .day, .show, .cta, .ftr) .btn-volt { background: var(--volt); }
+/* the night panels: opaque, and the big ones rounded into the paper */
+html[data-theme="light"] :is(.hero, .day-stick, .cta, .ftr) { background-color: var(--void); color: var(--text); }
+html[data-theme="light"] .dial { background-color: #0B0B10; }
+html[data-theme="light"] .hero { border-radius: 0 0 clamp(24px, 3vw, 44px) clamp(24px, 3vw, 44px); }
+html[data-theme="light"] .day { background: transparent; }
+html[data-theme="light"] .day-stick { top: 10px; height: calc(100vh - 20px); height: calc(100svh - 20px); margin: 0 10px; border-radius: clamp(22px, 2.6vw, 40px); }
+html[data-theme="light"] .cta { border-radius: clamp(24px, 3vw, 44px) clamp(24px, 3vw, 44px) 0 0; }
+html[data-theme="light"] .page-tool .ftr { border-radius: clamp(24px, 3vw, 44px) clamp(24px, 3vw, 44px) 0 0; margin-top: var(--s7); }
+html[data-theme="light"] .ftr { border-top: 0; }
+/* the nav: a white pill on paper, a dark one over the night panels */
+html[data-theme="light"] .nav { --glass-tint: rgba(255, 255, 255, .7); box-shadow: var(--glass-inner), var(--e3); }
+html[data-theme="light"] .nav.is-scrolled { --glass-tint: rgba(255, 255, 255, .86); }
+html[data-theme="light"].nav-dark .nav { --glass-tint: rgba(12, 12, 16, .62); }
+html[data-theme="light"].nav-dark .nav.is-scrolled { --glass-tint: rgba(10, 10, 14, .82); }
+html[data-theme="light"] .nav, html[data-theme="light"] .nav * { transition-property: color, background-color, border-color; transition-duration: .3s; }
+/* daylight instead of three coloured blobs, and a lighter grain */
+html[data-theme="light"] .aura i:nth-child(1), html[data-theme="light"] .aura i:nth-child(3) { display: none; }
+html[data-theme="light"] .aura i:nth-child(2) { opacity: .55; }
+html[data-theme="light"] .grain { opacity: .02; }
+/* buttons and accents that were tuned for the night */
+html[data-theme="light"] .btn-volt { background: var(--volt); color: #FFFFFF; }
+html[data-theme="light"] :is(.hero, .day-stick, .cta, .ftr, .dial) .btn-volt { background: var(--volt); color: var(--void); }
+/* product photos on daylight stages */
+html[data-theme="light"] .card-stage { background: radial-gradient(90% 70% at 50% 100%, #FFFFFF, transparent 70%), linear-gradient(180deg, #F6F3ED, #ECE7DD); }
+html[data-theme="light"] .card-stage img { filter: drop-shadow(0 16px 16px rgb(60 40 10 / .22)); }
+html[data-theme="light"] .card:hover .card-stage img { filter: drop-shadow(0 24px 24px rgb(60 40 10 / .28)); }
+html[data-theme="light"] .card-watt { -webkit-text-stroke-color: rgb(20 17 16 / .1); }
+html[data-theme="light"] .show-card .sc-stage { background: radial-gradient(80% 70% at 50% 100%, #FFFFFF, transparent 70%), linear-gradient(180deg, #F6F3ED, #EAE4D9); }
+html[data-theme="light"] .show-card img { filter: drop-shadow(0 26px 30px rgb(60 40 10 / .25)); }
+html[data-theme="light"] .show-card .sc-watt { -webkit-text-stroke-color: rgb(217 72 15 / .22); }
+html[data-theme="light"] ::selection { background: rgb(255 179 0 / .35); }
 
-/* theme button: sits in the (always dark) nav pill */
+/* theme button, in the nav */
 .theme-btn { position: relative; display: inline-grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: var(--r-full); color: var(--text-2); cursor: pointer; transition: color var(--d-s); }
 .theme-btn:hover { color: var(--sun); }
 .theme-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .theme-btn .i-moon, html[data-theme="light"] .theme-btn .i-sun { display: none; }
 html[data-theme="light"] .theme-btn .i-moon { display: block; }
 @media (max-width: 760px) { .theme-btn { width: 40px; height: 40px; } }
-html[data-theme="light"] .nav { --glass-tint: rgba(10, 10, 14, .82); }   /* the pill stays dark on cream, not grey */
-html[data-theme="light"] .aura i { opacity: .24; }
-html[data-theme="light"] .card-stage { background: radial-gradient(90% 80% at 50% 110%, rgba(255, 255, 255, .9), transparent 70%), linear-gradient(180deg, #F3EFE6, #E8E2D4); }
-html[data-theme="light"] .card-stage img { filter: drop-shadow(0 18px 18px rgba(60, 40, 10, .28)); }
-html[data-theme="light"] .card:hover .card-stage img { filter: drop-shadow(0 26px 26px rgba(60, 40, 10, .32)); }
 html[data-theme="light"] .map iframe { filter: none; }   /* the dark map is a dark-theme touch */

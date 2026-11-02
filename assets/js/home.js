@@ -17,6 +17,15 @@
     // the street is built behind the loading screen while the browser is idle (it's the heavy part), and the lamp
     // powers on just after the loading screen hands over (its own light reveals the page)
     let beam = null;
+    // low-power phones and Data Saver keep the painted CSS road (.hb-fallback): the live canvas is the heaviest thing on the site
+    const nav = navigator;
+    const lowPower = (nav.connection && nav.connection.saveData) || (nav.deviceMemory && nav.deviceMemory <= 2) ||
+      (nav.hardwareConcurrency && nav.hardwareConcurrency <= 4 && matchMedia('(pointer: coarse)').matches);
+    if (lowPower) {
+      hero.classList.add('hb-static');
+      if (motion) gsap.to(hero.querySelector('.hero-mid'), { yPercent: -18, opacity: 0, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: .6 } });
+      return;
+    }
     const mountBeam = function () {
       if (!beam) {
         try { beam = window.GSHeroBeam.mount(hero, { igniteDelay: 650, autostart: false }); GS.heroBeam = beam; } catch (e) { setTimeout(function () { throw e; }); }
@@ -82,45 +91,39 @@
     setInterval(paint, 30000);
   }
 
-  /* ---------- 3. marquee whose speed and skew follow scroll velocity ---------- */
+  // every layout-changing moment funnels into one ScrollTrigger.refresh (a refresh re-measures every pinned section: expensive)
+  let refreshT = 0;
+  function refreshSoon() { clearTimeout(refreshT); refreshT = setTimeout(function () { if (window.ScrollTrigger) window.ScrollTrigger.refresh(); }, 150); }
+
+  /* ---------- 3. marquee whose speed and skew follow scroll velocity ----------
+     The drift itself is a CSS animation (it runs on the compositor: no script at all while the page sits still).
+     Scrolling only nudges it: a short rAF loop speeds the animation up and skews the rows, then eases back and stops. */
   function marquee() {
     const box = document.querySelector('[data-mq]');
     if (!box) return;
     const tracks = Array.from(box.querySelectorAll('.mq-track'));
     tracks.forEach(function (t) { t.innerHTML += t.innerHTML; });
     if (GS.reduceMotion) return;
-    const st = tracks.map(function (t) { return { el: t, x: 0, dir: +t.dataset.dir || -1, w: 0 }; });
-    const measure = function () { st.forEach(function (s) { s.w = s.el.scrollWidth / 2; }); };
-    measure();
-    addEventListener('resize', measure);
-    let visible = true, lastY = scrollY, vel = 0, skew = 0, raf = 0;
-    // the loop only runs while the marquee is on screen and motion isn't paused
-    let lastT = 0;
-    const wake = function () { if (!raf && visible && !GS.motionPaused) { lastY = scrollY; lastT = 0; raf = requestAnimationFrame(loop); } };
-    new IntersectionObserver(function (en) { visible = en[0].isIntersecting; wake(); }).observe(box);
-    document.addEventListener('gs:motion', wake);
-    function loop(now) {
+    const size = function () { tracks.forEach(function (t) { t.style.animationDuration = Math.max(8, t.scrollWidth / 2 / 190).toFixed(1) + 's'; }); }; // ~190 px/s
+    size();
+    addEventListener('resize', size);
+    box.classList.add('is-css');
+    const anims = function () { return tracks.map(function (t) { return t.getAnimations ? t.getAnimations()[0] : null; }).filter(Boolean); };
+    let vel = 0, skew = 0, raf = 0, lastY = scrollY;
+    function settle() {
       raf = 0;
-      if (!visible || GS.motionPaused) return;
-      // time-based so it runs at the same speed on 60 Hz and 120 Hz screens
-      const dt = lastT ? Math.min(3, (now - lastT) / 16.667) : 1;
-      lastT = now;
-      const y = scrollY;
-      const lv = GS.lenis ? GS.lenis.velocity : (y - lastY);
+      const y = scrollY, lv = GS.lenis ? GS.lenis.velocity : y - lastY;
       lastY = y;
       vel += (lv - vel) * .12;
       skew += (clamp(vel * -.35, -12, 12) - skew) * .1;
-      if (visible) {
-        st.forEach(function (s) {
-          s.x += s.dir * (3.2 + Math.abs(vel) * .8) * dt; // ~190 px/s at rest, faster while scrolling
-          if (s.x <= -s.w) s.x += s.w;
-          if (s.x > 0) s.x -= s.w;
-          s.el.style.transform = 'translate3d(' + s.x.toFixed(1) + 'px,0,0) skewX(' + skew.toFixed(2) + 'deg)';
-        });
-      }
-      raf = requestAnimationFrame(loop);
+      const calm = Math.abs(vel) < .05 && Math.abs(skew) < .05;
+      const rate = calm ? 1 : 1 + Math.abs(vel) * .25;
+      anims().forEach(function (an) { if (an.updatePlaybackRate) an.updatePlaybackRate(rate); else an.playbackRate = rate; });
+      box.style.setProperty('--mq-skew', (calm ? 0 : skew).toFixed(2) + 'deg');
+      if (calm) { vel = skew = 0; return; }
+      raf = requestAnimationFrame(settle);
     }
-    wake();
+    addEventListener('scroll', function () { if (!raf && !GS.motionPaused) { lastY = scrollY; raf = requestAnimationFrame(settle); } }, { passive: true });
   }
 
   /* ---------- 4. words light up as you read ---------- */
@@ -433,7 +436,10 @@
     }).join('');
     const btns = Array.from(opts.querySelectorAll('.fopt'));
     let why = null, picks = null;
+    let picked = false;
     function choose(id, focus) {
+      const first = !picked;
+      picked = true;
       const f = FINDER.find(function (x) { return x.id === id; });
       btns.forEach(function (b) {
         const on = b.dataset.f === id;
@@ -446,7 +452,7 @@
       why.innerHTML = f.why;
       picks.innerHTML = f.picks.map(function (pid) { return GS.byId[pid]; }).filter(Boolean).map(function (p) { return GS.card(p); }).join('');
       if (motion) gsap.from(out.querySelectorAll('.card'), { y: 40, opacity: 0, duration: .9, ease: 'expo.out', stagger: .07 });
-      if (ST) ST.refresh();
+      if (ST && !first) refreshSoon();
     }
     opts.addEventListener('click', function (e) { const b = e.target.closest('.fopt'); if (b) choose(b.dataset.f); });
     opts.addEventListener('keydown', function (e) {
@@ -483,5 +489,6 @@
   finder();
   ctaLight();
   GS.reveals();
-  if (ST) { addEventListener('load', function () { ST.refresh(); }); if (document.fonts) document.fonts.ready.then(function () { ST.refresh(); }); }
+  // ScrollTrigger refreshes itself on load; the only extra measure needed is once the web fonts have changed line lengths
+  if (ST && document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(refreshSoon);
 })();

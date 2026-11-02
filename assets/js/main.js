@@ -581,7 +581,25 @@
     get motionPaused() { return motionPaused; }
   };
 
+  /* ---------- visit counter (no cookies; the admin console's Visitors page) ---------- */
+  if (CFG.countVisits && navigator.sendBeacon && !navigator.webdriver && /^https:$/.test(location.protocol)) {
+    let ref = '';
+    try { const r = document.referrer && new URL(document.referrer); if (r && r.host !== location.host) ref = r.host; } catch (e) { /* no referrer */ }
+    try { navigator.sendBeacon('/api/hit', JSON.stringify({ p: location.pathname, r: ref })); } catch (e) { /* never block the page */ }
+  }
+
   /* ---------- light / dark ---------- */
+  // In the light theme the nav is a white pill, except while it floats over one of the dark night panels: watch a thin
+  // band where the nav sits and flag the page (gs.css then gives the nav the dark tokens).
+  const darkParts = document.querySelectorAll('.hero, .day-stick, .cta, .ftr, .dial');
+  if (darkParts.length && 'IntersectionObserver' in window) {
+    const under = new Set();
+    const io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) under.add(e.target); else under.delete(e.target); });
+      root.classList.toggle('nav-dark', under.size > 0);
+    }, { rootMargin: '-30px 0px -92% 0px' });
+    darkParts.forEach(function (el) { io.observe(el); });
+  }
   const themeBtn = document.querySelector('[data-theme-toggle]');
   if (themeBtn) {
     const meta = document.querySelector('meta[name="theme-color"]');

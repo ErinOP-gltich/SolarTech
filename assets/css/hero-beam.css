@@ -163,3 +163,6 @@ html:not(.js) .hb-lit::after { content: none; }
 @media (prefers-reduced-motion: reduce) {
   .hb-fallback { transition: none; }
 }
+
+/* low-power devices: no live canvas, so no aiming hint (home.js adds .hb-static) */
+.hb.hb-static .hb-aim { display: none; }

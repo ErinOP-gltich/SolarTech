@@ -1109,7 +1109,9 @@
 
     function paintCss(b) {
       if (!lit.length) return;
-      if (clock < 2.6 || offsetsAt < 0) { measureOffsets(); offsetsAt = clock; }
+      // re-measure the lit headline after a resize/rebuild, and at three moments while its intro slides in (not every
+      // frame: getBoundingClientRect forces a layout each time)
+      if (offsetsAt < 0 || (offsetsAt < 2.6 && clock - offsetsAt > 0.8)) { measureOffsets(); offsetsAt = clock; }
       // CSS conic angles start at 12 o'clock and run clockwise
       var from = (b.a0 * 180 / Math.PI + 90), span = (b.a1 - b.a0) * 180 / Math.PI;
       var soft = Math.max(4, span * 0.22);
@@ -1117,16 +1119,22 @@
       var key = vals.join('|');
       if (key === cssState) return;
       cssState = key;
-      var st = host.style;
-      st.setProperty('--hb-ax', vals[0]); st.setProperty('--hb-ay', vals[1]);
-      st.setProperty('--hb-a0', vals[2]); st.setProperty('--hb-aw', vals[3]); st.setProperty('--hb-as', vals[4]);
-      st.setProperty('--hb-r', vals[5]); st.setProperty('--hb-k', vals[6]); st.setProperty('--hb-nr', vals[7]);
+      // set on the lit lines themselves, not the hero: a custom property changed on the hero would restyle every element in it
+      lit.forEach(function (el) {
+        var st = el.style;
+        st.setProperty('--hb-ax', vals[0]); st.setProperty('--hb-ay', vals[1]);
+        st.setProperty('--hb-a0', vals[2]); st.setProperty('--hb-aw', vals[3]); st.setProperty('--hb-as', vals[4]);
+        st.setProperty('--hb-r', vals[5]); st.setProperty('--hb-k', vals[6]); st.setProperty('--hb-nr', vals[7]);
+      });
     }
 
     /* ---------------- loop + pausing ---------------- */
     function frame(now) {
       raf = 0;
       if (!running) return;
+      // while the light only sweeps by itself (no pointer, no touch, ignition done) 30 fps looks the same and costs half
+      var idle = !aimPt && aimMode !== 'touch' && !(aimMode === 'pointer' && (inside || clock - lastInput < 6)) && clock - igniteAt > 2;
+      if (idle && lastNow && now - lastNow < 30) { raf = requestAnimationFrame(frame); return; }
       var dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 0; // keeps wall-clock pace down to 10 fps
       lastNow = now;
       clock += dt;
