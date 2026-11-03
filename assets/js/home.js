@@ -250,10 +250,22 @@
 
     // the scene eases toward the scroll position (critically damped), so it glides instead of stepping
     let phase = -1, raf = 0, cur = null, last = 0, swapTimer = 0;
-    function target() {
+    // sizes are measured when the layout changes, not every frame: a per-frame read forces the browser to lay out
+    // the page again after the frame's style writes
+    let secTop = 0, secH = 1, W = 1, H = 1;
+    function measure() {
       const r = sec.getBoundingClientRect();
-      return { on: r.bottom > -innerHeight * .25 && r.top < innerHeight * 1.25, t: 5 + 24 * clamp(-r.top / (sec.offsetHeight - innerHeight), 0, 1) };
+      secTop = r.top + scrollY; secH = sec.offsetHeight; W = stick.clientWidth; H = stick.clientHeight;
     }
+    measure();
+    if ('ResizeObserver' in window) new ResizeObserver(function () { measure(); wake(); }).observe(document.body);
+    if (window.ScrollTrigger) window.ScrollTrigger.addEventListener('refresh', measure);
+    function target() {
+      const top = secTop - scrollY;
+      return { on: top + secH > -innerHeight * .25 && top < innerHeight * 1.25, t: 5 + 24 * clamp(-top / Math.max(1, secH - innerHeight), 0, 1) };
+    }
+    const prev = {};
+    const put = function (el, k, v) { const id = k + (el === stick ? '' : el.dataset.m); if (prev[id] !== v) { prev[id] = v; el.style.setProperty(k, v); } };
     function tick(now) {
       raf = 0;
       const tg = target();
@@ -273,16 +285,16 @@
       const dark = clamp(1 - sp * 2.4, 0, 1);
       const lamp = lampLevel(t);
       const bat = interp(BAT, t);
-      const W = stick.clientWidth, H = stick.clientHeight;
 
-      stick.style.setProperty('--top', interp(SKY, t, 1));
-      stick.style.setProperty('--bot', interp(SKY, t, 2));
-      stick.style.setProperty('--night', dark.toFixed(3));
-      stick.style.setProperty('--shade', (dark * .75).toFixed(3));
-      stick.style.setProperty('--lamp', lamp.toFixed(3));
-      stick.style.setProperty('--sunpow', clamp(sp * 3, 0, 1).toFixed(3));
-      stick.style.setProperty('--charging', charging(t).toFixed(3));
-      stick.style.setProperty('--hint', (1 - ramp(p, .005, .03)).toFixed(3));
+      // only what changed is written (each write restyles the whole scene)
+      put(stick, '--top', interp(SKY, t, 1));
+      put(stick, '--bot', interp(SKY, t, 2));
+      put(stick, '--night', dark.toFixed(3));
+      put(stick, '--shade', (dark * .75).toFixed(3));
+      put(stick, '--lamp', lamp.toFixed(3));
+      put(stick, '--sunpow', clamp(sp * 3, 0, 1).toFixed(3));
+      put(stick, '--charging', charging(t).toFixed(3));
+      put(stick, '--hint', (1 - ramp(p, .005, .03)).toFixed(3));
 
       const u = (t - RISE) / (SET - RISE);
       const sx = W * (.08 + .84 * clamp(u, 0, 1));
@@ -294,9 +306,9 @@
       moon.style.transform = 'translate(' + mx.toFixed(1) + 'px,' + my.toFixed(1) + 'px)';
 
       clock.firstChild.nodeValue = pad(Math.floor(t) % 24) + ':' + pad(Math.floor((t % 1) * 60));
-      bars.bat.style.setProperty('--v', (bat / 100).toFixed(3));
-      bars.sun.style.setProperty('--v', sp.toFixed(3));
-      bars.lamp.style.setProperty('--v', lamp.toFixed(3));
+      put(bars.bat, '--v', (bat / 100).toFixed(3));
+      put(bars.sun, '--v', sp.toFixed(3));
+      put(bars.lamp, '--v', lamp.toFixed(3));
       outs.bat.textContent = Math.round(bat) + '%';
       outs.sun.textContent = Math.round(sp * 100) + '%';
       outs.lamp.textContent = Math.round(lamp * 100) + '%';
@@ -321,7 +333,7 @@
       return '<li><h3>' + GS.esc(x.h) + '</h3><p>' + GS.esc(x.p) + '</p></li>';
     }).join('') + '</ol>');
     addEventListener('scroll', wake, { passive: true });
-    addEventListener('resize', function () { cur = null; wake(); });
+    addEventListener('resize', function () { measure(); cur = null; wake(); });
     wake();
   }
 
