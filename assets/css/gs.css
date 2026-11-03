@@ -22,6 +22,7 @@
 :root,
 html[data-theme="light"] :is(.menu, .hero, .day-stick, .cta, .ftr, .lightbox, .gsl, .dial),
 html[data-theme="light"].nav-dark .nav {
+  color: var(--text);          /* text that only inherits its colour (the nav wordmark) follows the scope too */
   /* colour */
   --ink-rgb: 243 239 230;      /* text-coloured ink, for hairlines and outlines */
   --fx-rgb: 255 255 255;       /* the tint laid over a surface to lift it */
