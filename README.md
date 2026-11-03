@@ -20,7 +20,7 @@ Animation uses GSAP (ScrollTrigger, SplitText, Flip) and Lenis smooth scrolling,
 
 ### Light mode
 
-A sun/moon button in the nav switches between the dark "Solar Noir" look and "Daylight": warm white paper, ink-black type, white cards with soft warm shadows, and accents in the brand's deep orange and green. The choice is kept in `localStorage` and applied by `head.js` before first paint; the default is dark. The light theme is a second set of tokens, `html[data-theme="light"]` at the bottom of `assets/css/gs.css`. The night-time scenes (hero road, 24-hour demo, closing call to action with the footer, wattage dial) stay dark as rounded panels set into the page, and the nav turns into dark glass while it floats over one of them (`main.js` sets `.nav-dark`).
+A sun/moon button in the nav switches between the dark "Solar Noir" look and "Daylight": warm white paper, ink-black type, white cards with soft warm shadows, accents in the brand's deep orange and green. The choice is kept in `localStorage` and applied by `head.js` before first paint (so the loading screen is already in the right theme); the default is dark. Every part has a daylight version: the loading and page-transition screen (the lamp drawn in ink on paper), the hero (`hero-beam.js` paints the same street by day and rebuilds it when the theme flips; letters the lamp touches turn orange), the wattage dial (a brushed-aluminium instrument), the closing call to action, footer and menu. Only the 24-hour demo keeps its sky, as a rounded panel, and the nav turns into dark glass while it floats over it. The light theme is a second set of tokens, `html[data-theme="light"]`, at the bottom of `gs.css`, `hero-beam.css`, `loader.css` and `dial.css`.
 
 ### Speed
 

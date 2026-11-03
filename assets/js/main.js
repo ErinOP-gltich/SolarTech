@@ -589,9 +589,9 @@
   }
 
   /* ---------- light / dark ---------- */
-  // In the light theme the nav is a white pill, except while it floats over one of the dark night panels: watch a thin
+  // In the light theme the nav is a white pill, except while it floats over the 24-hour sky panel: watch a thin
   // band where the nav sits and flag the page (gs.css then gives the nav the dark tokens).
-  const darkParts = document.querySelectorAll('.hero, .day-stick, .cta, .ftr, .dial');
+  const darkParts = document.querySelectorAll('.day-stick');
   if (darkParts.length && 'IntersectionObserver' in window) {
     const under = new Set();
     const io = new IntersectionObserver(function (es) {

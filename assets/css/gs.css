@@ -17,10 +17,9 @@
 @font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url(../fonts/instrumentserif-italic-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
 /* Colour, glass and elevation tokens. The page is dark ("Solar Noir"); html[data-theme="light"] (further down) flips them, and
-   the night-time parts (hero road, 24-hour demo, closing call to action, footer, wattage dial, menu, loader) re-declare these
-   dark values so they stay dark in either theme. The nav joins them while it floats over one of them (main.js sets .nav-dark). */
+   the nav re-declares these dark values while it floats over the 24-hour sky (main.js sets .nav-dark), where a white pill
+   would glare. */
 :root,
-html[data-theme="light"] :is(.menu, .hero, .day-stick, .cta, .ftr, .lightbox, .gsl, .dial),
 html[data-theme="light"].nav-dark .nav {
   color: var(--text);          /* text that only inherits its colour (the nav wordmark) follows the scope too */
   /* colour */
@@ -947,16 +946,26 @@ html[data-theme="light"] {
   --e4: 0 1px 3px rgb(40 28 10 / .05), 0 18px 40px -22px rgb(40 28 10 / .24);
   --e5: 0 4px 10px rgb(40 28 10 / .06), 0 40px 80px -30px rgb(40 28 10 / .3);
 }
-/* the night panels: opaque, and the big ones rounded into the paper */
-html[data-theme="light"] :is(.hero, .day-stick, .cta, .ftr) { background-color: var(--void); color: var(--text); }
-html[data-theme="light"] .dial { background-color: #0B0B10; }
-html[data-theme="light"] .hero { border-radius: 0 0 clamp(24px, 3vw, 44px) clamp(24px, 3vw, 44px); }
+/* every part has a daylight version; only the 24-hour demo keeps its sky, as a rounded panel set into the page */
 html[data-theme="light"] .day { background: transparent; }
 html[data-theme="light"] .day-stick { top: 10px; height: calc(100vh - 20px); height: calc(100svh - 20px); margin: 0 10px; border-radius: clamp(22px, 2.6vw, 40px); }
-html[data-theme="light"] .cta { border-radius: clamp(24px, 3vw, 44px) clamp(24px, 3vw, 44px) 0 0; }
-html[data-theme="light"] .page-tool .ftr { border-radius: clamp(24px, 3vw, 44px) clamp(24px, 3vw, 44px) 0 0; margin-top: var(--s7); }
-html[data-theme="light"] .ftr { border-top: 0; }
-/* the nav: a white pill on paper, a dark one over the night panels */
+html[data-theme="light"] .day-scroll { color: #FFFFFF; }
+/* hero: daylight road (hero-beam.js paints it), ink headline, letters the light touches turn orange */
+html[data-theme="light"] .hero-title { text-shadow: none; }
+html[data-theme="light"] .hero .live { --glass-tint: rgba(255, 255, 255, .78); }
+/* closing call to action: the lamp throws a warm cone onto the paper */
+html[data-theme="light"] .cta::after { background: radial-gradient(80% 55% at 50% 22%, rgb(250 248 244 / .7), transparent 75%); }
+html[data-theme="light"] .cta-cone { background: conic-gradient(from 155deg at 50% 0, transparent 0deg, rgba(255, 160, 50, .07) 14deg, rgba(255, 170, 60, .2) 25deg, rgba(255, 160, 50, .07) 36deg, transparent 50deg); }
+html[data-theme="light"] .cta-pool { background: radial-gradient(closest-side, rgba(255, 170, 60, .28), rgba(255, 140, 40, .08) 60%, transparent); }
+/* footer on paper: the logo made for light backgrounds */
+html[data-theme="light"] .ftr { border-top: 1px solid var(--line); }
+.ftr-brand .lg-l { display: none; }
+html[data-theme="light"] .ftr-brand .lg-d { display: none; }
+html[data-theme="light"] .ftr-brand .lg-l { display: block; }
+/* menu and lightbox: frosted paper instead of smoked glass */
+html[data-theme="light"] .menu { background: rgb(250 248 244 / .86); }
+html[data-theme="light"] .lightbox::backdrop { background: rgb(250 248 244 / .85); }
+/* the nav: a white pill on paper, dark glass over the 24-hour sky */
 html[data-theme="light"] .nav { --glass-tint: rgba(255, 255, 255, .7); box-shadow: var(--glass-inner), var(--e3); }
 html[data-theme="light"] .nav.is-scrolled { --glass-tint: rgba(255, 255, 255, .86); }
 html[data-theme="light"].nav-dark .nav { --glass-tint: rgba(12, 12, 16, .62); }
@@ -968,7 +977,6 @@ html[data-theme="light"] .aura i:nth-child(2) { opacity: .55; }
 html[data-theme="light"] .grain { opacity: .02; }
 /* buttons and accents that were tuned for the night */
 html[data-theme="light"] .btn-volt { background: var(--volt); color: #FFFFFF; }
-html[data-theme="light"] :is(.hero, .day-stick, .cta, .ftr, .dial) .btn-volt { background: var(--volt); color: var(--void); }
 /* product photos on daylight stages */
 html[data-theme="light"] .card-stage { background: radial-gradient(90% 70% at 50% 100%, #FFFFFF, transparent 70%), linear-gradient(180deg, #F6F3ED, #ECE7DD); }
 html[data-theme="light"] .card-stage img { filter: drop-shadow(0 16px 16px rgb(60 40 10 / .22)); }

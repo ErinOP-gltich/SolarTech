@@ -50,8 +50,17 @@
   var LAMP = [1.0, 0.84, 0.60];        // warm-white LED light
   var LIT_GAIN = 1.0;
   var KNEE = 0.4;                      // soft shoulder on the lit street: bright paint tops out near L 0.23                 // street albedo × LAMP × gain = the lit street
-  var MOON = [0.016, 0.018, 0.026];    // the unlit street: a faint, cool night
-  var FOG = [0.0042, 0.0040, 0.0062];  // haze toward the horizon (≈ #101015)
+  // two moods for the same street: night (the dark theme) and daylight (the light theme, html[data-theme="light"])
+  var NIGHT = { day: false, amb: [0.016, 0.018, 0.026], fog: [0.0042, 0.0040, 0.0062],      // a faint, cool night; haze ≈ #101015
+    sky: ['#050507', '#08080c', '#121219'], hills: ['#0c0c12', '#09090d'], trees: '#060609' };
+  var DAYLIGHT = { day: true, amb: [0.62, 0.62, 0.6], fog: [0.56, 0.66, 0.8],               // bright, slightly warm daylight; blue haze far off
+    sky: ['#9CC3E6', '#CFE1EE', '#E9EFF0'], hills: ['#7E9A7F', '#9DB49D'], trees: '#46644E' };
+  var PAL = NIGHT;
+  var MOON = PAL.amb, FOG = PAL.fog;
+  function setPalette() {
+    PAL = document.documentElement.getAttribute('data-theme') === 'light' ? DAYLIGHT : NIGHT;
+    MOON = PAL.amb; FOG = PAL.fog;
+  }
   var KEY = vnorm([-0.55, 0.62, -0.56]); // studio key on the luminaire: upper-left, from the camera side
   var KEYC = [0.36, 0.42, 0.56];
   var RIMC = [0.30, 0.25, 0.20];
@@ -227,6 +236,11 @@
 
     /* ---------------- building the street (static) ---------------- */
     function tone(alb, lit, z) {
+      if (PAL.day) {
+        var d = cmul(alb, MOON);
+        if (lit) d = cadd(d, cscale(cmul(alb, LAMP), 1.1));
+        return cmix(d, FOG, 1 - Math.exp(-Math.max(0, z - 14) / 150));
+      }
       if (lit) {
         var c = cscale(cmul(alb, LAMP), LIT_GAIN);
         c = [c[0] / (1 + c[0] / KNEE), c[1] / (1 + c[1] / KNEE), c[2] / (1 + c[2] / KNEE)];
@@ -264,9 +278,9 @@
       // sky (the unlit layer only)
       if (!isLit) {
         var sky = ctx.createLinearGradient(0, 0, 0, Math.max(hz, 1) + 2);
-        sky.addColorStop(0, '#050507');
-        sky.addColorStop(0.7, '#08080c');
-        sky.addColorStop(1, '#121219');
+        sky.addColorStop(0, PAL.sky[0]);
+        sky.addColorStop(0.7, PAL.sky[1]);
+        sky.addColorStop(1, PAL.sky[2]);
         ctx.fillStyle = sky; ctx.fillRect(0, 0, W, Math.max(hz, 0) + 2);
         // the hills around Guwahati, two layers
         var hr = rng(5);
@@ -279,11 +293,11 @@
             ctx.lineTo(x, y);
           }
           ctx.lineTo(W, hz + 2); ctx.closePath();
-          ctx.fillStyle = layer ? '#09090d' : '#0c0c12'; ctx.fill();
+          ctx.fillStyle = PAL.hills[layer]; ctx.fill();
         }
-        // a few stars
+        // a few stars (night only)
         var st = rng(3);
-        for (var i = 0; i < 46; i++) {
+        for (var i = 0; i < (PAL.day ? 0 : 46); i++) {
           var sy = st() * (hz - 0.035 * H), sxp = st() * W;
           if (sy < 4) continue;
           ctx.fillStyle = 'rgba(243,239,230,' + (0.08 + st() * 0.26).toFixed(2) + ')';
@@ -427,7 +441,7 @@
         [[-11, 48], [-17, 70], [-9.5, 96], [-22, 120], [13, 140], [-14, 160]].forEach(function (t) {
           var base = P(t[0], 1, t[1]), topP = P(t[0] + 0.3, 9.5, t[1]);
           var wpx = cam.f * 0.16 / base[2];
-          ctx.fillStyle = '#060609';
+          ctx.fillStyle = PAL.trees;
           ctx.beginPath(); ctx.moveTo(base[0] - wpx, base[1]); ctx.lineTo(topP[0] - wpx * 0.5, topP[1]); ctx.lineTo(topP[0] + wpx * 0.5, topP[1]); ctx.lineTo(base[0] + wpx, base[1]); ctx.fill();
           var cw = cam.f * (3.2 + tr() * 1.6) / base[2], ch = cam.f * (0.9 + tr() * 0.5) / base[2];
           for (var k = 0; k < 5; k++) {
@@ -486,6 +500,7 @@
       });
     }
     function drawDistantLight(ctx, maskOnly) {
+      if (PAL.day) return;   // street lights are off in daylight
       DISTANT.forEach(function (z, i) {
         var fog = Math.exp(-(z - 20) / 95);
         var hd = cam.pv(distantHead(z));
@@ -528,7 +543,7 @@
       var h = vnorm(vadd(KEY, v));
       var spec = Math.pow(Math.max(0, vdot(n, h)), 36) * 0.9;
       var down = Math.max(0, -n[1]) * (warm || 0);
-      var c = cmul(base, cadd(cadd([0.012, 0.012, 0.016], cscale(KEYC, k)), cscale(LAMP, down)));
+      var c = cmul(base, cadd(cadd(PAL.day ? [0.42, 0.44, 0.48] : [0.012, 0.012, 0.016], cscale(KEYC, k)), cscale(LAMP, down)));
       return cadd(cadd(c, cscale(RIMC, rim)), cscale([0.55, 0.6, 0.7], spec));
     }
 
@@ -751,6 +766,7 @@
 
     /* ---------------- sizing / rebuild ---------------- */
     function build() {
+      setPalette();
       var r = host.getBoundingClientRect();
       W = Math.max(1, Math.round(r.width)); H = Math.max(1, Math.round(r.height));
       var dev = window.devicePixelRatio || 1;
@@ -965,7 +981,7 @@
         g.addColorStop(0, 'rgba(255,238,206,' + a0 + ')'); g.addColorStop(0.55, 'rgba(255,226,180,' + (a0 * 0.45 + a1 * 0.55) + ')'); g.addColorStop(1, 'rgba(255,214,160,' + a1 + ')');
         return g;
       };
-      var Iv = clamp(I, 0, 1.2);
+      var Iv = clamp(I, 0, 1.2) * (PAL.day ? 0.4 : 1);
       fillPoly(vctx, widen(pool, 1.7, 1.35), lg(0.06 * Iv, 0.02 * Iv));
       fillPoly(vctx, cone, lg(0.28 * Iv, 0.08 * Iv));
       fillPoly(vctx, widen(pool, 0.6, 0.5), lg(0.2 * Iv, 0.0));
@@ -1011,7 +1027,7 @@
         return (1 - sstep(0.45, 1.0, lat / hw)) * (1.05 - 0.55 * clamp(s2, 0, 1)) * (s2 > 1 ? 1 - sstep(1, 1.12, s2) : 1);
       };
       var tt = clock;
-      motes.forEach(function (m) {
+      if (!PAL.day) motes.forEach(function (m) {
         if (dt) {
           m.x += (Math.sin(tt * 0.3 * m.sp + m.ph) * 4 + 2) * dt;
           m.y += (Math.cos(tt * 0.23 * m.sp + m.ph * 1.7) * 3 - 1.2) * dt;
@@ -1025,7 +1041,7 @@
         var r2 = m.r * 2.6;
         fx.drawImage(dot, m.x - r2, m.y - r2, r2 * 2, r2 * 2);
       });
-      bokeh.forEach(function (bk) {
+      if (!PAL.day) bokeh.forEach(function (bk) {
         if (dt) { bk.y -= 3 * dt; bk.x += Math.sin(tt * 0.2 + bk.ph) * 2 * dt; if (bk.y < -20) bk.y += H + 40; }
         var b = beamAt(bk.x, bk.y);
         if (b < 0.02) return;
@@ -1035,7 +1051,7 @@
       fx.globalAlpha = 1;
 
       // 5 · fireflies over the tea (they ignore the beam)
-      flies.forEach(function (fl) {
+      if (!PAL.day) flies.forEach(function (fl) {
         var ph = ((tt + fl.ph) % fl.per) / fl.per;
         var on = ph < 0.12 ? sstep(0, 0.05, ph) * (1 - sstep(0.06, 0.12, ph)) : 0;
         if (reduced) on = 0.6;
@@ -1196,6 +1212,8 @@
     document.addEventListener('visibilitychange', onVis);
     function onMotion(e) { motionPaused = e && e.detail && 'paused' in e.detail ? !!e.detail.paused : !!(window.GS && window.GS.motionPaused); sync(); }
     document.addEventListener('gs:motion', onMotion);
+    function onTheme() { build(); if (!running) still(); }
+    document.addEventListener('gs:theme', onTheme);
 
     var rq = 0, lastW = 0, lastH = 0;
     function onResize() {
@@ -1245,6 +1263,7 @@
         removeEventListener('orientationchange', onResize);
         document.removeEventListener('visibilitychange', onVis);
         document.removeEventListener('gs:motion', onMotion);
+        document.removeEventListener('gs:theme', onTheme);
         ['--hb-ax', '--hb-ay', '--hb-a0', '--hb-aw', '--hb-as', '--hb-r', '--hb-k', '--hb-nr'].forEach(function (p) { host.style.removeProperty(p); });
         host.classList.remove('hb-on');
         if (ownStage) stage.remove(); else { cScene.remove(); cFx.remove(); }

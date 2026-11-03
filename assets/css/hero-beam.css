@@ -166,3 +166,27 @@ html:not(.js) .hb-lit::after { content: none; }
 
 /* low-power devices: no live canvas, so no aiming hint (home.js adds .hb-static) */
 .hb.hb-static .hb-aim { display: none; }
+
+/* light theme: a daylight road (hero-beam.js), an ink headline, and the letters the lamp touches turn orange */
+html[data-theme="light"] .hb { --hb-unlit: #2E2923; --hb-lit: #E8590C; }
+html[data-theme="light"] .hb-title .hb-lit:not(.grad) { background: linear-gradient(180deg, #2E2923 0%, #141110 100%); -webkit-background-clip: text; background-clip: text; }
+html[data-theme="light"] .hb-title .hb-lit, html[data-theme="light"] .hb-title .grad { filter: none; }
+/* the night needed dark halos behind the type; daylight needs none, only a soft paper glow behind the small print */
+html[data-theme="light"] .hb-title, html[data-theme="light"] .hb .hero-title { text-shadow: none; }
+html[data-theme="light"] .hb .lede { text-shadow: 0 0 12px rgb(250 248 244 / .95), 0 0 2px rgb(250 248 244 / .9); }
+html[data-theme="light"] .hb-lit::after { text-shadow: 0 0 .12em rgba(255, 180, 90, .45); }
+html[data-theme="light"] .hb .ticker-track span::before { text-shadow: none; }
+html[data-theme="light"] .hb::after {
+  background:
+    linear-gradient(0deg, rgb(250 248 244 / .94) 0%, rgb(250 248 244 / .6) 7%, rgb(250 248 244 / 0) 18%),
+    linear-gradient(90deg, rgb(250 248 244 / .72) 0%, rgb(250 248 244 / .28) 30%, rgb(250 248 244 / 0) 48%);
+}
+html[data-theme="light"] .hb-fallback {
+  background:
+    radial-gradient(22% 7% at 58% 71%, rgba(255, 190, 110, .3), transparent 100%),
+    linear-gradient(180deg, #DCE7EF 0%, #EDF1F2 30%, #CBD3C6 31%, #A9AFA6 60%, #8F948C 100%);
+}
+@media (max-width: 760px) {
+  /* portrait: the copy sits over the road, so the paper fade reaches higher */
+  html[data-theme="light"] .hb::after { background: linear-gradient(0deg, rgb(250 248 244 / .96) 0%, rgb(250 248 244 / .82) 34%, rgb(250 248 244 / .35) 56%, rgb(250 248 244 / 0) 72%); }
+}

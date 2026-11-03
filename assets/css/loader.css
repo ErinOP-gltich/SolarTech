@@ -285,3 +285,23 @@ html.js .gsl {
 @media print {
   html.js .gsl { display: none; }
 }
+
+/* ---------- light theme: the same lamp, drawn in ink on a morning-paper curtain ----------
+   (html[data-theme] is set by head.js before this paints, so there is no dark flash) */
+html[data-theme="light"].is-loading { background-color: #FAF8F4; }
+html.js[data-theme="light"] .gsl {
+  --void: #FAF8F4;
+  --line: rgba(20, 17, 16, .42);
+  --line-2: rgba(20, 17, 16, .15);
+  --text: #141110;
+  --muted: #6B655B;
+  --volt: #2B8A3E;
+}
+html[data-theme="light"] .gsl-curtain {
+  background:
+    radial-gradient(ellipse 70% 55% at 62% -8%, rgba(255, 196, 0, .14), transparent 70%),   /* first of the morning */
+    radial-gradient(ellipse 120% 95% at 50% 40%, #FFFFFF 0%, var(--void) 70%);
+}
+html[data-theme="light"] .gsl-status i { background: #D6D0C4; }
+html[data-theme="light"] .gsl-on { color: rgba(20, 17, 16, .3); }
+html[data-theme="light"] .gsl--on .gsl-status i { box-shadow: 0 0 8px rgba(43, 138, 62, .45); }

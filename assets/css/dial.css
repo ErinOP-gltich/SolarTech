@@ -655,3 +655,59 @@
   .dial *, .dial *::before, .dial *::after { transition-duration: 0s !important; transition-delay: 0s !important; animation: none !important; }
   .dial.is-armed .ds-light, .dial.is-armed .ds-floor, .dial.is-armed .ds-dust { opacity: 1; }
 }
+
+/* ======================================================================
+   LIGHT THEME — the daylight instrument: a white glass panel, a brushed
+   aluminium knob (the plasma filament and the hub still glow), a pale stage
+   where the beam reads as a warm wedge, ink scale and rulers.
+   ====================================================================== */
+html[data-theme="light"] .dial {
+  background:
+    radial-gradient(1px 1px at 12px 12px, rgba(20, 17, 16, .07) 1px, transparent 1.5px) 0 0 / 24px 24px,
+    var(--glass-fill), rgba(255, 255, 255, .72);
+}
+html[data-theme="light"] .dial-keys kbd { background: rgba(20, 17, 16, .03); }
+/* scale */
+html[data-theme="light"] .dk-grad { stroke: rgba(20, 17, 16, .16); }
+html[data-theme="light"] .dk-min { stroke: rgba(20, 17, 16, .3); }
+html[data-theme="light"] .dk-track { stroke: rgba(20, 17, 16, .07); }
+html[data-theme="light"] .dk-maj { stroke: rgba(20, 17, 16, .4); }
+html[data-theme="light"] .dk-lab.is-lit { fill: rgba(20, 17, 16, .7); }
+html[data-theme="light"] .dk-tip b { background: #FFFFFF; box-shadow: 0 0 0 2px rgba(255, 179, 0, .5), 0 0 10px 3px rgba(255, 140, 0, .55), 0 0 22px 6px rgba(255, 90, 20, .25); }
+/* knob: brushed aluminium */
+html[data-theme="light"] .dk-shadow { box-shadow: 0 0 0 1px rgba(20, 17, 16, .14), 0 34px 50px -20px rgba(60, 40, 10, .38), 0 10px 18px rgba(60, 40, 10, .14); }
+html[data-theme="light"] .dk-grip { background: repeating-conic-gradient(from 0deg, #EDEAE3 0deg .7deg, #CFC9BE 1.1deg 1.9deg, #ABA498 2.2deg 2.6deg, #EDEAE3 3deg); }
+html[data-theme="light"] .dk-shade {
+  background: radial-gradient(120% 120% at 30% 8%, rgba(255, 255, 255, .75), rgba(255, 255, 255, .12) 38%, rgba(60, 40, 10, .08) 62%, rgba(60, 40, 10, .26) 100%);
+  box-shadow: inset 0 1px 0 #FFFFFF, inset 0 -2px 8px rgba(60, 40, 10, .18);
+}
+html[data-theme="light"] .dk-face {
+  background:
+    repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .5) 0 1px, rgba(60, 40, 10, .035) 1px 2px, transparent 2px 3.5px),
+    conic-gradient(from 18deg, #F3F1EC, #D7D2C8 9%, #FFFFFF 21%, #D2CDC3 34%, #EDEAE4 47%, #CEC8BE 58%, #FBFAF7 71%, #D5D0C6 85%, #F3F1EC);
+  box-shadow: 0 0 0 1px rgba(20, 17, 16, .16), 0 0 0 2px rgba(255, 255, 255, .8), 0 10px 18px -4px rgba(60, 40, 10, .28), inset 0 2px 1px #FFFFFF, inset 0 -4px 10px rgba(60, 40, 10, .12);
+}
+html[data-theme="light"] .dk-face::after { box-shadow: 0 0 0 1px rgba(20, 17, 16, .1), 0 1px 0 1px rgba(255, 255, 255, .8), inset 0 1px 0 rgba(255, 255, 255, .6); }
+html[data-theme="light"] .dk-engr-ring { stroke: rgba(20, 17, 16, .16); }
+html[data-theme="light"] .dk-engr-ring + .dk-engr-ring { stroke: rgba(255, 255, 255, .8); }
+html[data-theme="light"] .dk-engr-t { fill: rgba(20, 17, 16, .4); }
+html[data-theme="light"] .dk-engr-sh { fill: rgba(255, 255, 255, .9); }
+html[data-theme="light"] .dk-ind i { background: #2A2622; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6), 0 1px 0 rgba(255, 255, 255, .9); }
+html[data-theme="light"] .dk-gloss { background: radial-gradient(42% 30% at 34% 18%, rgba(255, 255, 255, .55), transparent 70%), radial-gradient(60% 40% at 70% 92%, rgba(255, 140, 40, .06), transparent 70%); }
+/* stage: the lamp hangs in pale light; the beam is a warm wedge on the paper */
+html[data-theme="light"] .dial-stage { background: radial-gradient(90% 60% at 50% 100%, rgba(255, 140, 40, .1), transparent 70%), linear-gradient(180deg, #F7F4EE 0%, #ECE7DD 100%); }
+html[data-theme="light"] .ds-cone--h { opacity: calc(var(--lv) * var(--lv) * .5); }
+html[data-theme="light"] .ds-rays { opacity: calc(.08 + var(--lv) * .3); }
+html[data-theme="light"] .ds-floor { background-image: linear-gradient(90deg, rgba(200, 110, 30, .28) 1px, transparent 1px), linear-gradient(0deg, rgba(200, 110, 30, .28) 1px, transparent 1px); }
+html[data-theme="light"] .ds-horizon { background: linear-gradient(90deg, transparent, rgba(20, 17, 16, .14) 20%, rgba(20, 17, 16, .22) 50%, rgba(20, 17, 16, .14) 80%, transparent); }
+html[data-theme="light"] .ds-cable { background: linear-gradient(180deg, transparent, rgba(20, 17, 16, .45)); }
+html[data-theme="light"] .ds-img { filter: drop-shadow(0 16px 22px rgba(60, 40, 10, .28)); -webkit-mask-image: none; mask-image: none; }
+html[data-theme="light"] .ds-ruler {
+  background:
+    repeating-linear-gradient(180deg, rgba(20, 17, 16, .25) 0 1px, transparent 1px 50px) 0 0 / 14px 100%,
+    repeating-linear-gradient(180deg, rgba(20, 17, 16, .13) 0 1px, transparent 1px 10px) 0 0 / 7px 100%;
+  background-repeat: no-repeat;
+}
+/* readout */
+html[data-theme="light"] .dr-dig.is-ghost i { -webkit-text-stroke-color: rgba(20, 17, 16, .14); }
+html[data-theme="light"] .dr-bar { background: rgba(20, 17, 16, .08); }
