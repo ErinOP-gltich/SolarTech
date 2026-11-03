@@ -15,8 +15,8 @@ const ld = {
   '@graph': [
     { '@type': 'BreadcrumbList', itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
-      { '@type': 'ListItem', position: 2, name: 'Marketplace', item: SITE + 'products.html' }] },
-    { '@type': 'OfferCatalog', '@id': SITE + 'products.html#catalogue', name: 'Green Sun Technologies product catalogue', url: SITE + 'products.html',
+      { '@type': 'ListItem', position: 2, name: 'Marketplace', item: SITE + 'products' }] },
+    { '@type': 'OfferCatalog', '@id': SITE + 'products#catalogue', name: 'Green Sun Technologies product catalogue', url: SITE + 'products',
       numberOfItems: P.length, seller: { '@id': SITE + '#business' },
       itemListElement: P.map((p, i) => ({ '@type': 'Offer', position: i + 1, availability: 'https://schema.org/InStock', areaServed: 'IN',
         itemOffered: { '@type': 'Product', name: p.name, sku: p.part || p.id, mpn: p.part || undefined, category: cat(p.cat),
@@ -34,10 +34,10 @@ const photos = [...new Map(P.filter(p => !/\.svg$/.test(p.img)).map(p => [p.img,
 writeFileSync('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url><loc>${SITE}</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>1.0</priority></url>
-  <url><loc>${SITE}products.html</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority>
+  <url><loc>${SITE}products</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority>
 ${photos.map(img).join('\n')}
   </url>
-  <url><loc>${SITE}contact.html</loc><lastmod>${today}</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>${SITE}contact</loc><lastmod>${today}</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
 </urlset>
 `);
 console.log('seo: catalogue of', P.length, 'products, sitemap with', photos.length, 'photos');

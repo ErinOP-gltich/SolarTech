@@ -29,10 +29,10 @@ The animated parts are written to stay off the main thread: the marquee is a CSS
 ## Preview
 
 ```bash
-python3 -m http.server 8000
+npx wrangler pages dev . --port 8788
 ```
 
-Then open http://localhost:8000.
+Then open http://localhost:8788. (Cloudflare serves the pages without `.html`, as `/products` and `/contact`, and the site links to them that way, so use Wrangler rather than a plain static server, which wouldn't find them.)
 
 ## Deploying
 

@@ -7,7 +7,7 @@
        products,            // the semi-integrated street lights (sorted by watt here anyway);
                             // defaults to window.GS_PRODUCTS ids matching /^si-\d+w$/
        onChange(product),   // called whenever the selected light changes (user input or set())
-       contactHref(id),     // link for "Enquire about the …" (default: 'contact.html?p=' + id)
+       contactHref(id),     // link for "Enquire about the …" (default: 'contact?p=' + id)
        initial              // optional starting id (default: the 40 W, else the middle stop)
      });
      dial.set('si-80w');    // also accepts a wattage: dial.set(80)
@@ -315,7 +315,7 @@
     var id = 'gsd' + (++uid);
     var span = Math.max(1, n - 1);
     var step = n > 1 ? SWEEP / (n - 1) : 0;
-    var hrefFor = typeof opts.contactHref === 'function' ? opts.contactHref : function (pid) { return 'contact.html?p=' + encodeURIComponent(pid); };
+    var hrefFor = typeof opts.contactHref === 'function' ? opts.contactHref : function (pid) { return 'contact?p=' + encodeURIComponent(pid); };
     var onChange = typeof opts.onChange === 'function' ? opts.onChange : null;
     var wMin = items[0].watt, wMax = items[n - 1].watt;
     var lmMax = wMax * EFFICACY;
@@ -501,7 +501,7 @@
       if (inQuote(q, p.id)) { q.remove(p.id); msg = (p.short || p.name) + ' removed from your quote list'; }
       else { q.add(p.id, 1); msg = (p.short || p.name) + ' added to your quote list'; }
       syncAdd();
-      try { if (G && typeof G.toast === 'function') G.toast(msg, { href: 'contact.html', text: 'Get quote' }); } catch (e) { /* optional */ }
+      try { if (G && typeof G.toast === 'function') G.toast(msg, { href: 'contact', text: 'Get quote' }); } catch (e) { /* optional */ }
     }
 
     /* ---------- commit ---------- */

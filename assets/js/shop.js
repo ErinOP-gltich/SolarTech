@@ -33,7 +33,7 @@
     const host = $('[data-dial]');
     const lights = ALL.filter(function (p) { return /^si-\d+w$/.test(p.id); }).sort(function (a, b) { return a.watt - b.watt; });
     if (!host || !window.GSDial || !lights.length) { const sec = $('[data-dial-sec]'); if (sec) sec.hidden = true; return; }
-    window.GSDial.mount(host, { products: lights, contactHref: function (id) { return 'contact.html?p=' + encodeURIComponent(id); } });
+    window.GSDial.mount(host, { products: lights, contactHref: function (id) { return 'contact?p=' + encodeURIComponent(id); } });
   }
 
   /* ---------- 2. search ---------- */
@@ -113,7 +113,7 @@
   function renderTable(list) {
     table.innerHTML = '<table class="ptable"><thead><tr><th></th><th>Product</th><th>Power</th><th>Battery</th><th>Panel</th><th>Backup</th><th>Protection</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>' +
       list.map(function (p) {
-        const href = 'contact.html?p=' + encodeURIComponent(p.id);
+        const href = 'contact?p=' + encodeURIComponent(p.id);
         return '<tr><td><span class="th' + (p.blueprint ? ' blueprint' : '') + '"><img src="' + GS.esc(p.img) + '" alt="" loading="lazy"></span></td>' +
           '<td class="nm"><b>' + GS.esc(p.name) + '</b><span class="label">' + GS.esc(p.part) + '</span></td>' +
           '<td class="watt">' + (p.watt ? p.watt + 'W' : '—') + '</td><td>' + GS.esc(p.battery) + '</td><td>' + GS.esc(p.panel) + '</td>' +
