@@ -16,6 +16,7 @@
     plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
     check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
     chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     star: '<svg class="star" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l2.6 8.4L23 12l-8.4 2.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg>'
   };
 
@@ -163,9 +164,12 @@
           '<button class="icon-btn glass sl' + (on ? ' is-on' : '') + '" type="button" data-add="' + esc(p.id) + '" aria-pressed="' + on + '" aria-label="Add ' + esc(p.short || p.name) + ' to quote list"><span class="state" aria-hidden="true"></span>' + (on ? ICON.check : ICON.plus) + '</button>' +
           '<button class="icon-btn glass sl" type="button" data-more aria-expanded="false" aria-controls="' + moreId + '" aria-label="Full specifications: ' + esc(p.short || p.name) + '"><span class="state" aria-hidden="true"></span>' + ICON.chevron + '</button>' +
         '</div>' +
-        '<div class="card-more" id="' + moreId + '"><div inert><dl>' + (p.specs || []).map(function (s) {
-          return '<div><dt>' + esc(s[0]) + '</dt><dd>' + esc(s[1]) + '</dd></div>';
-        }).join('') + '</dl></div></div>' +
+        '<div class="card-more" id="' + moreId + '" role="region" aria-label="Specifications: ' + esc(p.short || p.name) + '"><div inert data-lenis-prevent>' +
+          '<div class="card-more-head"><span class="label">Full specifications</span>' +
+          '<button class="icon-btn sl" type="button" data-more-close aria-label="Close specifications"><span class="state" aria-hidden="true"></span>' + ICON.close + '</button></div>' +
+          '<dl>' + (p.specs || []).map(function (s) {
+            return '<div><dt>' + esc(s[0]) + '</dt><dd>' + esc(s[1]) + '</dd></div>';
+          }).join('') + '</dl></div></div>' +
       '</article>';
   }
 
@@ -204,8 +208,44 @@
     toastTimer = setTimeout(hide, 4200);
   }
 
+  /* ---------- spec drawers: they slide out sideways, so opening one never reflows the grid ---------- */
+  // Beside the card where there is room (right, else left, over the neighbouring card); on a single column, over the
+  // card itself. One open at a time.
+  function sideFor(c) {
+    const g = c.parentElement.getBoundingClientRect(), r = c.getBoundingClientRect(), gap = 16;
+    if (r.right + gap + r.width <= g.right + 2) return 'r';
+    if (r.left - gap - r.width >= g.left - 2) return 'l';
+    return 'in';
+  }
+  function setMore(c, open) {
+    if (open === c.classList.contains('is-open')) return;
+    if (open) {
+      document.querySelectorAll('.card.is-open').forEach(function (o) { setMore(o, false); });
+      c.dataset.side = sideFor(c);
+      c.classList.add('is-more');
+    }
+    c.classList.toggle('is-open', open);
+    const btnMore = c.querySelector('[data-more]');
+    if (btnMore) btnMore.setAttribute('aria-expanded', open);
+    const body = c.querySelector('.card-more > div');
+    if (body) body.inert = !open;
+    // the card lets the drawer show past its edge only while the drawer is out (or sliding back)
+    clearTimeout(c._moreT);
+    if (!open) c._moreT = setTimeout(function () { if (!c.classList.contains('is-open')) c.classList.remove('is-more'); }, reduceMotion ? 0 : 820);
+  }
+  addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    const c = document.querySelector('.card.is-open');
+    if (!c) return;
+    setMore(c, false);
+    const b = c.querySelector('[data-more]'); if (b) b.focus();
+  });
+  addEventListener('resize', function () { document.querySelectorAll('.card.is-open').forEach(function (c) { c.dataset.side = sideFor(c); }); });
+
   /* ---------- delegated clicks: quote list, spec drawers, ripples ---------- */
   document.addEventListener('click', function (e) {
+    const openCard = document.querySelector('.card.is-open');
+    if (openCard && !openCard.contains(e.target)) setMore(openCard, false); // a click anywhere else puts it away
     const add = e.target.closest('[data-add]');
     if (add) {
       const id = add.dataset.add;
@@ -220,14 +260,9 @@
       return;
     }
     const more = e.target.closest('[data-more]');
-    if (more) {
-      const c = more.closest('.card');
-      const open = c.classList.toggle('is-open');
-      more.setAttribute('aria-expanded', open);
-      const body = c.querySelector('.card-more > div');
-      if (body) body.inert = !open;
-      if (window.ScrollTrigger) setTimeout(function () { window.ScrollTrigger.refresh(); }, 850);
-    }
+    if (more) { const c = more.closest('.card'); setMore(c, !c.classList.contains('is-open')); return; }
+    const shut = e.target.closest('[data-more-close]');
+    if (shut) { const c = shut.closest('.card'); setMore(c, false); const b = c.querySelector('[data-more]'); if (b) b.focus(); }
   });
 
   document.addEventListener('pointerdown', function (e) {
@@ -474,11 +509,6 @@
     dlg.addEventListener('close', function () { if (lenis) lenis.start(); });
   }
 
-  // Chromium can refract the backdrop through an SVG displacement filter; elsewhere glass stays frosted
-  if (window.chrome && CSS.supports && CSS.supports('backdrop-filter', 'url(#lg-refract)') && document.getElementById('lg-refract')) {
-    root.classList.add('lg-refract');
-  }
-
   /* ---------- credential tickers: a seamless loop at a steady reading speed ---------- */
   // The track scrolls by half its width, so it must be two identical halves, each at least as wide as
   // the strip: the original items are repeated until they are, and the duration is set from that width.
@@ -589,9 +619,9 @@
   }
 
   /* ---------- light / dark ---------- */
-  // In the light theme the nav is a white pill, except while it floats over the 24-hour sky panel: watch a thin
-  // band where the nav sits and flag the page (gs.css then gives the nav the dark tokens).
-  const darkParts = document.querySelectorAll('.day-stick');
+  // In the light theme the nav is a white pill, except while it floats over a dark panel (the night hero, the
+  // 24-hour sky): watch a thin band where the nav sits and flag the page (gs.css then gives the nav the dark tokens).
+  const darkParts = document.querySelectorAll('.hero, .day-stick');
   if (darkParts.length && 'IntersectionObserver' in window) {
     const under = new Set();
     const io = new IntersectionObserver(function (es) {

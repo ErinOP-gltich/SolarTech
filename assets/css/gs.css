@@ -16,10 +16,11 @@
 @font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url(../fonts/geistmono-numero.woff2) format('woff2'); unicode-range: U+2116; }
 @font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url(../fonts/instrumentserif-italic-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 
-/* Colour, glass and elevation tokens. The page is dark ("Solar Noir"); html[data-theme="light"] (further down) flips them, and
-   the nav re-declares these dark values while it floats over the 24-hour sky (main.js sets .nav-dark), where a white pill
-   would glare. */
+/* Colour, glass and elevation tokens. The page is dark ("Solar Noir"); html[data-theme="light"] (further down) flips them.
+   The home hero keeps these dark values in both themes (it is a night scene), and so does the nav while it floats over a
+   dark panel (main.js sets .nav-dark), where a white pill would glare. */
 :root,
+html[data-theme="light"] .hero,
 html[data-theme="light"].nav-dark .nav {
   color: var(--text);          /* text that only inherits its colour (the nav wordmark) follows the scope too */
   /* colour */
@@ -95,7 +96,12 @@ html[data-theme="light"].nav-dark .nav {
   --gutter: clamp(16px, 3.4vw, 56px);
   --maxw: 1480px;
   --nav-h: 64px;
+
+  /* size: deploy.sh (scale.mjs) writes every length in the stylesheets as N × --px, so the live site shows at 90% on
+     anything wider than a phone, like a browser zoomed out. In the source files lengths are plain px (100%). */
+  --px: 1px;
 }
+@media (min-width: 761px) { :root { --px: .9px; } }
 
 /* ------------------------------------------------------------------ base */
 *, *::before, *::after { box-sizing: border-box; }
@@ -134,19 +140,10 @@ h2.label, h3.label { margin: 0; font-weight: 500; }
 
 /* ambient light behind everything: gives the glass something to refract */
 .aura { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; background: var(--void); }
-.aura i { position: absolute; border-radius: 50%; opacity: .5; will-change: transform; } /* soft radial gradients instead of a live 90px blur */
-.aura i:nth-child(1) { width: 52vw; height: 52vw; left: -14vw; top: 30vh; background: radial-gradient(circle, rgba(255, 59, 31, .5), rgba(255, 59, 31, .22) 32%, rgba(255, 59, 31, .06) 55%, transparent 70%); animation: drift1 26s var(--ease) infinite alternate; }
-.aura i:nth-child(2) { width: 46vw; height: 46vw; right: -12vw; top: -10vh; background: radial-gradient(circle, rgba(255, 196, 0, .36), rgba(255, 196, 0, .16) 32%, rgba(255, 196, 0, .05) 55%, transparent 70%); animation: drift2 32s var(--ease) infinite alternate; }
-.aura i:nth-child(3) { width: 38vw; height: 38vw; left: 34vw; bottom: -18vh; background: radial-gradient(circle, rgba(198, 255, 61, .2), rgba(198, 255, 61, .09) 32%, rgba(198, 255, 61, .03) 55%, transparent 70%); animation: drift3 38s var(--ease) infinite alternate; }
-@keyframes drift1 { to { transform: translate(18vw, -24vh) scale(1.2); } }
-@keyframes drift2 { to { transform: translate(-22vw, 30vh) scale(.85); } }
-@keyframes drift3 { to { transform: translate(-16vw, -20vh) scale(1.25); } }
-
-/* film grain */
-.grain { position: fixed; inset: -50%; z-index: 250; pointer-events: none; opacity: .035; will-change: transform;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain .9s steps(6) infinite; }
-@keyframes grain { 0% { transform: translate(0, 0); } 20% { transform: translate(-3%, 2%); } 40% { transform: translate(2%, -4%); } 60% { transform: translate(-4%, -2%); } 80% { transform: translate(3%, 3%); } 100% { transform: translate(0, 0); } }
+.aura i { position: absolute; border-radius: 50%; opacity: .5; } /* soft radial gradients, standing still: no live blur, no animation */
+.aura i:nth-child(1) { width: 52vw; height: 52vw; left: -14vw; top: 30vh; background: radial-gradient(circle, rgba(255, 59, 31, .5), rgba(255, 59, 31, .22) 32%, rgba(255, 59, 31, .06) 55%, transparent 70%); }
+.aura i:nth-child(2) { width: 46vw; height: 46vw; right: -12vw; top: -10vh; background: radial-gradient(circle, rgba(255, 196, 0, .36), rgba(255, 196, 0, .16) 32%, rgba(255, 196, 0, .05) 55%, transparent 70%); }
+.aura i:nth-child(3) { width: 38vw; height: 38vw; left: 34vw; bottom: -18vh; background: radial-gradient(circle, rgba(198, 255, 61, .2), rgba(198, 255, 61, .09) 32%, rgba(198, 255, 61, .03) 55%, transparent 70%); }
 
 /* ------------------------------------------------------------------ type */
 .xl, .h1, .h2, .h3 { font-family: var(--f-display); font-weight: 900; font-stretch: 125%; text-transform: uppercase; letter-spacing: -.025em; }
@@ -180,8 +177,6 @@ h2.label, h3.label { margin: 0; font-weight: 500; }
   position: relative;
   isolation: isolate;
   background: var(--glass-fill), var(--glass-tint);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-edge);
   box-shadow: var(--glass-inner), var(--e4);
 }
@@ -209,8 +204,10 @@ h2.label, h3.label { margin: 0; font-weight: 500; }
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
 .glass-strong { background: var(--glass-fill-strong), var(--glass-base); }
-.refract { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
-html.lg-refract .refract { backdrop-filter: url(#lg-refract) blur(14px) saturate(185%); }
+/* Frosting (a live blur of what is behind) is costly: every frosted panel is re-blurred on every frame the page moves.
+   So only the few panels that float over moving things get it (the nav, the catalogue's command bar, the snackbar,
+   the controls over the hero's animated road); cards and panels on the plain page are tinted glass without it. */
+.refract, .toast.glass, .hero .glass { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
 
 /* ------------------------------------------------------------------ state layers + ripple (M3) */
 .sl { position: relative; overflow: hidden; isolation: isolate; -webkit-tap-highlight-color: transparent; }
@@ -230,7 +227,6 @@ html.lg-refract .refract { backdrop-filter: url(#lg-refract) blur(14px) saturate
   border-radius: var(--r-full);
   font-family: var(--f-mono); font-size: 12.5px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap;
   transition: transform var(--d-m) var(--ease-expo), box-shadow var(--d-m) var(--ease), background-color var(--d-s);
-  will-change: transform;
 }
 .btn > * { position: relative; z-index: 2; }
 .btn .lbl { display: inline-block; overflow: hidden; height: 1.25em; line-height: 1.25em; }
@@ -369,7 +365,7 @@ html.lg-refract .refract { backdrop-filter: url(#lg-refract) blur(14px) saturate
 html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-show 0s 6s forwards; }
 @keyframes gs-show { to { opacity: 1; transform: none; } }
 .nw { white-space: nowrap; }
-.split .ch { display: inline-block; will-change: transform; }
+.split .ch { display: inline-block; }
 .line-mask { display: block; overflow: hidden; padding-bottom: .04em; margin-bottom: -.04em; }
 /* page headings break after their first line from the start: the split wraps it in a block .line-mask, and the
    heading would otherwise grow a line as the page appears and push everything below it down */
@@ -686,16 +682,24 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .card-specs dd { margin: 3px 0 0; font-size: 13.5px; font-weight: 600; line-height: 1.3; }
 .card-actions { position: relative; z-index: 2; display: flex; align-items: center; gap: var(--s2); padding: var(--s4) var(--s4) var(--s4) var(--s5); }
 .card-actions .btn { flex: 1; }
-.card-more { position: relative; z-index: 2; margin: 0 var(--s2) var(--s2); border-radius: var(--r-l); background: var(--inset); overflow: hidden; display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--d-l) var(--ease-expo); }
-.card-more > div { min-height: 0; }
-.card.is-open .card-more { grid-template-rows: 1fr; }
-.card-more dl { margin: 0; padding: var(--s3) var(--s4); font-size: 13.5px; }
-.card-more dl div { display: grid; grid-template-columns: 44% 1fr; gap: var(--s3); padding: 7px 0; border-bottom: 1px dashed var(--line); }
+/* full specifications: a drawer that slides out sideways, beside the card (main.js sets data-side: r, l, or "in" over
+   the card on a single column), so opening one never pushes the grid about */
+.card.is-more { z-index: 6; overflow: visible; }
+.card-more { position: absolute; z-index: 4; top: 0; bottom: 0; left: calc(100% + var(--s4)); width: 100%; border-radius: var(--r-xl); background: var(--ink-2); border: 1px solid var(--glass-edge); box-shadow: var(--e5); visibility: hidden; clip-path: inset(0 100% 0 0 round var(--r-xl)); transition: clip-path var(--d-l) var(--ease-expo), visibility 0s linear var(--d-l); }
+.card[data-side="l"] .card-more { left: auto; right: calc(100% + var(--s4)); clip-path: inset(0 0 0 100% round var(--r-xl)); }
+.card[data-side="in"] .card-more { left: 0; clip-path: inset(0 0 0 100% round var(--r-xl)); }
+.card.is-open .card-more { visibility: visible; clip-path: inset(0 round var(--r-xl)); transition: clip-path var(--d-l) var(--ease-expo); }
+.card-more > div { height: 100%; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.card-more-head { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: var(--s2); padding: var(--s3) var(--s3) var(--s2) var(--s5); background: var(--ink-2); border-bottom: 1px solid var(--line); }
+.card-more dl { margin: 0; padding: var(--s2) var(--s5) var(--s4); font-size: 13.5px; }
+.card-more dl div { display: grid; grid-template-columns: 44% 1fr; gap: var(--s3); padding: 9px 0; border-bottom: 1px dashed var(--line); }
 .card-more dl div:last-child { border-bottom: 0; }
 .card-more dt { color: var(--muted); }
 .card-more dd { margin: 0; font-weight: 500; }
-.card .icon-btn[data-more] svg { transition: transform var(--d-m) var(--ease-expo); }
-.card.is-open .icon-btn[data-more] svg { transform: rotate(180deg); }
+.card .icon-btn[data-more] svg { transform: rotate(-90deg); transition: transform var(--d-m) var(--ease-expo); }
+.card.is-open .icon-btn[data-more] svg { transform: rotate(90deg); }
+.card[data-side="l"] .icon-btn[data-more] svg { transform: rotate(90deg); }
+.card[data-side="l"].is-open .icon-btn[data-more] svg { transform: rotate(-90deg); }
 
 /* =====================================================================
    INNER PAGES
@@ -905,14 +909,13 @@ a.reach-card:hover { transform: translateX(6px); }
 .motion-tog[aria-pressed="true"] { color: var(--volt); border-color: rgba(198, 255, 61, .5); }
 .motion-tog[aria-pressed="true"] i::before { left: 1px; width: 0; height: 0; border-radius: 0; background: none; border-style: solid; border-width: 5px 0 5px 9px; border-color: transparent transparent transparent currentColor; }
 .motion-tog[aria-pressed="true"] i::after { display: none; }
-.motion-paused .aura i, .motion-paused .grain, .motion-paused .nav-logo img, .motion-paused .ticker-track, .motion-paused .phero-sun, .motion-paused .live .pulse::after, .motion-paused .scroll-cue i::after, .motion-paused .day-scene .flow { animation-play-state: paused; }
+.motion-paused .nav-logo img, .motion-paused .ticker-track, .motion-paused .phero-sun, .motion-paused .live .pulse::after, .motion-paused .scroll-cue i::after, .motion-paused .day-scene .flow { animation-play-state: paused; }
 .ticker:hover .ticker-track { animation-play-state: paused; }
 .hero-foot .motion-tog { flex: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
   .js .rv { opacity: 1; transform: none; }
-  .grain { display: none; }
 }
 
 
@@ -950,9 +953,8 @@ html[data-theme="light"] {
 html[data-theme="light"] .day { background: transparent; }
 html[data-theme="light"] .day-stick { top: 10px; height: calc(100vh - 20px); height: calc(100svh - 20px); margin: 0 10px; border-radius: clamp(22px, 2.6vw, 40px); }
 html[data-theme="light"] .day-scroll { color: #FFFFFF; }
-/* hero: daylight road (hero-beam.js paints it), ink headline, letters the light touches turn orange */
-html[data-theme="light"] .hero-title { text-shadow: none; }
-html[data-theme="light"] .hero .live { --glass-tint: rgba(255, 255, 255, .78); }
+/* hero: the night road stays dark (dark tokens above), set into the paper as a rounded panel like the 24-hour sky */
+html[data-theme="light"] .hero { margin: 10px 10px 0; min-height: calc(100vh - 10px); min-height: calc(100svh - 10px); border-radius: clamp(22px, 2.6vw, 40px); background: var(--void); color-scheme: dark; }
 /* closing call to action: the lamp throws a warm cone onto the paper */
 html[data-theme="light"] .cta::after { background: radial-gradient(80% 55% at 50% 22%, rgb(250 248 244 / .7), transparent 75%); }
 html[data-theme="light"] .cta-cone { background: conic-gradient(from 155deg at 50% 0, transparent 0deg, rgba(255, 160, 50, .07) 14deg, rgba(255, 170, 60, .2) 25deg, rgba(255, 160, 50, .07) 36deg, transparent 50deg); }
@@ -971,10 +973,9 @@ html[data-theme="light"] .nav.is-scrolled { --glass-tint: rgba(255, 255, 255, .8
 html[data-theme="light"].nav-dark .nav { --glass-tint: rgba(12, 12, 16, .62); }
 html[data-theme="light"].nav-dark .nav.is-scrolled { --glass-tint: rgba(10, 10, 14, .82); }
 html[data-theme="light"] .nav, html[data-theme="light"] .nav * { transition-property: color, background-color, border-color; transition-duration: .3s; }
-/* daylight instead of three coloured blobs, and a lighter grain */
+/* daylight instead of three coloured blobs */
 html[data-theme="light"] .aura i:nth-child(1), html[data-theme="light"] .aura i:nth-child(3) { display: none; }
 html[data-theme="light"] .aura i:nth-child(2) { opacity: .55; }
-html[data-theme="light"] .grain { opacity: .02; }
 /* buttons and accents that were tuned for the night */
 html[data-theme="light"] .btn-volt { background: var(--volt); color: #FFFFFF; }
 /* product photos on daylight stages */

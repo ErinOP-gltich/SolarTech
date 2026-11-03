@@ -149,8 +149,9 @@
       else if (n.nodeType === 1) el.replaceChild(wrap(n.textContent, n.className), n);
     });
     if (GS.reduceMotion) { el.classList.add('no-scrub'); words.forEach(function (w) { w.classList.add('on'); }); return; }
-    let lit = -1;
+    let lit = -1, raf = 0, near = true;
     function update() {
+      raf = 0;
       const r = el.getBoundingClientRect();
       // every word is lit by the time the paragraph's bottom reaches 75% of the viewport
       const p = clamp((innerHeight * .9 - r.top) / (r.height + innerHeight * .15), 0, 1);
@@ -159,7 +160,9 @@
       lit = n;
       words.forEach(function (w, i) { w.classList.toggle('on', i < n); });
     }
-    addEventListener('scroll', function () { requestAnimationFrame(update); }, { passive: true });
+    // one measurement per frame, and only while the paragraph is on or near the screen
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { near = es[0].isIntersecting; if (near && !raf) raf = requestAnimationFrame(update); }, { rootMargin: '30% 0px' }).observe(el);
+    addEventListener('scroll', function () { if (near && !raf) raf = requestAnimationFrame(update); }, { passive: true });
     update();
   }
 
