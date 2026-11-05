@@ -4,8 +4,8 @@ window.GS_CONFIG = {
   company: 'Green Sun Technologies',
   tagline: 'The best way to power up',
 
-  phone: '+91 99209 96608',
-  whatsapp: '919920996608',            // country code + number, digits only
+  phone: '0000000',
+  whatsapp: '0000000',            // country code + number, digits only
   email: 'greensuntechnologies2024@gmail.com',
 
   address: [
