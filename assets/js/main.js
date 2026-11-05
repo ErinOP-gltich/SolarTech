@@ -165,7 +165,7 @@
           '<button class="icon-btn glass sl" type="button" data-more aria-expanded="false" aria-controls="' + moreId + '" aria-label="Full specifications: ' + esc(p.short || p.name) + '"><span class="state" aria-hidden="true"></span>' + ICON.chevron + '</button>' +
         '</div>' +
         '<div class="card-more" id="' + moreId + '" role="region" aria-label="Specifications: ' + esc(p.short || p.name) + '"><div inert data-lenis-prevent>' +
-          '<div class="card-more-head"><span class="label">Full specifications</span>' +
+          '<div class="card-more-head"><span><span class="label">Full specifications</span><b class="card-more-name">' + esc(p.name) + '</b></span>' +
           '<button class="icon-btn sl" type="button" data-more-close aria-label="Close specifications"><span class="state" aria-hidden="true"></span>' + ICON.close + '</button></div>' +
           '<dl>' + (p.specs || []).map(function (s) {
             return '<div><dt>' + esc(s[0]) + '</dt><dd>' + esc(s[1]) + '</dd></div>';
@@ -630,21 +630,43 @@
     }, { rootMargin: '-30px 0px -92% 0px' });
     darkParts.forEach(function (el) { io.observe(el); });
   }
-  const themeBtn = document.querySelector('[data-theme-toggle]');
-  if (themeBtn) {
+  const themeBtns = document.querySelectorAll('[data-theme-toggle]'); // the nav's icon, and the menu's switch on phones
+  if (themeBtns.length) {
     const meta = document.querySelector('meta[name="theme-color"]');
     const paint = function (t) {
-      themeBtn.setAttribute('aria-pressed', t === 'light');
-      themeBtn.setAttribute('aria-label', t === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+      themeBtns.forEach(function (b) {
+        b.setAttribute('aria-pressed', t === 'light');
+        b.setAttribute('aria-label', t === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+        const txt = b.querySelector('[data-theme-label]');
+        if (txt) txt.textContent = t === 'light' ? 'Dark mode' : 'Light mode';
+      });
       if (meta) meta.setAttribute('content', t === 'light' ? '#F5F1E8' : '#050507');
     };
     paint(root.dataset.theme);
-    themeBtn.addEventListener('click', function () {
+    themeBtns.forEach(function (b) { b.addEventListener('click', function () {
       const t = root.dataset.theme === 'light' ? 'dark' : 'light';
       root.dataset.theme = t;
       try { localStorage.setItem('gs-theme', t); } catch (e) { /* private mode: it just won't be remembered */ }
       paint(t);
       document.dispatchEvent(new CustomEvent('gs:theme', { detail: { theme: t } }));
-    });
+    }); });
+  }
+
+  /* ---------- below 1180px the nav leaves while you scroll down and comes back as soon as you scroll up ---------- */
+  // (on wide screens it stays, except in the marketplace, where shop.js has it make way for the pinned command bar)
+  if (document.querySelector('[data-nav]')) {
+    const narrow = matchMedia('(max-width: 1180px)');
+    let lastY = scrollY, raf = 0;
+    root.classList.add('nav-tuckable');
+    addEventListener('scroll', function () {
+      if (raf) return;
+      raf = requestAnimationFrame(function () {
+        raf = 0;
+        const y = scrollY, dy = y - lastY;
+        if (!narrow.matches || Math.abs(dy) < 6) return; // ignore tiny jitters
+        lastY = y;
+        root.classList.toggle('nav-tucked', dy > 0 && y > 120);
+      });
+    }, { passive: true });
   }
 })();

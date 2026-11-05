@@ -889,6 +889,72 @@ a.reach-card:hover { transform: translateX(6px); }
   .phero-sun { width: 80vw; right: -30vw; top: 30px; opacity: .45; }
 }
 
+/* ------------------------------------------------------------------ phones: one column, so everything gets compact
+   The nav keeps the logo, the quote list and the menu (the light/dark switch moves into the menu), sections sit closer,
+   numbers go two to a row, and the catalogue is a two-column grid of the essentials. */
+.menu-theme, .card-more-name { display: none; }
+@media (max-width: 760px) {
+  .nav .theme-btn { display: none; }
+  .nav-quote { height: 40px; padding: 0 4px 0 14px; gap: 6px; }
+  .nav-quote .t { display: inline; font-size: 11px; letter-spacing: .12em; }
+  .nav-quote .badge { min-width: 30px; height: 30px; }
+  .menu-theme { display: inline-flex; align-items: center; gap: var(--s2); align-self: flex-start; height: 40px; margin-top: var(--s6); padding: 0 16px 0 12px; border-radius: var(--r-full); border: 1px solid var(--line-2); color: var(--text-2); }
+  .menu-theme svg { position: relative; z-index: 2; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+
+  .sec { padding: 72px 0; }
+  .day { height: 400vh; } /* the 24-hour story scrubs a little faster */
+  .form-actions { display: grid; } .form-actions .btn { width: 100%; }
+  .h2 { margin-bottom: var(--s5); }
+  .sec-head { margin-bottom: var(--s5); }
+
+  .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--s5); }
+  .stat { grid-template-columns: 1fr; align-content: start; gap: var(--s2); padding: var(--s4) 0; }
+  .stat-n { font-size: 54px; }
+  .stat-l p { font-size: 16px; line-height: 1.2; }
+
+  .pillars { gap: var(--s3); }
+  .pillar { min-height: 0; padding: var(--s5); }
+  .pillar .big { font-size: 44px; }
+  .pillar h3 { margin-top: var(--s3); }
+
+  .show-card .sc-stage { height: 200px; }
+  .show-card .sc-body { padding: var(--s4); }
+  .show-card .sc-body .h3 { font-size: 20px; }
+
+  .cert { padding: var(--s4); }
+  .cert .std { margin-top: var(--s4); }
+
+  /* catalogue: two to a row */
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: stretch; }
+  .finder-grid .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .card { border-radius: var(--r-l); transform-style: flat; }
+  .card-top { min-height: 0; padding: 10px 10px 0; }
+  .card-top .label { font-size: 9.5px; letter-spacing: .08em; }
+  .card-badge { height: 20px; padding: 0 6px; font-size: 9px; letter-spacing: .06em; }
+  .card-stage, .finder-grid .card-stage { height: 140px; margin: 6px 6px 0; padding: 10px; border-radius: var(--r-m); }
+  .card-watt { font-size: 56px; }
+  .card-body, .finder-grid .card-body { padding: 10px 10px 4px; }
+  .card-part { font-size: 9.5px; letter-spacing: .08em; }
+  .card-title { font-size: 14px; margin-bottom: var(--s2); min-height: 0; }
+  .card-tags { display: none; }
+  .card-specs { grid-template-columns: 1fr; }
+  .card-specs div, .card-specs div + div { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; padding: 5px 0 0; border-left: 0; }
+  .card-specs dt { font-size: 9px; letter-spacing: .08em; }
+  .card-specs dd { min-height: 0; margin: 0; font-size: 12px; text-align: right; }
+  .card-actions, .finder-grid .card-actions { gap: 6px; padding: 10px; }
+  .card-actions .btn { --h: 36px; padding: 0 8px; font-size: 10.5px; letter-spacing: .08em; }
+  .card-actions .btn .arr { display: none; }
+  .card-actions .icon-btn { width: 34px; height: 34px; }
+  .card-actions .icon-btn svg { width: 16px; height: 16px; }
+  /* full specifications: a sheet that slides in from the side over the whole screen */
+  .card[data-side="in"].is-more { z-index: 260; } /* the card's layer, so its sheet covers the nav too */
+  .card[data-side="in"] .card-more { position: fixed; z-index: 5; inset: 0; width: auto; border: 0; border-radius: 0; clip-path: inset(0 0 0 100%); }
+  .card[data-side="in"].is-open .card-more { clip-path: inset(0); }
+  .card[data-side="in"] .card-more-head { padding: calc(var(--s4) + env(safe-area-inset-top)) var(--s3) var(--s3) var(--s5); }
+  .card[data-side="in"] .card-more-name { display: block; margin-top: 4px; font-family: var(--f-display); font-weight: 800; font-size: 17px; line-height: 1.2; }
+  .card[data-side="in"] .card-more dl { font-size: 15px; padding-bottom: calc(var(--s6) + env(safe-area-inset-bottom)); }
+}
+
 @media (max-height: 560px) and (orientation: landscape) {
   .day-hud { align-items: start; padding-top: calc(var(--nav-h) + 24px); padding-bottom: var(--s4); }
   .day-card { padding: var(--s4); max-width: 420px; }

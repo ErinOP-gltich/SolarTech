@@ -607,12 +607,12 @@
   .dial-inst, .dial-stage, .dr-top, .dr-head, .dr-specs, .dr-night, .dr-actions { grid-column: 1; grid-row: auto; }
   .dr-top { order: 1; margin: 0 16px; padding-top: 16px; }
   .dr-head { order: 2; margin: 14px 16px 18px; }
-  .dial-inst { order: 3; padding: 56px 0; border-right: 0; border-top: 1px solid var(--gd-line); }
-  .dial-stage { order: 4; min-height: 380px; border-top: 1px solid var(--gd-line); --lt: 11; --lh: 27; --fy: 80%; }
+  .dial-inst { order: 3; padding: 28px 0; border-right: 0; border-top: 1px solid var(--gd-line); }
+  .dial-stage { order: 4; min-height: 300px; border-top: 1px solid var(--gd-line); --lt: 11; --lh: 27; --fy: 80%; }
   .dr-specs { order: 5; margin: 0 16px; border-top: 1px solid var(--gd-line); }
   .dr-night { order: 6; margin: 18px 16px 0; }
-  .dr-actions { order: 7; margin: 0 16px; padding: 22px 0 18px; flex-direction: column; }
-  .dial-knob { width: 78vw; max-width: 440px; }
+  .dr-actions { order: 7; margin: 0 16px; padding: 18px 0 16px; }
+  .dial-knob { width: 68vw; max-width: 400px; }
   .dial-ann--tl { left: 16px; top: 18px; }
   .dial-ann--tr { right: 16px; top: 18px; }
   .dial-ann--bl { left: 16px; bottom: 18px; }
@@ -630,7 +630,7 @@
   .dr-unit b { font-size: 34px; }
   .dr-spec .v { font-size: 16px; }
   .dr-spec--lm .v { font-size: 28px; }
-  .dr-cta, .dr-add { width: 100%; min-height: 54px; }
+  .dr-cta, .dr-add { flex: 1; min-width: 0; min-height: 50px; }
   .dial-x--tl, .dial-x--bl { left: -1px; }
   .dial-x--tr, .dial-x--br { right: -1px; }
 }
