@@ -309,7 +309,7 @@ h2.label, h3.label { margin: 0; font-weight: 500; }
 .nav-tuckable .nav { transition: transform 560ms cubic-bezier(.05, .7, .1, 1), opacity 320ms cubic-bezier(.2, 0, 0, 1) 60ms; }
 .nav-tucked .nav { transform: translate(-50%, calc(-100% - 40px)) scale(.97); opacity: 0; pointer-events: none;
   transition: transform 340ms cubic-bezier(.3, 0, .8, .15), opacity 200ms linear 80ms; }
-.nav-tucked .nav:focus-within { transform: translateX(-50%); opacity: 1; pointer-events: auto; }
+.nav-tucked .nav:has(:focus-visible) { transform: translateX(-50%); opacity: 1; pointer-events: auto; } /* back for keyboard focus only: a mouse click on the theme button mustn't pin it */
 .nav-logo { display: flex; align-items: center; gap: var(--s3); flex: none; }
 .nav-logo img { width: 38px; height: 38px; animation: spin 30s linear infinite; }
 .nav-logo span { display: grid; line-height: 1; font-family: var(--f-display); font-weight: 900; font-stretch: 125%; font-size: 14px; letter-spacing: -.01em; }

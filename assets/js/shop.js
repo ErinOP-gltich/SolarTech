@@ -214,8 +214,8 @@
   if (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) document.querySelectorAll('[data-kbd]').forEach(function (k) { k.textContent = '⌘K'; });
   // While the command bar is pinned over the catalogue, the site nav tucks away and the bar moves up into its
   // place; once the products have scrolled past, the nav comes back. Measured from a marker at the bar's
-  // natural position, so the bar moving up never flips the state back (wide screens only: below 1180 px the
-  // bar is not sticky).
+  // natural position, so the bar moving up never flips the state back. Below 1180 px the bar is not sticky, so
+  // there the nav simply leaves while you scroll down and comes back as soon as you scroll up.
   (function tuckNav() {
     const cmd = $('[data-cmd]'), cat = $('#catalogue');
     if (!cmd || !cat || !document.querySelector('[data-nav]')) return;
@@ -227,13 +227,21 @@
     // send the nav off while the bar is still this far below it: the bar then scrolls straight on to its new pin at
     // the top instead of stopping under the nav and jumping up once it has gone
     const LEAD = 64;
-    let tucked = false, raf = 0;
+    let tucked = false, raf = 0, lastY = scrollY;
     document.documentElement.classList.add('nav-tuckable');
     const check = function () {
       raf = 0;
-      const t = mark.getBoundingClientRect().top, edge = pinAt() + LEAD;
-      const near = tucked ? t <= edge + 12 : t <= edge; // a little hysteresis: resting on the edge can't flicker
-      const want = wide.matches && near && cat.getBoundingClientRect().bottom > cmd.offsetHeight + innerHeight * .35;
+      const y = scrollY, dy = y - lastY;
+      let want = tucked;
+      if (wide.matches) {
+        lastY = y;
+        const t = mark.getBoundingClientRect().top, edge = pinAt() + LEAD;
+        const near = tucked ? t <= edge + 12 : t <= edge; // a little hysteresis: resting on the edge can't flicker
+        want = near && cat.getBoundingClientRect().bottom > cmd.offsetHeight + innerHeight * .35;
+      } else if (Math.abs(dy) > 6) { // ignore tiny jitters
+        lastY = y;
+        want = dy > 0 && y > 120;
+      }
       if (want !== tucked) { tucked = want; document.documentElement.classList.toggle('nav-tucked', want); }
     };
     addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(check); }, { passive: true });
