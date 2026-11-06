@@ -244,7 +244,8 @@
     const charging = function (t) { return ramp(t, 5.9, 6.3) * (1 - ramp(t, 15.2, 15.6)); };
     const phaseOf = function (t) { return t < 6.5 ? 0 : t < 18 ? 1 : t < 24 ? 2 : 3; };
 
-    function fitScene() { scene.setAttribute('viewBox', innerWidth < 760 ? '760 0 480 900' : '0 0 1600 900'); }
+    // phones: the scene fills the top 60% (the story is a sheet below it), framed on the whole lamp post
+    function fitScene() { scene.setAttribute('viewBox', innerWidth < 761 ? '614 0 693 900' : '0 0 1600 900'); }
     fitScene();
     addEventListener('resize', fitScene);
 
@@ -296,13 +297,14 @@
       put(stick, '--charging', charging(t).toFixed(3));
       put(stick, '--hint', (1 - ramp(p, .005, .03)).toFixed(3));
 
-      const u = (t - RISE) / (SET - RISE);
+      const u = (t - RISE) / (SET - RISE), phone = W < 761; // on a phone the sky is the top half: a flatter, higher arc
       const sx = W * (.08 + .84 * clamp(u, 0, 1));
-      const sy = u > 0 && u < 1 ? H * (.74 - .6 * Math.sin(Math.PI * u)) : H * .95;
+      const down = phone ? .56 : .95; // below the horizon: behind the hills (on a phone the story sheet is lower down)
+      const sy = u > 0 && u < 1 ? H * (phone ? .5 - .42 * Math.sin(Math.PI * u) : .74 - .6 * Math.sin(Math.PI * u)) : H * down;
       sun.style.transform = 'translate(' + sx.toFixed(1) + 'px,' + sy.toFixed(1) + 'px)';
       const mu = (t - 18.4) / 11.2;
       const mx = W * (.1 + .8 * clamp(mu, 0, 1));
-      const my = mu > 0 && mu < 1 ? H * (.7 - .48 * Math.sin(Math.PI * mu)) : H * .95;
+      const my = mu > 0 && mu < 1 ? H * (phone ? .4 - .34 * Math.sin(Math.PI * mu) : .7 - .48 * Math.sin(Math.PI * mu)) : H * down;
       moon.style.transform = 'translate(' + mx.toFixed(1) + 'px,' + my.toFixed(1) + 'px)';
 
       clock.firstChild.nodeValue = pad(Math.floor(t) % 24) + ':' + pad(Math.floor((t % 1) * 60));
@@ -397,7 +399,16 @@
   /* ---------- 8. hovering a family or sector floats its product next to the cursor ---------- */
   function peeks() {
     const peek = document.querySelector('[data-peek-el]');
-    if (!peek || !GS.finePointer || GS.reduceMotion) return;
+    if (!GS.finePointer) { // touch screens can't hover: each row shows its product as a thumbnail instead
+      document.querySelectorAll('[data-peek-list]').forEach(function (list) {
+        list.classList.add('with-thumbs');
+        list.querySelectorAll('[data-peek]').forEach(function (row) {
+          row.insertAdjacentHTML('afterbegin', '<img class="pthumb" src="' + GS.esc(row.dataset.peek) + '" alt="" loading="lazy" decoding="async">');
+        });
+      });
+      return;
+    }
+    if (!peek || GS.reduceMotion) return;
     const img = peek.querySelector('img');
     let x = 0, y = 0, px = 0, py = 0, on = false, raf = 0;
     // the preview eases after the pointer while it's shown, and the loop sleeps the rest of the visit

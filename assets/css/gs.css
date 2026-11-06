@@ -538,6 +538,10 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .fam a:hover .h3 { transform: translateX(var(--s5)); }
 .fam a:hover .h3 .it { color: var(--sun); }
 .fam .cnt { text-align: right; }
+/* touch screens: the product each row would float on hover is a thumbnail in the row (home.js adds them) */
+.with-thumbs .pthumb { width: 64px; height: 64px; object-fit: contain; padding: 6px; border-radius: var(--r-m); background: rgb(var(--fx-rgb) / .06); }
+.fam.with-thumbs a { grid-template-columns: 64px minmax(0, 1fr) auto; }
+.fam.with-thumbs .label.n, .sectors.with-thumbs li > .label { display: none; }
 
 /* the floating preview that follows the cursor */
 .peek { position: fixed; z-index: 60; left: 0; top: 0; width: 260px; height: 300px; margin: -150px 0 0 -130px; border-radius: var(--r-xl); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: var(--s5); pointer-events: none; opacity: 0; transform: scale(.6) rotate(-6deg); transition: opacity var(--d-m), transform var(--d-l) var(--ease-expo); }
@@ -601,6 +605,7 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .sectors li:hover .h3 { transform: translateX(var(--s5)); }
 .sectors li:hover .h3 .it { color: var(--sun); }
 .sectors p { margin: 0; color: var(--text-2); font-size: 15px; }
+.sectors.with-thumbs li { grid-template-columns: 64px minmax(0, 1fr) minmax(0, 34ch); }
 
 /* ---------- CTA */
 .cta { position: relative; min-height: 110vh; min-height: 110svh; display: grid; place-items: start center; text-align: center; overflow: hidden; isolation: isolate; padding: clamp(120px, 16vh, 200px) 0 var(--s9); }
@@ -908,6 +913,44 @@ a.reach-card:hover { transform: translateX(6px); }
 
   .sec { padding: 72px 0; }
   .day { height: 400vh; } /* the 24-hour story scrubs a little faster */
+  /* the 24-hour story: the scene in the top 60% with the whole lamp post in view, the story a sheet across the bottom */
+  .day-scene { top: 0; bottom: auto; height: 60%; }
+  .day-hud { padding: 0; align-items: end; }
+  .day-card { width: 100%; max-width: none; border-radius: var(--r-xl) var(--r-xl) 0 0; border-bottom: 0; padding: var(--s4) var(--gutter) calc(var(--s4) + env(safe-area-inset-bottom)); }
+  .day-card.glass { background: var(--glass-fill-strong), var(--glass-base-strong); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .day-scroll { display: none; }
+  .phase { min-height: 6.4em; }
+  .fam.with-thumbs a { grid-template-columns: 64px minmax(0, 1fr); column-gap: var(--s4); row-gap: var(--s1); }
+  .fam.with-thumbs .pthumb { grid-row: span 2; }
+  .fam.with-thumbs .cnt { text-align: left; }
+  .fam .h3 { font-size: 26px; }
+  .sectors.with-thumbs li { grid-template-columns: 64px minmax(0, 1fr); column-gap: var(--s4); row-gap: var(--s1); }
+  .sectors.with-thumbs li .pthumb { grid-row: span 2; align-self: start; }
+  .sectors .h3 { font-size: 22px; }
+  /* light finder: the places as a grid of tiles, the suggestions a row to swipe through */
+  .finder-opts { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--s5); }
+  .fopt { grid-template-columns: 1fr; align-content: start; gap: var(--s2); min-height: 0; padding: var(--s3); }
+  .fopt svg { width: 36px; height: 36px; padding: 8px; }
+  .fopt b { font-size: 14px; line-height: 1.25; }
+  .fopt small { font-size: 12px; line-height: 1.35; }
+  .fopt .radio { display: none; }
+  /* closing call to action: no screen-and-a-bit of empty room under the buttons */
+  .cta { min-height: 0; padding: 120px 0 96px; }
+  /* marketplace: the catalogue first; the wattage dial (a long instrument on a phone) comes after it */
+  main:has(> [data-dial-sec]) { display: flex; flex-direction: column; }
+  main > [data-dial-sec] { order: 1; padding-bottom: 72px; }
+  main > [data-dial-sec] ~ .sec:not(#catalogue) { order: 2; }
+  main > #catalogue { padding-top: var(--s4) !important; } /* beats its inline desktop spacing */
+  main:has(> [data-dial-sec]) .sec-head .no { display: none; } /* the №s follow the desktop order */
+  /* contact: the quick ways in first (call, WhatsApp, email as three tiles), then the form, then where we are */
+  .contact-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+  .contact-grid > .reach { display: contents; }
+  .contact-grid > :not(.reach), .reach > :not(a) { grid-column: 1 / -1; }
+  .contact-grid > :not(.reach) { order: 1; margin: var(--s4) 0; }
+  .reach > :not(a) { order: 2; }
+  .reach > a.reach-card { order: 0; grid-template-columns: 1fr; justify-items: center; gap: var(--s2); padding: var(--s3) var(--s2); text-align: center; }
+  .reach > a.reach-card b, .reach > a.reach-card .arr { display: none; }
+  .reach > a.reach-card .ic { width: 44px; height: 44px; }
   .form-actions { display: grid; } .form-actions .btn { width: 100%; }
   .h2 { margin-bottom: var(--s5); }
   .sec-head { margin-bottom: var(--s5); }
@@ -931,7 +974,9 @@ a.reach-card:hover { transform: translateX(6px); }
 
   /* catalogue: two to a row */
   .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; align-items: stretch; }
-  .finder-grid .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .finder-grid .cards { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 64%; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter) var(--s1); scroll-padding: 0 var(--gutter); scrollbar-width: none; }
+  .finder-grid .cards::-webkit-scrollbar { display: none; }
+  .finder-grid .cards > .card { scroll-snap-align: start; }
   .card { border-radius: var(--r-l); transform-style: flat; }
   .card-top { min-height: 0; padding: 10px 10px 0; }
   .card-top .label { font-size: 9.5px; letter-spacing: .08em; }
