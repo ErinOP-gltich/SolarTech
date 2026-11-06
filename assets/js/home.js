@@ -303,7 +303,7 @@
       const u = (t - RISE) / (SET - RISE), phone = W < 761; // on a phone the sky is the top half: a flatter, higher arc
       const sx = W * (.08 + .84 * clamp(u, 0, 1));
       const down = phone ? .56 : .95; // below the horizon: behind the hills (on a phone the story sheet is lower down)
-      const sy = u > 0 && u < 1 ? H * (phone ? .5 - .42 * Math.sin(Math.PI * u) : .74 - .6 * Math.sin(Math.PI * u)) : H * down;
+      const sy = u > 0 && u < 1 ? H * (phone ? .46 - .4 * Math.sin(Math.PI * u) : .74 - .6 * Math.sin(Math.PI * u)) : H * down;
       sun.style.transform = 'translate(' + sx.toFixed(1) + 'px,' + sy.toFixed(1) + 'px)';
       const mu = (t - 18.4) / 11.2;
       const mx = W * (.1 + .8 * clamp(mu, 0, 1));

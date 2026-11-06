@@ -1121,3 +1121,14 @@ html[data-theme="light"] ::selection { background: rgb(255 179 0 / .35); }
 html[data-theme="light"] .theme-btn .i-moon { display: block; }
 @media (max-width: 760px) { .theme-btn { width: 40px; height: 40px; } }
 html[data-theme="light"] .map iframe { filter: none; }   /* the dark map is a dark-theme touch */
+
+/* light theme on touch screens and phones: white surfaces instead of grey washes, and no glow smudging a small screen */
+html[data-theme="light"] .with-thumbs .pthumb { background: #FFFFFF; box-shadow: var(--e2); }
+html[data-theme="light"] .fopt { background: #FFFFFF; border-color: var(--line); box-shadow: var(--e1); }
+html[data-theme="light"] .fopt svg { background: rgb(217 72 15 / .08); }
+html[data-theme="light"] .fopt[aria-checked="true"] { background: #F1F8EC; border-color: rgb(43 138 62 / .45); }
+html[data-theme="light"] .fopt[aria-checked="true"] svg { background: var(--volt); color: #FFFFFF; }
+@media (max-width: 760px) {
+  html[data-theme="light"] .aura { display: none; }
+  html[data-theme="light"] .phero-sun { width: 64vw; right: -26vw; top: 56px; opacity: .22; }
+}
