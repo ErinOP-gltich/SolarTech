@@ -33,7 +33,12 @@
     const host = $('[data-dial]');
     const lights = ALL.filter(function (p) { return /^si-\d+w$/.test(p.id); }).sort(function (a, b) { return a.watt - b.watt; });
     if (!host || !window.GSDial || !lights.length) { const sec = $('[data-dial-sec]'); if (sec) sec.hidden = true; return; }
-    window.GSDial.mount(host, { products: lights, contactHref: function (id) { return 'contact?p=' + encodeURIComponent(id); } });
+    const mount = function () { window.GSDial.mount(host, { products: lights, contactHref: function (id) { return 'contact?p=' + encodeURIComponent(id); } }); };
+    // on a phone the dial sits below the catalogue (gs.css): it's heavy to set up, so build it only on its way into view
+    if (matchMedia('(max-width: 760px)').matches && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); mount(); } }, { rootMargin: '900px 0px' });
+      io.observe(host);
+    } else mount();
   }
 
   /* ---------- 2. search ---------- */

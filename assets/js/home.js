@@ -509,15 +509,9 @@
   heroBeam();
   heroIntro();
   liveStatus();
-  marquee();
-  litUp();
-  countUps();
-  dayCycle();
-  showroom();
-  peeks();
-  finder();
-  ctaLight();
-  GS.reveals();
+  // the rest is below the fold (and behind the loading screen): one part per task, so no long task holds a slow phone up
+  const rest = [marquee, litUp, countUps, dayCycle, showroom, peeks, finder, ctaLight, GS.reveals];
+  (function next() { rest.shift()(); if (rest.length) setTimeout(next, 0); })();
   // ScrollTrigger refreshes itself on load; the only extra measure needed is once the web fonts have changed line lengths
   if (ST && document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(refreshSoon);
 })();

@@ -381,9 +381,11 @@
     });
   }
   /* ---------- lite: a device that can't keep up gets the light version (measured, not guessed) ---------- */
-  // Frames are counted twice: for two seconds a moment after the loading screen hands over, and for the first second
-  // and a half of scrolling (where most of the work is). Under 40 a second, or a quarter of them late, and the page drops
-  // its costliest work (main.js: smooth scrolling; home.js: the live hero; gs.css: live blur).
+  // Frames are counted for two seconds of the visitor's own scrolling, from just after it starts (the first moments carry
+  // one-off work like decoding images, which says nothing about the device; scrolling is where most of the work is, and a
+  // page someone is scrolling is surely on screen, unlike a background or covered one, whose frames are held back on
+  // purpose). Under 36 a second, or a quarter of them late, and the page drops its costliest work (main.js: smooth
+  // scrolling; home.js: the live hero; gs.css: live blur).
   function frameRate(ms, done) {
     let n = 0, late = 0, t0 = 0, last = 0, away = document.hidden;
     const gone = function () { away = true; };
@@ -401,12 +403,12 @@
     if (root.classList.contains('lite') || reduceMotion || !window.requestAnimationFrame) return;
     const judge = function (fps, lateShare) {
       window.GS_PROBE = (window.GS_PROBE || []).concat({ fps: Math.round(fps), late: +lateShare.toFixed(2) }); // for the console
-      if (!root.classList.contains('lite') && (fps < 40 || lateShare > .25)) goLite();
+      if (!root.classList.contains('lite') && (fps < 36 || lateShare > .25)) goLite();
     };
     ready(function () {
-      setTimeout(function () { frameRate(2000, judge); }, 1500);
-      const onScroll = function () { removeEventListener('scroll', onScroll); frameRate(1500, judge); };
-      addEventListener('scroll', onScroll, { passive: true });
+      const kinds = ['wheel', 'touchmove', 'keydown'];
+      const start = function () { kinds.forEach(function (k) { removeEventListener(k, start); }); setTimeout(function () { frameRate(2000, judge); }, 600); };
+      kinds.forEach(function (k) { addEventListener(k, start, { passive: true }); });
     });
   }
   function goLite() {

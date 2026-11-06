@@ -750,7 +750,7 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .cmd .seg { background: var(--inset); border: 1px solid var(--line); overflow-x: auto; max-width: 100%; scrollbar-width: none; position: relative; }
 .cmd .seg::-webkit-scrollbar { display: none; }
 .cmd-row2 { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); width: 100%; padding: var(--s1) var(--s2) var(--s1); }
-.cmd-chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); flex: 1 1 auto; min-width: 0; }
+.cmd-chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); flex: 1 1 auto; min-width: 0; min-height: 36px; } /* a chip's height, kept before shop.js fills it, so the grid doesn't jump */
 .cmd-tools { display: flex; align-items: center; gap: var(--s2); margin-left: auto; flex: none; }
 .cmd-search input { text-overflow: ellipsis; }
 .viewtog { display: inline-flex; padding: 3px; border-radius: var(--r-full); border: 1px solid var(--line); background: var(--inset); }
@@ -893,6 +893,7 @@ a.reach-card:hover { transform: translateX(6px); }
   .cmd { border-radius: var(--r-l); }
   .cmd-row2 { padding: 0; gap: var(--s3); }
   .cmd-chips { flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: var(--s1) var(--s4) var(--s1) var(--s1); -webkit-mask: linear-gradient(90deg, #000 85%, transparent); mask: linear-gradient(90deg, #000 85%, transparent); }
+  .cmd-chips { min-height: 44px; }
   .cmd-chips::-webkit-scrollbar { display: none; }
   .cmd-chips > *, .cmd-chips .chip { flex: none; }
   .cmd-tools { flex: 1 1 100%; margin-left: 0; }
