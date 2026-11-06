@@ -658,6 +658,11 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .card:hover .card-stage img { transform: translateZ(60px) translateY(-6px) scale(1.05); filter: brightness(1.08) drop-shadow(0 26px 32px rgba(0, 0, 0, .6)); }
 .card-stage.blueprint { background: linear-gradient(rgba(140, 190, 255, .08) 1px, transparent 1px) 0 0 / 20px 20px, linear-gradient(90deg, rgba(140, 190, 255, .08) 1px, transparent 1px) 0 0 / 20px 20px, rgba(11, 33, 73, .55); }
 .card-stage.blueprint img { filter: none; }
+/* photographed on site (the high masts): the photo fills the stage instead of floating on it */
+.card-stage.photo { padding: 0; }
+.card-stage.photo img, .card:hover .card-stage.photo img { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; object-position: 50% 15%; filter: none; transform: none; }
+.card-stage.photo img { transition: transform var(--d-l) var(--ease-expo); }
+.card:hover .card-stage.photo img { transform: scale(1.04); }
 .card-watt { position: absolute; z-index: 0; left: var(--s3); bottom: -.1em; font-size: 104px; line-height: .8; color: transparent; -webkit-text-stroke: 1.2px rgb(var(--ink-rgb) / .14); transition: -webkit-text-stroke-color var(--d-m); }
 .card:hover .card-watt { -webkit-text-stroke-color: rgba(255, 196, 0, .55); }
 .card-body { position: relative; z-index: 2; flex: 1; padding: var(--s4) var(--s5) var(--s2); }
@@ -1048,6 +1053,7 @@ html[data-theme="light"] .btn-volt { background: var(--volt); color: #FFFFFF; }
 html[data-theme="light"] .card-stage { background: radial-gradient(90% 70% at 50% 100%, #FFFFFF, transparent 70%), linear-gradient(180deg, #F6F3ED, #ECE7DD); }
 html[data-theme="light"] .card-stage img { filter: drop-shadow(0 16px 16px rgb(60 40 10 / .22)); }
 html[data-theme="light"] .card:hover .card-stage img { filter: drop-shadow(0 24px 24px rgb(60 40 10 / .28)); }
+html[data-theme="light"] .card-stage.photo img { filter: none; }
 html[data-theme="light"] .card-watt { -webkit-text-stroke-color: rgb(20 17 16 / .1); }
 html[data-theme="light"] .show-card .sc-stage { background: radial-gradient(80% 70% at 50% 100%, #FFFFFF, transparent 70%), linear-gradient(180deg, #F6F3ED, #EAE4D9); }
 html[data-theme="light"] .show-card img { filter: drop-shadow(0 26px 30px rgb(60 40 10 / .25)); }

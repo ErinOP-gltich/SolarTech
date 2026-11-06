@@ -48,10 +48,10 @@
 
   window.GS_CATEGORIES = [
     { id: 'street', short: 'Street', name: 'Solar Street Lights', blurb: '9 W lanes to 80 W highways. OSRAM LEDs, LiFePO₄ packs, IP66.', img: IMG + 'si-50w.webp' },
-    { id: 'mast', short: 'Mast & flood', name: 'High Masts & Floods', blurb: 'Light whole junctions, yards and grounds from one point.', img: IMG + 'flood-60w.webp' },
+    { id: 'mast', short: 'Mast & flood', name: 'High Masts & Floods', blurb: 'High masts from 12 m to 30 m, and solar floods for yards and grounds.', img: IMG + 'flood-60w.webp' },
     { id: 'traffic', short: 'Traffic', name: 'Traffic & Road Safety', blurb: 'Solar blinkers and push-button pedestrian crossings.', img: IMG + 'blinker-20w.webp' },
-    { id: 'storage', short: 'Storage', name: 'Energy Storage', blurb: 'LiFePO₄ battery packs rated for 5,000 cycles.', img: IMG + 'battery-100ah.webp' },
-    { id: 'poles', short: 'Poles', name: 'Poles & Decorative', blurb: 'Cast-aluminium decorative poles with drop-down lanterns.', img: IMG + 'deco-pole.webp' }
+    { id: 'storage', short: 'Energy', name: 'Batteries & Solar Panels', blurb: 'LiFePO₄ packs rated for 5,000 cycles, and monocrystalline panels.', img: IMG + 'battery-100ah.webp' },
+    { id: 'poles', short: 'Poles', name: 'Poles & Decorative', blurb: 'GI street-light poles, and decorative and heritage poles for parks and campuses.', img: IMG + 'deco-pole.webp' }
   ];
 
   window.GS_PRODUCTS = [
@@ -115,6 +115,23 @@
       ].concat(SI_COMMON)
     },
     {
+      id: 'aio-9w', cat: 'street',
+      name: '9W All-in-One Solar Street Light', short: '9W All-in-One',
+      part: 'All-in-one · 15 V', watt: 9, img: IMG + 'aio-9w.webp',
+      key: [['Power', '9 W'], ['Light', 'Warm white'], ['Body', 'Polycarbonate']],
+      battery: 'Inbuilt', chem: '', panel: 'Inbuilt', optic: 'Warm white', ip: '', autonomy: '',
+      tags: ['All-in-one', 'Warm white', 'Pathways'],
+      badge: 'All-in-one',
+      specs: [
+        ['Power', '9 W'],
+        ['Type', 'All-in-one: panel, battery and LED in one unit'],
+        ['System voltage', '15 V'],
+        ['Light colour', 'Warm white'],
+        ['Body', 'Polycarbonate'],
+        ['Use', 'Pathways, gardens, homes and campuses']
+      ]
+    },
+    {
       id: 'high-mast-12m', cat: 'mast', featured: true,
       name: '12 m Solar High Mast', short: '12 m Solar High Mast',
       part: 'Made to site', watt: null, img: IMG + 'high-mast.webp',
@@ -131,6 +148,51 @@
         ['Dimming', '6 h at 100% + 6 h at 50%'],
         ['Ingress protection', 'IP66'],
         ['Autonomy', '2 days']
+      ]
+    },
+    {
+      id: 'mast-20m-100w', cat: 'mast', photo: true,
+      name: '20 m LED High Mast, 4 × 100 W', short: '20 m High Mast · 4 × 100 W',
+      part: 'Multi-arm · 4 heads', watt: null, img: IMG + 'mast-20m-100w.webp',
+      big: '20m', key: [['Height', '20 m'], ['Lights', '4 × 100 W'], ['Colour', 'Pure white']],
+      battery: '—', chem: '', panel: '—', optic: 'Pure white', ip: '', autonomy: '',
+      tags: ['20 m', 'Multi-arm', 'Highways'],
+      specs: [
+        ['Mast height', '20 m'],
+        ['Arms', 'Multi-arm'],
+        ['Luminaires', '4 × 100 W LED'],
+        ['Light colour', 'Pure white'],
+        ['Use', 'Highways, intersections, stadiums and large open areas']
+      ]
+    },
+    {
+      id: 'mast-30m-150w', cat: 'mast', photo: true,
+      name: '30 m LED High Mast, 6 × 150 W', short: '30 m High Mast · 6 × 150 W',
+      part: 'Multi-arm · 6 heads', watt: null, img: IMG + 'mast-30m-150w.webp',
+      big: '30m', key: [['Height', '30 m'], ['Lights', '6 × 150 W'], ['Colour', 'Pure white']],
+      battery: '—', chem: '', panel: '—', optic: 'Pure white', ip: '', autonomy: '',
+      tags: ['30 m', 'Multi-arm', 'Highways'],
+      specs: [
+        ['Mast height', '30 m'],
+        ['Arms', 'Multi-arm'],
+        ['Luminaires', '6 × 150 W LED'],
+        ['Light colour', 'Pure white'],
+        ['Use', 'Highways and wide open spaces']
+      ]
+    },
+    {
+      id: 'mast-20m-200w', cat: 'mast', photo: true,
+      name: '20 m LED High Mast, 6 × 200 W', short: '20 m High Mast · 6 × 200 W',
+      part: 'Multi-arm · 6 heads', watt: null, img: IMG + 'mast-20m-200w.webp',
+      big: '20m', key: [['Height', '20 m'], ['Lights', '6 × 200 W'], ['Colour', 'Cool white']],
+      battery: '—', chem: '', panel: '—', optic: 'Cool white', ip: '', autonomy: '',
+      tags: ['20 m', 'Multi-arm', 'Highways'],
+      specs: [
+        ['Mast height', '20 m'],
+        ['Arms', 'Multi-arm'],
+        ['Luminaires', '6 × 200 W LED'],
+        ['Light colour', 'Cool white'],
+        ['Use', 'Highways, flyovers, parking lots and industrial zones']
       ]
     },
     {
@@ -209,6 +271,20 @@
       ]
     },
     {
+      id: 'panel-400w', cat: 'storage',
+      name: '400 Wp Monocrystalline Solar Panel', short: '400 Wp Mono Panel',
+      part: 'Monocrystalline · 24 V', watt: null, img: IMG + 'panel-400w.webp',
+      big: '400W', key: [['Power', '400 Wp'], ['Cells', 'Monocrystalline'], ['System', '24 V']],
+      battery: '—', chem: '', panel: '400 Wp', optic: '', ip: '', autonomy: '',
+      tags: ['Monocrystalline', '24 V', 'Rooftop'],
+      specs: [
+        ['Rated power', '400 Wp'],
+        ['Cell type', 'Monocrystalline'],
+        ['Operating voltage', '24 V'],
+        ['Use', 'Residential, commercial and industrial solar systems']
+      ]
+    },
+    {
       id: 'deco-pole-5m', cat: 'poles',
       name: '5 m Decorative Pole with Drop-Down LED Lanterns', short: '5 m Decorative Pole',
       part: '60 W lantern', watt: 60, img: IMG + 'deco-pole.webp', blueprint: true,
@@ -227,6 +303,53 @@
         ['Lantern', '60 W OSRAM LED, cool white, CRI > 80'],
         ['Lantern housing', 'Aluminium, matte black, IP65'],
         ['Input', '220 V, inbuilt driver']
+      ]
+    },
+    {
+      id: 'deco-pole-heritage', cat: 'poles',
+      name: '5 m Heritage Decorative Pole, Double Arm', short: '5 m Heritage Pole',
+      part: 'Mild steel · black', watt: null, img: IMG + 'deco-pole-heritage.webp',
+      big: '5m', key: [['Height', '5 m'], ['Arms', 'Double'], ['Finish', 'Black']],
+      battery: '—', chem: '', panel: '—', optic: '', ip: '', autonomy: '',
+      tags: ['Heritage', 'Double arm', 'Parks'],
+      specs: [
+        ['Pole height', '5 m'],
+        ['Style', 'Heritage'],
+        ['Arms', 'Double'],
+        ['Material', 'Mild steel, mild-steel base'],
+        ['Finish', 'Powder-coated, black'],
+        ['Use', 'Landscapes, gardens, parks, pathways, campuses and resorts']
+      ]
+    },
+    {
+      id: 'pole-gi-octagonal-6m', cat: 'poles',
+      name: '6 m GI Octagonal Pole, Single Arm', short: '6 m Octagonal Pole',
+      part: 'Single arm · galvanised', watt: null, img: IMG + 'pole-gi-octagonal.webp',
+      big: '6m', key: [['Height', '6 m'], ['Arm', 'Single'], ['Material', 'GI']],
+      battery: '—', chem: '', panel: '—', optic: '', ip: '', autonomy: '',
+      tags: ['GI', 'Octagonal', 'Street lights'],
+      specs: [
+        ['Height', '6 m'],
+        ['Section', 'Octagonal'],
+        ['Arm', 'Single bracket'],
+        ['Material', 'Galvanised iron (GI)'],
+        ['Finish', 'Galvanised'],
+        ['Use', 'Residential streets, pathways, parks and public lighting']
+      ]
+    },
+    {
+      id: 'pole-gi-tubular-6m', cat: 'poles',
+      name: '6 m GI Tubular Pole', short: '6 m Tubular Pole',
+      part: 'Round · galvanised', watt: null, img: IMG + 'pole-gi-tubular.webp',
+      big: '6m', key: [['Height', '6 m'], ['Section', 'Round'], ['Material', 'GI']],
+      battery: '—', chem: '', panel: '—', optic: '', ip: '', autonomy: '',
+      tags: ['GI', 'Round', 'Street lights'],
+      specs: [
+        ['Height', '6 m'],
+        ['Section', 'Round tubular'],
+        ['Material', 'Galvanised iron (GI)'],
+        ['Finish', 'Galvanised, silver'],
+        ['Use', 'Street lights on residential and commercial roads']
       ]
     }
   ];

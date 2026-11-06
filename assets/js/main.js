@@ -6,6 +6,11 @@
   const byId = Object.create(null); // no prototype, so ?p=constructor can't match anything
   PRODUCTS.forEach(function (p) { byId[p.id] = p; });
   const root = document.documentElement;
+  // product counts in the page copy follow the catalogue (it can grow from the console)
+  document.querySelectorAll('[data-n]').forEach(function (el) {
+    const n = el.dataset.n === 'all' ? PRODUCTS.length : PRODUCTS.filter(function (p) { return p.cat === el.dataset.n; }).length;
+    el.textContent = el.hasAttribute('data-n-noun') ? n + (n === 1 ? ' product' : ' products') : n;
+  });
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const finePointer = window.matchMedia('(pointer: fine)').matches;
   const gsap = window.gsap;
@@ -147,7 +152,7 @@
       '<article class="card glass glass-edge' + (opts.feature ? ' is-feature' : '') + '" data-id="' + esc(p.id) + '" data-flip-id="' + esc(p.id) + '">' +
         '<div class="card-top"><span class="label">№ ' + (n < 10 ? '0' : '') + n + ' · ' + esc(cat ? cat.short || cat.name : '') + '</span>' +
           (p.badge ? '<span class="card-badge">' + esc(p.badge) + '</span>' : '') + '</div>' +
-        '<a class="card-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true">' +
+        '<a class="card-stage' + (p.blueprint ? ' blueprint' : '') + (p.photo ? ' photo' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true">' +
           (big ? '<span class="card-watt cond">' + esc(big) + '</span>' : '') +
           '<img src="' + esc(p.img) + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async">' + // its link is aria-hidden, so this is for image search only
         '</a>' +

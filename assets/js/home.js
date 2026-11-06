@@ -361,7 +361,7 @@
             '<button class="icon-btn glass sl" type="button" data-add="' + GS.esc(p.id) + '" aria-pressed="false" aria-label="Add ' + GS.esc(p.short || p.name) + ' to quote list"><span class="state" aria-hidden="true"></span>' + GS.icon.plus + '</button></div>' +
         '</div></article>';
     }).join('') +
-      '<div class="show-end glass glass-edge"><div><p class="label">18 products · 5 families</p><p class="h3">The whole <span class="it grad">catalogue</span></p>' +
+      '<div class="show-end glass glass-edge"><div><p class="label"><span data-n="all">' + GS.products.length + '</span> products · 5 families</p><p class="h3">The whole <span class="it grad">catalogue</span></p>' +
       GS.btn('Enter the marketplace', 'products.html', 'btn-plasma') + '</div></div>';
     document.dispatchEvent(new CustomEvent('gs:quote'));
 

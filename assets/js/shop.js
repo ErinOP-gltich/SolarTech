@@ -74,7 +74,7 @@
     const items = [{ id: 'all', name: 'All' }].concat(CATS);
     seg.insertAdjacentHTML('beforeend', items.map(function (c) {
       const n = c.id === 'all' ? ALL.length : ALL.filter(function (p) { return p.cat === c.id; }).length;
-      const short = { street: 'Street lights', mast: 'Masts & floods', traffic: 'Traffic', storage: 'Storage', poles: 'Poles' }[c.id] || c.name;
+      const short = { street: 'Street lights', mast: 'Masts & floods', traffic: 'Traffic', storage: 'Energy', poles: 'Poles' }[c.id] || c.name;
       return '<button type="button" class="sl" aria-pressed="' + (state.cat === c.id) + '" data-cat="' + c.id + '"><span class="state" aria-hidden="true"></span><span>' + GS.esc(short) + '</span> <span class="n">' + n + '</span></button>';
     }).join(''));
     const chip = function (kind, f) {
