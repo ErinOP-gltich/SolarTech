@@ -132,6 +132,35 @@
       ]
     },
     {
+      id: 'aio-hybrid', cat: 'street',
+      name: 'Hybrid All-in-One Solar Street Light', short: 'Hybrid All-in-One',
+      part: 'HYB-AIO-SOL', watt: null, img: IMG + 'aio-hybrid.webp',
+      big: 'HYB', key: [['Battery', '12.8 V · 42 Ah'], ['Panel', '100 Wp mono'], ['Backup', '1 day']],
+      battery: '12.8 V · 42 Ah', chem: 'LiFePO₄', panel: '100 Wp', optic: 'Lens', ip: 'IP66', autonomy: '1 day',
+      tags: ['All-in-one', 'Hybrid', 'Motion sensor'],
+      badge: 'Hybrid',
+      specs: [
+        ['Battery', '12.8 V, 42 Ah LiFePO₄'],
+        ['Solar panel', 'Monocrystalline 100 Wp, 12 V'],
+        ['Panel size', '1327 × 415 × 30 mm'],
+        ['Charge controller', 'Hybrid MPPT'],
+        ['LED make', 'OSRAM'],
+        ['LED efficacy', '140 lm/W'],
+        ['LED life', '50,000 hrs'],
+        ['Colour temperature', '5500–6500 K'],
+        ['Colour rendering', 'CRI > 70'],
+        ['Power factor', '> 0.9'],
+        ['Driver', 'Integrated'],
+        ['Optic', 'Lens'],
+        ['Housing', 'Mild steel, powder-coated; heat-, corrosion- & UV-resistant'],
+        ['Ingress protection', 'IP66'],
+        ['Motion sensor', 'Yes'],
+        ['Operation', 'Hybrid; dusk to dawn, automatic ON/OFF and dimming'],
+        ['Autonomy', '1 day'],
+        ['Operating temperature', '−20 °C to 50 °C']
+      ]
+    },
+    {
       id: 'high-mast-12m', cat: 'mast', featured: true,
       name: '12 m Solar High Mast', short: '12 m Solar High Mast',
       part: 'Made to site', watt: null, img: IMG + 'high-mast.webp',
