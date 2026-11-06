@@ -528,8 +528,8 @@
         let reps = 0;
         const add = function () { base.forEach(function (s, i) { const c = s.cloneNode(true); if (reps) c.setAttribute('aria-hidden', 'true'); track.appendChild(c); }); reps++; };
         add();
-        const unit = track.scrollWidth;
-        while (track.scrollWidth < box.clientWidth + unit && reps < 12) add();
+        // each half only needs to cover the strip: anything longer is a wider moving layer for the phone to paint
+        while (track.scrollWidth < box.clientWidth && reps < 12) add();
         const half = track.scrollWidth;
         for (let r = reps; r > 0; r--) add(); // second, identical half
         track.style.setProperty('--tick-dur', (half / SPEED).toFixed(2) + 's');

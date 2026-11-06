@@ -108,6 +108,8 @@
     size();
     addEventListener('resize', size);
     box.classList.add('is-css');
+    // touch screens: a steady drift only. A fling would otherwise whip the speed and skew up and snap them back
+    if (!GS.finePointer) return;
     const anims = function () { return tracks.map(function (t) { return t.getAnimations ? t.getAnimations()[0] : null; }).filter(Boolean); };
     let vel = 0, skew = 0, raf = 0, lastY = scrollY;
     function settle() {
