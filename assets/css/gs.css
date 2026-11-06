@@ -208,6 +208,13 @@ h2.label, h3.label { margin: 0; font-weight: 500; }
    So only the few panels that float over moving things get it (the nav, the catalogue's command bar, the snackbar,
    the controls over the hero's animated road); cards and panels on the plain page are tinted glass without it. */
 .refract, .toast.glass, .hero .glass { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+/* lite (low-end devices, or any that can't keep up: head.js, main.js): no live blur at all; the floating panels get a
+   solid backing instead, so text on them stays readable */
+.lite .refract, .lite .toast.glass, .lite .hero .glass, .lite .menu, .lite .lightbox::backdrop { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.lite .refract { background-color: var(--ink-1); }
+.lite .toast.glass { background-color: var(--ink-2); }
+.lite .menu { background: rgb(5 5 7 / .97); }
+html[data-theme="light"].lite .menu { background: rgb(250 248 244 / .98); }
 
 /* ------------------------------------------------------------------ state layers + ripple (M3) */
 .sl { position: relative; overflow: hidden; isolation: isolate; -webkit-tap-highlight-color: transparent; }

@@ -1252,6 +1252,7 @@
       pause: function () { userPaused = true; sync(); },
       play: function () { waiting = false; userPaused = false; sync(); },
       setProgress: function (p) {
+        if (destroyed) return;
         p = clamp(+p || 0, 0, 1);
         if (Math.abs(p - progress) < 0.0005) return;
         progress = p;

@@ -346,21 +346,23 @@
 
   /* ---------- smooth scroll (Lenis) driven by the GSAP ticker so ScrollTrigger stays in sync ---------- */
   let lenis = null;
+  let tickLenis = null;
   function smooth() {
-    if (reduceMotion || !window.Lenis) return;
+    if (reduceMotion || !window.Lenis || root.classList.contains('lite')) return;
     lenis = new window.Lenis({ lerp: .085, duration: 1.2, smoothWheel: true, wheelMultiplier: .95, touchMultiplier: 1.5 });
     if (window.ScrollTrigger) window.ScrollTrigger.config({ ignoreMobileResize: true }); // no re-layout when a phone's address bar slides
     // the loading screen locks the page; keep Lenis still until it lifts
     if (root.classList.contains('is-loading')) { lenis.stop(); ready(function () { lenis.start(); }); }
     if (gsap) {
       lenis.on('scroll', function () { if (window.ScrollTrigger) window.ScrollTrigger.update(); });
-      gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
+      tickLenis = function (t) { lenis.raf(t * 1000); };
+      gsap.ticker.add(tickLenis);
       gsap.ticker.lagSmoothing(0);
     } else {
       (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
     }
     document.addEventListener('click', function (e) {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (!lenis || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const a = e.target.closest('a[href*="#"]');
       if (!a || a.target === '_blank') return;
       const url = new URL(a.href, location.href);
@@ -378,6 +380,42 @@
       target.focus({ preventScroll: true });
     });
   }
+  /* ---------- lite: a device that can't keep up gets the light version (measured, not guessed) ---------- */
+  // Frames are counted twice: for two seconds a moment after the loading screen hands over, and for the first second
+  // and a half of scrolling (where most of the work is). Under 40 a second, or a quarter of them late, and the page drops
+  // its costliest work (main.js: smooth scrolling; home.js: the live hero; gs.css: live blur).
+  function frameRate(ms, done) {
+    let n = 0, late = 0, t0 = 0, last = 0, away = document.hidden;
+    const gone = function () { away = true; };
+    document.addEventListener('visibilitychange', gone, { once: true });
+    requestAnimationFrame(function frame(t) {
+      if (away) return;                           // a hidden tab doesn't draw: that's not slowness
+      if (t0) { n++; if (t - last > 34) late++; } else t0 = t;
+      last = t;
+      if (t - t0 < ms) { requestAnimationFrame(frame); return; }
+      document.removeEventListener('visibilitychange', gone);
+      done(n / ((t - t0) / 1000), late / Math.max(1, n));
+    });
+  }
+  function liteProbe() {
+    if (root.classList.contains('lite') || reduceMotion || !window.requestAnimationFrame) return;
+    const judge = function (fps, lateShare) {
+      window.GS_PROBE = (window.GS_PROBE || []).concat({ fps: Math.round(fps), late: +lateShare.toFixed(2) }); // for the console
+      if (!root.classList.contains('lite') && (fps < 40 || lateShare > .25)) goLite();
+    };
+    ready(function () {
+      setTimeout(function () { frameRate(2000, judge); }, 1500);
+      const onScroll = function () { removeEventListener('scroll', onScroll); frameRate(1500, judge); };
+      addEventListener('scroll', onScroll, { passive: true });
+    });
+  }
+  function goLite() {
+    root.classList.add('lite');
+    try { localStorage.setItem('gs-lite', String(Date.now())); } catch (e) { /* not remembered: measured again next visit */ }
+    if (lenis) { if (tickLenis) gsap.ticker.remove(tickLenis); lenis.destroy(); lenis = null; }
+    document.dispatchEvent(new CustomEvent('gs:lite'));
+  }
+
   function scrollToTop() {
     if (lenis) lenis.scrollTo(0); else scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
   }
@@ -598,6 +636,7 @@
   enhance();
   paintCount(false);
   smooth();
+  liteProbe();
   nav();
   reveals();
   glassMotion();

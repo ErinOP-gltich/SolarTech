@@ -18,9 +18,8 @@
     // powers on just after the loading screen hands over (its own light reveals the page)
     let beam = null;
     // low-power phones and Data Saver keep the painted CSS road (.hb-fallback): the live canvas is the heaviest thing on the site
-    const nav = navigator;
-    const lowPower = (nav.connection && nav.connection.saveData) || (nav.deviceMemory && nav.deviceMemory <= 2) ||
-      (nav.hardwareConcurrency && nav.hardwareConcurrency <= 4 && matchMedia('(pointer: coarse)').matches);
+    // (head.js marks those as .lite before the first paint; main.js adds it later if the device can't keep up)
+    const lowPower = document.documentElement.classList.contains('lite');
     if (lowPower) {
       hero.classList.add('hb-static');
       if (motion) gsap.to(hero.querySelector('.hero-mid'), { yPercent: -18, opacity: 0, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: .6 } });
@@ -33,6 +32,8 @@
       return beam;
     };
     (window.requestIdleCallback || function (f) { return setTimeout(f, 1); })(mountBeam, { timeout: 1200 });
+    // the frame-rate check found this device too slow: swap the live road for the painted one
+    document.addEventListener('gs:lite', function () { if (beam) { beam.destroy(); hero.classList.add('hb-static'); } }, { once: true });
     GS.ready(function () {
       if (!mountBeam()) return;
       beam.play();
