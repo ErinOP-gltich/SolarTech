@@ -29,5 +29,5 @@ try {
   if (lite) document.documentElement.classList.add('lite');
 })();
 
-/* Theme: dark ("Solar Noir") unless the visitor chose light with the nav button. Set here, before first paint, so there is no flash. */
-try { document.documentElement.dataset.theme = localStorage.getItem('gs-theme') === 'light' ? 'light' : 'dark'; } catch (e) { document.documentElement.dataset.theme = 'dark'; }
+/* Theme: light ("Daylight") unless the visitor chose dark with the nav button. Set here, before first paint, so there is no flash. */
+try { document.documentElement.dataset.theme = localStorage.getItem('gs-theme') === 'dark' ? 'dark' : 'light'; } catch (e) { document.documentElement.dataset.theme = 'light'; }

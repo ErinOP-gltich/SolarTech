@@ -16,15 +16,16 @@ window.GS_CONFIG = {
   // what Google Maps searches for on the Contact page (a place name, an address or "lat,lng")
   mapQuery: 'Pub Boragaon, Belwali Road, Guwahati, Assam 781035',
 
-  // PAN India: the first entry is shown highlighted on the Contact page, then every state and union territory
+  // the Contact page shows the list up to 'PAN India'; 'PAN India' and everything after it appear when the visitor taps More
   serviceAreas: [
-    'PAN India', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-    'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
-    'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
-    'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
-    'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Andaman & Nicobar Islands',
-    'Chandigarh', 'Dadra & Nagar Haveli and Daman & Diu', 'Delhi', 'Jammu & Kashmir', 'Ladakh', 'Lakshadweep',
-    'Puducherry'
+    'Guwahati & Kamrup Metro', 'All districts of Assam', 'Arunachal Pradesh', 'Meghalaya', 'Nagaland',
+    'Manipur', 'Mizoram', 'Tripura', 'Sikkim',
+    'PAN India',
+    'Andhra Pradesh', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana',
+    'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra',
+    'Odisha', 'Punjab', 'Rajasthan', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh',
+    'Uttarakhand', 'West Bengal', 'Andaman & Nicobar Islands', 'Chandigarh', 'Dadra & Nagar Haveli and Daman & Diu', 'Delhi',
+    'Jammu & Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
   ],
 
   // Optional: a form backend that accepts a plain JSON POST, e.g. a Formspree or Getform form URL (Web3Forms needs an

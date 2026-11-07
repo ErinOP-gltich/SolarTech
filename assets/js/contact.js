@@ -192,8 +192,18 @@
   });
 
   /* ---------- areas + map ---------- */
+  // the list up to "PAN India" shows; "PAN India" and the rest wait behind a More button
   const areas = document.querySelector('[data-areas]');
-  if (areas) areas.innerHTML = (CFG.serviceAreas || []).map(function (a) { return '<li class="tag">' + GS.esc(a) + '</li>'; }).join('');
+  if (areas) {
+    const all = CFG.serviceAreas || [], cut = all.indexOf('PAN India');
+    areas.innerHTML = all.map(function (a, i) { return '<li class="tag' + (cut > -1 && i >= cut ? ' later' : '') + (i === cut ? ' hi' : '') + '">' + GS.esc(a) + '</li>'; }).join('') +
+      (cut > -1 ? '<li><button type="button" class="tag tag-more" aria-expanded="false">More</button></li>' : '');
+    const more = areas.querySelector('.tag-more');
+    if (more) more.addEventListener('click', function () {
+      const open = areas.classList.toggle('open');
+      more.setAttribute('aria-expanded', open); more.textContent = open ? 'Less' : 'More';
+    });
+  }
   const map = document.querySelector('[data-map]');
   if (map && CFG.mapQuery) {
     map.innerHTML = GS.btn('Open in Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(CFG.mapQuery), 'btn-glass glass btn-sm', ' target="_blank" rel="noopener"');
