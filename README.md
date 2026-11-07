@@ -24,7 +24,7 @@ A sun/moon button in the nav switches between the dark "Solar Noir" look and "Da
 
 ### Size
 
-The live site shows at 90% on anything wider than a phone, as if the browser were zoomed out. `deploy.sh` runs `scale.mjs` on the upload copy, which writes every length in the stylesheets as `N × var(--px)`; `gs.css` sets `--px` to `.9px` above 760px. The source files keep plain pixels, so `npx wrangler pages dev .` shows 100%; `./deploy.sh build` makes the scaled copy to try locally.
+The live site shows at 90% on every screen, as if the browser were zoomed out. `deploy.sh` runs `scale.mjs` on the upload copy, which writes every length in the stylesheets as `N × var(--px)`; `gs.css` sets `--px` to `.9px`. The source files keep plain pixels, so `npx wrangler pages dev .` shows 100%; `./deploy.sh build` makes the scaled copy to try locally.
 
 ### Speed
 

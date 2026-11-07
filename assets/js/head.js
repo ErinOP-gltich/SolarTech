@@ -17,12 +17,14 @@ try {
   }
 } catch (e) { /* old browsers: the page still works, a refresh just keeps its place */ }
 
-/* Lite: phones short on cores, any device short on memory, Data Saver, or a device that couldn't keep up on an earlier
+/* Lite: Android phones short on cores, any device short on memory, Data Saver, or a device that couldn't keep up on an earlier
    visit (main.js measures the frame rate and remembers a slow result for three days) get the light version: the painted
    hero instead of the live one, no live blur, native scrolling. Decided here so the first paint is already light. */
 (function () {
-  var nv = navigator, c = nv.connection, lite = (c && c.saveData) || (nv.deviceMemory && nv.deviceMemory <= 2) ||
-    (nv.hardwareConcurrency && nv.hardwareConcurrency <= 4 && window.matchMedia && matchMedia('(pointer: coarse)').matches);
+  // (cores are only counted where the browser also reports memory, i.e. Chromium: Safari's core count isn't reliable,
+  // and iPhones are left to the frame-rate check)
+  var nv = navigator, c = nv.connection, lite = (c && c.saveData) || (nv.deviceMemory && (nv.deviceMemory <= 2 ||
+    (nv.hardwareConcurrency && nv.hardwareConcurrency <= 4 && window.matchMedia && matchMedia('(pointer: coarse)').matches)));
   try { lite = lite || Date.now() - (+localStorage.getItem('gs-lite') || 0) < 3 * 864e5; } catch (e) { /* storage blocked */ }
   if (lite) document.documentElement.classList.add('lite');
 })();

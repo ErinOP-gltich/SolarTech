@@ -98,10 +98,9 @@ html[data-theme="light"].nav-dark .nav {
   --nav-h: 64px;
 
   /* size: deploy.sh (scale.mjs) writes every length in the stylesheets as N × --px, so the live site shows at 90% on
-     anything wider than a phone, like a browser zoomed out. In the source files lengths are plain px (100%). */
-  --px: 1px;
+     every screen, like a browser zoomed out. In the source files lengths are plain px (100%). */
+  --px: .9px;
 }
-@media (min-width: 761px) { :root { --px: .9px; } }
 
 /* ------------------------------------------------------------------ base */
 *, *::before, *::after { box-sizing: border-box; }
@@ -804,6 +803,7 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .form-status.ok { color: var(--volt); }
 .form-status.bad { color: #FF8A6B; }
 .reach { display: grid; gap: var(--s3); }
+.reach-quick { display: none; } /* phones only (see the phone block) */
 .reach-card { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: var(--s4); padding: var(--s4); border-radius: var(--r-xl); transition: transform var(--d-m) var(--ease-expo); }
 a.reach-card:hover { transform: translateX(6px); }
 .reach-card .ic { display: grid; place-items: center; width: 52px; height: 52px; border-radius: var(--r-l); background: var(--plasma); color: var(--on-plasma); }
@@ -950,15 +950,12 @@ a.reach-card:hover { transform: translateX(6px); }
   main > [data-dial-sec] ~ .sec:not(#catalogue) { order: 2; }
   main > #catalogue { padding-top: var(--s4) !important; } /* beats its inline desktop spacing */
   main:has(> [data-dial-sec]) .sec-head .no { display: none; } /* the №s follow the desktop order */
-  /* contact: the quick ways in first (call, WhatsApp, email as three tiles), then the form, then where we are */
-  .contact-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
-  .contact-grid > .reach { display: contents; }
-  .contact-grid > :not(.reach), .reach > :not(a) { grid-column: 1 / -1; }
-  .contact-grid > :not(.reach) { order: 1; margin: var(--s4) 0; }
-  .reach > :not(a) { order: 2; }
-  .reach > a.reach-card { order: 0; grid-template-columns: 1fr; justify-items: center; gap: var(--s2); padding: var(--s3) var(--s2); text-align: center; }
-  .reach > a.reach-card b, .reach > a.reach-card .arr { display: none; }
-  .reach > a.reach-card .ic { width: 44px; height: 44px; }
+  /* contact: the quick ways in first, as three tiles above the form (the same links as the cards beside it on wider
+     screens, which hide here, so the "other ways to reach us" group keeps its place for screen readers) */
+  .reach-quick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+  .reach > a.reach-card { display: none; }
+  .reach-quick .reach-card { grid-template-columns: 1fr; justify-items: center; gap: var(--s2); padding: var(--s3) var(--s2); text-align: center; }
+  .reach-quick .reach-card .ic { width: 44px; height: 44px; }
   .form-actions { display: grid; } .form-actions .btn { width: 100%; }
   .h2 { margin-bottom: var(--s5); }
   .sec-head { margin-bottom: var(--s5); }
@@ -987,17 +984,17 @@ a.reach-card:hover { transform: translateX(6px); }
   .finder-grid .cards > .card { scroll-snap-align: start; }
   .card { border-radius: var(--r-l); transform-style: flat; }
   .card-top { min-height: 0; padding: 10px 10px 0; }
-  .card-top .label { font-size: 9.5px; letter-spacing: .08em; }
-  .card-badge { height: 20px; padding: 0 6px; font-size: 9px; letter-spacing: .06em; }
+  .card-top .label { font-size: 10.5px; letter-spacing: .08em; }
+  .card-badge { height: 20px; padding: 0 6px; font-size: 10px; letter-spacing: .06em; }
   .card-stage, .finder-grid .card-stage { height: 140px; margin: 6px 6px 0; padding: 10px; border-radius: var(--r-m); }
   .card-watt { font-size: 56px; }
   .card-body, .finder-grid .card-body { padding: 10px 10px 4px; }
-  .card-part { font-size: 9.5px; letter-spacing: .08em; }
+  .card-part { font-size: 10.5px; letter-spacing: .08em; }
   .card-title { font-size: 14px; margin-bottom: var(--s2); min-height: 0; }
   .card-tags { display: none; }
   .card-specs { grid-template-columns: 1fr; }
   .card-specs div, .card-specs div + div { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; padding: 5px 0 0; border-left: 0; }
-  .card-specs dt { font-size: 9px; letter-spacing: .08em; }
+  .card-specs dt { font-size: 10px; letter-spacing: .08em; }
   .card-specs dd { min-height: 0; margin: 0; font-size: 12px; text-align: right; }
   .card-actions, .finder-grid .card-actions { gap: 6px; padding: 10px; }
   .card-actions .btn { --h: 36px; padding: 0 8px; font-size: 10.5px; letter-spacing: .08em; }

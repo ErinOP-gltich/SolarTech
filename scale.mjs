@@ -1,6 +1,6 @@
-// The site is shown at 90% on screens wider than a phone, as if the browser were zoomed out (the client's choice).
+// The site is shown at 90% on every screen, as if the browser were zoomed out (the client's choice).
 // Run by deploy.sh on the upload copy: every length over 1.5px in the given stylesheets becomes calc(N * var(--px)), and
-// gs.css sets --px to .9px above 760px (1px on phones, where smaller type would be hard to read). Viewport units and
+// gs.css sets --px to .9px. Viewport units and
 // hairlines stay as they are, which is what browser zoom does too. Real CSS pixels, so scripts that measure the page
 // (the hero beam, ScrollTrigger, Flip) need no changes, unlike CSS zoom.
 //   node scale.mjs assets/css/*.css

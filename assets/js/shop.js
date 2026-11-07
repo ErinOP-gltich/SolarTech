@@ -143,6 +143,7 @@
     if (state.view === 'list') { renderTable(list); return; }
 
     const els = Object.keys(cards).map(function (k) { return cards[k]; });
+    GS.closeMore(); // an open spec drawer is fixed to its card on phones: it would ride the cards' moves
     els.forEach(function (c) { c.style.transform = ''; });
     const flipState = animate && motion && Flip ? Flip.getState(els, { props: 'opacity' }) : null;
     list.forEach(function (p) { grid.appendChild(cards[p.id]); });
@@ -235,7 +236,7 @@
     let tucked = false, raf = 0;
     const check = function () {
       raf = 0;
-      if (!wide.matches) { tucked = false; return; }
+      if (!wide.matches) { if (tucked) { tucked = false; document.documentElement.classList.remove('nav-tucked'); } return; }
       const t = mark.getBoundingClientRect().top, edge = pinAt() + LEAD;
       const near = tucked ? t <= edge + 12 : t <= edge; // a little hysteresis: resting on the edge can't flicker
       const want = near && cat.getBoundingClientRect().bottom > cmd.offsetHeight + innerHeight * .35;

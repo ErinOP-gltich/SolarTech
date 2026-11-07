@@ -247,8 +247,10 @@
     const charging = function (t) { return ramp(t, 5.9, 6.3) * (1 - ramp(t, 15.2, 15.6)); };
     const phaseOf = function (t) { return t < 6.5 ? 0 : t < 18 ? 1 : t < 24 ? 2 : 3; };
 
-    // phones: the scene fills the top 60% (the story is a sheet below it), framed on the whole lamp post
-    function fitScene() { scene.setAttribute('viewBox', innerWidth < 761 ? '614 0 693 900' : '0 0 1600 900'); }
+    // phones: the scene fills the top 60% (the story is a sheet below it), framed on the whole lamp post. The same
+    // query as gs.css, not a width measured here (the light theme's margins and desktop scrollbars would skew that)
+    const phoneMq = matchMedia('(max-width: 760px)');
+    function fitScene() { scene.setAttribute('viewBox', phoneMq.matches ? '614 0 693 900' : '0 0 1600 900'); }
     fitScene();
     addEventListener('resize', fitScene);
 
@@ -300,7 +302,7 @@
       put(stick, '--charging', charging(t).toFixed(3));
       put(stick, '--hint', (1 - ramp(p, .005, .03)).toFixed(3));
 
-      const u = (t - RISE) / (SET - RISE), phone = W < 761; // on a phone the sky is the top half: a flatter, higher arc
+      const u = (t - RISE) / (SET - RISE), phone = phoneMq.matches; // on a phone the sky is the top half: a flatter, higher arc
       const sx = W * (.08 + .84 * clamp(u, 0, 1));
       const down = phone ? .56 : .95; // below the horizon: behind the hills (on a phone the story sheet is lower down)
       const sy = u > 0 && u < 1 ? H * (phone ? .46 - .4 * Math.sin(Math.PI * u) : .74 - .6 * Math.sin(Math.PI * u)) : H * down;
@@ -511,7 +513,11 @@
   liveStatus();
   // the rest is below the fold (and behind the loading screen): one part per task, so no long task holds a slow phone up
   const rest = [marquee, litUp, countUps, dayCycle, showroom, peeks, finder, ctaLight, GS.reveals];
-  (function next() { rest.shift()(); if (rest.length) setTimeout(next, 0); })();
+  (function next() {
+    const part = rest.shift();
+    try { part(); } catch (e) { setTimeout(function () { throw e; }); } // still reported, but the parts after it run
+    if (rest.length) setTimeout(next, 0);
+  })();
   // ScrollTrigger refreshes itself on load; the only extra measure needed is once the web fonts have changed line lengths
   if (ST && document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(refreshSoon);
 })();

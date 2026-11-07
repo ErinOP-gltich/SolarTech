@@ -403,7 +403,9 @@
     if (root.classList.contains('lite') || reduceMotion || !window.requestAnimationFrame) return;
     const judge = function (fps, lateShare) {
       window.GS_PROBE = (window.GS_PROBE || []).concat({ fps: Math.round(fps), late: +lateShare.toFixed(2) }); // for the console
-      if (!root.classList.contains('lite') && (fps < 36 || lateShare > .25)) goLite();
+      // a steady ~30 a second is a capped display (iOS Low Power Mode), not a slow device: lite now, but not remembered
+      const capped = fps > 26 && fps < 34 && lateShare < .1;
+      if (!root.classList.contains('lite') && (fps < 36 || lateShare > .25)) goLite(!capped);
     };
     ready(function () {
       const kinds = ['wheel', 'touchmove', 'keydown'];
@@ -411,9 +413,9 @@
       kinds.forEach(function (k) { addEventListener(k, start, { passive: true }); });
     });
   }
-  function goLite() {
+  function goLite(remember) {
     root.classList.add('lite');
-    try { localStorage.setItem('gs-lite', String(Date.now())); } catch (e) { /* not remembered: measured again next visit */ }
+    if (remember) try { localStorage.setItem('gs-lite', String(Date.now())); } catch (e) { /* not remembered: measured again next visit */ }
     if (lenis) { if (tickLenis) gsap.ticker.remove(tickLenis); lenis.destroy(); lenis = null; }
     document.dispatchEvent(new CustomEvent('gs:lite'));
   }
@@ -652,6 +654,7 @@
 
   window.GS = {
     config: CFG, products: PRODUCTS, byId: byId, quote: quote, card: card, btn: btn, esc: esc, icon: ICON, toast: toast,
+    closeMore: function () { document.querySelectorAll('.card.is-open').forEach(function (c) { setMore(c, false); }); },
     reduceMotion: reduceMotion, finePointer: finePointer, reveals: reveals, enhance: enhance, splitIn: splitIn, ready: ready,
     get lenis() { return lenis; },
     get motionPaused() { return motionPaused; }
@@ -702,8 +705,10 @@
   // (on wide screens it stays, except in the marketplace, where shop.js has it make way for the pinned command bar)
   if (document.querySelector('[data-nav]')) {
     const narrow = matchMedia('(max-width: 1180px)');
-    let lastY = scrollY, raf = 0;
+    let lastY = scrollY, raf = 0, mine = false; // mine: this rule hid the nav (shop.js has its own on wide screens)
     root.classList.add('nav-tuckable');
+    // widened past 1180px (a tablet turned to landscape): give back a nav this rule hid, or it would stay hidden
+    narrow.addEventListener('change', function () { if (!narrow.matches && mine) { mine = false; root.classList.remove('nav-tucked'); } lastY = scrollY; });
     addEventListener('scroll', function () {
       if (raf) return;
       raf = requestAnimationFrame(function () {
@@ -711,7 +716,8 @@
         const y = scrollY, dy = y - lastY;
         if (!narrow.matches || Math.abs(dy) < 6) return; // ignore tiny jitters
         lastY = y;
-        root.classList.toggle('nav-tucked', dy > 0 && y > 120);
+        mine = dy > 0 && y > 120;
+        root.classList.toggle('nav-tucked', mine);
       });
     }, { passive: true });
   }
