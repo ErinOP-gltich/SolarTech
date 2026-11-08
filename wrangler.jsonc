@@ -1,4 +1,4 @@
-// Green Sun website — Cloudflare Pages project "solartech" (see README). Only the three small Functions in functions/
+// Green Sun website — Cloudflare Pages project "solartech" (see README). Only the small Functions in functions/
 // use these; the pages themselves are plain files. database_id is filled in during setup.
 {
   "name": "solartech",
@@ -9,5 +9,6 @@
   ],
   "r2_buckets": [
     { "binding": "MEDIA", "bucket_name": "solartech-media" }
-  ]
+  ],
+  "ai": { "binding": "AI" }   // Ask AI (functions/api/ask.js)
 }

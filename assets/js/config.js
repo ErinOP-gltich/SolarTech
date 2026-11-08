@@ -37,7 +37,7 @@ window.GS_CONFIG = {
   // Live content from the admin console (the solartech-admin project). Leave false until the console's login (Cloudflare Access)
   // is set up and its first "Import the catalogue" is done: with it on, the Contact page's "Send enquiry" button saves into
   // the console's inbox, and the site reads its products and contact details from /api/public instead of these files.
-  liveApi: false,
+  liveApi: true,
 
   // Count page views for the admin console's Visitors page (no cookies; see functions/api/hit.js). Only works on Cloudflare.
   countVisits: true,

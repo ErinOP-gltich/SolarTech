@@ -223,6 +223,13 @@
 
   renderItems();
 
+  // a road planned on the Road planner page arrives with the quote list: write it into the message, once
+  try {
+    const planned = sessionStorage.getItem('gs-plan');
+    if (planned && !field('message').value) field('message').value = 'From the road planner: ' + planned;
+    sessionStorage.removeItem('gs-plan');
+  } catch (e) { /* private mode */ }
+
   // page intro
   GS.ready(function () {
     document.querySelectorAll('[data-hero-line]').forEach(function (l, i) { GS.splitIn(l, .1 + i * .12); });

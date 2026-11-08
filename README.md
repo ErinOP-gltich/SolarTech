@@ -93,12 +93,12 @@ The redesigned logo keeps the original idea (a smiling sun whose face is a plug)
 
 | File | Use |
 |---|---|
-| `assets/brand/gs-mark.svg` | The sun on its own |
+| `assets/brand/gs-mark.svg` | The sun on its own (the same file as `favicon.svg`) |
 | `assets/brand/gs-lockup-light.svg` / `gs-lockup-dark.svg` | Sun + wordmark, for light and dark backgrounds |
-| `assets/brand/favicon.svg`, `apple-touch-icon.png` | Browser tab and phone home-screen icons |
-| `assets/brand/og-image.jpg` | Preview image when the site is shared on social media / WhatsApp (97 KB; `og-image.png` is the lossless master) |
+| `assets/brand/favicon.svg`, `favicon.ico`, `apple-touch-icon.png` | Browser tab and phone home-screen icons |
+| `assets/brand/og-image.jpg` | Preview image when the site is shared on social media / WhatsApp: the full registered logo |
 
-The wordmark is set in Archivo Expanded Black with Geist Mono (free, Google Fonts) and converted to outlines. To rebuild the SVGs: `pip install fonttools`, download the two static TTFs (links in the script), then `python3 brand-source/build_logo.py Archivo-ExpandedBlack.ttf GeistMono-Medium.ttf`.
+The sun is the company's registered (™) logo, traced to vector from the logo artwork so it stays sharp at any size; never redraw or recolour it. The lettering beside it (GREEN SUN / TECHNOLOGIES) is Archivo Expanded Black with Geist Mono, converted to outlines.
 
 **Previous version.** The first design is tagged `v1-original` in this repository.
 

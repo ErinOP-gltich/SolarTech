@@ -12,7 +12,7 @@ branch=main; [ "$1" = "preview" ] && branch=preview
 node seo.mjs   # catalogue structured data + sitemap follow products.js
 src=$(pwd)
 tmp=$(mktemp -d)
-rsync -a --exclude .git --exclude README.md --exclude brand-source --exclude deploy.sh --exclude seo.mjs --exclude scale.mjs --exclude node_modules --exclude .wrangler --exclude .gitignore ./ "$tmp/"
+rsync -a --exclude .git --exclude README.md --exclude deploy.sh --exclude seo.mjs --exclude scale.mjs --exclude test --exclude node_modules --exclude .wrangler --exclude .gitignore ./ "$tmp/"
 cd "$tmp"
 npx --yes esbuild@0.25 assets/js/*.js assets/css/*.css --minify --legal-comments=none --log-level=warning --outbase=. --outdir=. --allow-overwrite
 node "$src/scale.mjs" assets/css/*.css

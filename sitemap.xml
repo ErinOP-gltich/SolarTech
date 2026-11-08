@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  <url><loc>https://greensuntechnologies.com/</loc><lastmod>2026-11-07</lastmod><changefreq>monthly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://greensuntechnologies.com/products</loc><lastmod>2026-11-07</lastmod><changefreq>weekly</changefreq><priority>0.9</priority>
+  <url><loc>https://greensuntechnologies.com/</loc><lastmod>2026-11-08</lastmod><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://greensuntechnologies.com/products</loc><lastmod>2026-11-08</lastmod><changefreq>weekly</changefreq><priority>0.9</priority>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/si-9w.webp</image:loc><image:title>9W Semi-Integrated Solar Street Light</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/si-15w.webp</image:loc><image:title>15W Semi-Integrated Solar Street Light</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/si-20w.webp</image:loc><image:title>20W Semi-Integrated Solar Street Light</image:title></image:image>
@@ -27,5 +27,8 @@
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/pole-gi-octagonal.webp</image:loc><image:title>6 m GI Octagonal Pole, Single Arm</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/pole-gi-tubular.webp</image:loc><image:title>6 m GI Tubular Pole</image:title></image:image>
   </url>
-  <url><loc>https://greensuntechnologies.com/contact</loc><lastmod>2026-11-07</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://greensuntechnologies.com/planner</loc><lastmod>2026-11-08</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://greensuntechnologies.com/projects</loc><lastmod>2026-11-08</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://greensuntechnologies.com/factory</loc><lastmod>2026-11-08</lastmod><changefreq>yearly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://greensuntechnologies.com/contact</loc><lastmod>2026-11-08</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
 </urlset>
