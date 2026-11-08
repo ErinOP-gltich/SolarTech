@@ -155,25 +155,30 @@
       truck: '<path d="M2 6h11v10H2zM13 10h5l3 3v3h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>'
     };
     stepsEl.innerHTML = F.steps.map(function (s, i) {
-      return '<li class="fx-card" style="--i:' + i + '"><div class="fx-card-in fx-acc' + (i % 3) + '">' +
-        '<div class="fx-tx"><span class="fx-big" aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span>' +
-        '<p class="label fx-kick"><span class="fx-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[s.icon] || ICONS.check) + '</svg></span>Step ' + (i + 1) + ' of ' + F.steps.length + '</p>' +
-        '<h3 class="fx-h">' + esc(s.title) + '</h3><p class="fx-p">' + esc(s.text) + '</p>' +
-        (s.facts ? '<ul class="fx-facts">' + s.facts.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul>' : '') + '</div>' +
-        '<div class="fx-ph' + (s.photo ? ' is-photo' : '') + '">' + (s.img ? '<img src="' + esc(s.img) + '" alt="" loading="lazy" decoding="async">' : '') + '</div>' +
-        '</div></li>';
+      return '<li class="fx-row' + (i % 2 ? ' is-flip' : '') + '">' +
+        '<div class="fx-pic rv"><div class="fx-stage' + (s.photo ? ' is-photo' : '') + '">' + (s.img ? '<img src="' + esc(s.img) + '" alt="" loading="lazy" decoding="async">' : '') + '</div></div>' +
+        '<span class="fx-node" aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<div class="fx-copy rv" style="--d:.08s"><p class="label fx-kick"><span class="fx-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[s.icon] || ICONS.check) + '</svg></span>Step ' + (i + 1) + ' of ' + F.steps.length + '</p>' +
+        '<h3 class="h3 fx-h">' + esc(s.title) + '</h3><p class="fx-p">' + esc(s.text) + '</p>' +
+        (s.facts ? '<ul class="fx-facts">' + s.facts.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul>' : '') + '</div></li>';
     }).join('');
+    GS.reveals();
 
-    // as each card slides up over the one before, that one shrinks back and dims a little
-    const cards = stepsEl.querySelectorAll('.fx-card');
-    if (window.gsap && window.ScrollTrigger && !calm()) {
-      cards.forEach(function (c, i) {
-        const next = cards[i + 1]; if (!next) return;
-        gsap.to(c.querySelector('.fx-card-in'), {
-          scale: .94, opacity: .55, ease: 'none',
-          scrollTrigger: { trigger: next, start: 'top 70%', end: 'top 15%', scrub: true }
-        });
-      });
+    // the line down the middle fills as you read, and each step's number lights when its row reaches the middle of the screen
+    const tl = document.querySelector('[data-tl]'), line = tl && tl.querySelector('[data-line]');
+    const rows = stepsEl.querySelectorAll('.fx-row');
+    if (calm() || !('IntersectionObserver' in window)) { rows.forEach(function (r) { r.classList.add('is-on'); }); if (line) line.style.transform = 'none'; }
+    else {
+      const io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) e.target.classList.add('is-on'); }); }, { rootMargin: '0px 0px -45% 0px' });
+      rows.forEach(function (r) { io.observe(r); });
+      let raf = 0;
+      const fill = function () {
+        raf = 0;
+        const r = tl.getBoundingClientRect(), mid = innerHeight * .55;
+        line.style.transform = 'scaleY(' + Math.min(1, Math.max(0, (mid - r.top) / r.height)).toFixed(4) + ')';
+      };
+      addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(fill); }, { passive: true });
+      fill();
     }
 
     // photos and videos
