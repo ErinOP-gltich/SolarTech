@@ -29,12 +29,15 @@
     var ps = clean(d && d.products);
     if (ps.length) window.GS_PRODUCTS = ps.map(function (p, i) { p.order = i; return p; });
     if (d && d.config) CONTACT.forEach(function (k) { if (d.config[k] != null && d.config[k] !== '') C[k] = d.config[k]; });
+    // projects and factory photos saved in the console replace the examples in work-data.js (which only fills what's unset)
+    if (d && Array.isArray(d.projects) && d.projects.length) window.GS_PROJECTS = d.projects.map(function (x) { x.photos = Array.isArray(x.photos) ? x.photos : []; return x; });
+    if (d && Array.isArray(d.factory) && d.factory.length) window.GS_FACTORY_MEDIA = d.factory;
   }
 
   var cached = null;
   try { cached = JSON.parse(localStorage.getItem(KEY)); } catch (e) { /* private mode, or damaged: ignore */ }
   var built = '';   // what this page is built from, measured before apply() adds defaults to the objects
-  if (cached) { built = JSON.stringify({ products: cached.products || [], config: cached.config || null }); apply(cached); }
+  if (cached) { built = JSON.stringify({ products: cached.products || [], config: cached.config || null, projects: cached.projects || null, factory: cached.factory || null }); apply(cached); }
 
   if (!C.liveApi || !window.fetch) return;
 
@@ -46,11 +49,11 @@
     return r.json();
   }).then(function (d) {
     clearTimeout(give);
-    var products = d.products || [], config = d.config || null;
-    if (!products.length && !config) return;                   // the console hasn't published anything yet
-    var str = JSON.stringify({ products: products, config: config });
+    var products = d.products || [], config = d.config || null, projects = d.projects || null, factory = d.factory || null;
+    if (!products.length && !config && !projects && !factory) return;   // the console hasn't published anything yet
+    var str = JSON.stringify({ products: products, config: config, projects: projects, factory: factory });
     if (str === built) return;
-    try { localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), products: products, config: config })); } catch (e) { return; }
+    try { localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), products: products, config: config, projects: projects, factory: factory })); } catch (e) { return; }
     // reload once to show it, never in a loop (a fresh value is already stored, so the next load matches)
     try {
       if (Date.now() - (+sessionStorage.getItem(FLAG) || 0) < 20000) return;

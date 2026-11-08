@@ -3,7 +3,8 @@
    (photos go in assets/img/work/, as .webp or .jpg) and delete the sample line. */
 
 // A project: where it is (lat/lng from Google Maps: right-click the spot → the numbers at the top), what went up, photos.
-window.GS_PROJECTS = [
+window.GS_PROJECTS = window.GS_PROJECTS || [   // the console's projects (live.js) take the place of these examples
+
   {
     id: 'sample-mast-market', sample: true,
     title: 'High mast for a market square', type: 'High mast', year: 2025,
@@ -57,7 +58,7 @@ window.GS_PROJECTS = [
 // The factory: how a light is made (the steps are written from the catalogue; check them with the owner). Each step shows a
 // picture: img (a cut-out product shot) or, with photo: true, a full photo. Then the photos and videos. A video is { type: 'video', src: 'assets/img/work/line.mp4', poster: 'assets/img/work/line.webp' }; keep it short
 // (under 20 MB) and muted.
-window.GS_FACTORY = {
+window.GS_FACTORY = {   // the steps live here; the photos and videos come from the console when it has some (live.js)
   steps: [
     { icon: 'ruler', img: 'assets/img/products/pole-gi-octagonal.webp', facts: ['Road width', 'Pole spacing', 'Nights of backup'], title: 'Sized to the site', text: 'Every order starts with the road: its width, the pole spacing and how many nights it must run without sun. That sets the light, the battery and the panel.' },
     { icon: 'chip', img: 'assets/img/products/si-50w.webp', facts: ['OSRAM LEDs', '155 lm/W', '50,000 h'], title: 'The LED engine', text: 'OSRAM LED chips on aluminium boards: 155 lumens a watt, 50,000 hours, 5500–6500 K daylight white.' },
@@ -67,7 +68,7 @@ window.GS_FACTORY = {
     { icon: 'check', img: 'assets/img/products/si-30w.webp', facts: ['Charged', 'Switched on', 'Checked'], title: 'Tested before it leaves', text: 'Lights are charged, switched on and checked before they are packed.' },
     { icon: 'truck', img: 'assets/img/products/mast-30m-150w.webp', facts: ['North-East install', 'PAN India supply'], photo: true, title: 'Out to the road', text: 'Our crew installs across the North-East; we ship and support PAN India.' }
   ],
-  media: [
+  media: window.GS_FACTORY_MEDIA || [
     { type: 'photo', src: 'assets/img/products/battery-100ah.webp', caption: 'Battery packs', sample: true },
     { type: 'photo', src: 'assets/img/products/si-50w.webp', caption: 'Light heads', sample: true },
     { type: 'photo', src: 'assets/img/products/panel-400w.webp', caption: 'Solar panels', sample: true },
