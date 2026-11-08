@@ -400,7 +400,8 @@
     });
   }
   function liteProbe() {
-    if (root.classList.contains('lite') || reduceMotion || !window.requestAnimationFrame) return;
+    let pref = null; try { pref = localStorage.getItem('gs-lite-pref'); } catch (e) { /* storage blocked */ }
+    if (root.classList.contains('lite') || reduceMotion || pref === '0' || !window.requestAnimationFrame) return;
     const judge = function (fps, lateShare) {
       window.GS_PROBE = (window.GS_PROBE || []).concat({ fps: Math.round(fps), late: +lateShare.toFixed(2) }); // for the console
       // a steady ~30 a second is a capped display (iOS Low Power Mode), not a slow device: lite now, but not remembered
@@ -612,6 +613,17 @@
 
   /* ---------- "Pause motion": stops the looping animations (tickers, marquee, drifting light, the sun) ---------- */
   let motionPaused = false;
+  // footer: Lite mode on / off, remembered; the page reloads so every effect starts again in the chosen mode
+  function liteToggle() {
+    document.querySelectorAll('[data-lite-toggle]').forEach(function (b) {
+      const on = root.classList.contains('lite');
+      b.setAttribute('aria-pressed', on); b.querySelector('[data-lite-state]').textContent = on ? 'On' : 'Off';
+      b.addEventListener('click', function () {
+        try { localStorage.setItem('gs-lite-pref', root.classList.contains('lite') ? '0' : '1'); localStorage.removeItem('gs-lite'); } catch (e) { return; }
+        location.reload();
+      });
+    });
+  }
   function motionToggle() {
     const read = function () { try { motionPaused = localStorage.getItem('gs-motion') === 'paused'; } catch (e) { /* storage blocked */ } };
     read();
@@ -649,6 +661,7 @@
   footerSign();
   tickers();
   motionToggle();
+  liteToggle();
 
   root.classList.add('gs-up'); // the CSS fail-safe stands down: reveals and headlines are in the runtime's hands
 

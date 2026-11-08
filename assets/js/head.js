@@ -25,7 +25,11 @@ try {
   // and iPhones are left to the frame-rate check)
   var nv = navigator, c = nv.connection, lite = (c && c.saveData) || (nv.deviceMemory && (nv.deviceMemory <= 2 ||
     (nv.hardwareConcurrency && nv.hardwareConcurrency <= 4 && window.matchMedia && matchMedia('(pointer: coarse)').matches)));
-  try { lite = lite || Date.now() - (+localStorage.getItem('gs-lite') || 0) < 3 * 864e5; } catch (e) { /* storage blocked */ }
+  try {
+    lite = lite || Date.now() - (+localStorage.getItem('gs-lite') || 0) < 3 * 864e5;
+    var pref = localStorage.getItem('gs-lite-pref');   // the footer's Lite mode switch: '1' on, '0' off, beats the guess
+    if (pref === '1') lite = true; else if (pref === '0') lite = false;
+  } catch (e) { /* storage blocked */ }
   if (lite) document.documentElement.classList.add('lite');
 })();
 
