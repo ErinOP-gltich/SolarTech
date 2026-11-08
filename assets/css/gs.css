@@ -1037,6 +1037,10 @@ a.reach-card:hover { transform: translateX(6px); }
 .motion-tog[aria-pressed="true"] { color: var(--volt); border-color: rgba(198, 255, 61, .5); }
 .motion-tog[aria-pressed="true"] i::before { left: 1px; width: 0; height: 0; border-radius: 0; background: none; border-style: solid; border-width: 5px 0 5px 9px; border-color: transparent transparent transparent currentColor; }
 .motion-tog[aria-pressed="true"] i::after { display: none; }
+/* Lite mode: a ring that fills when it's on (the motion switch keeps its pause / play icon) */
+[data-lite-toggle] i::before, [data-lite-toggle][aria-pressed="true"] i::before { left: 1px; top: 1px; width: 8px; height: 8px; border: 0; border-radius: 50%; background: transparent; box-shadow: inset 0 0 0 1.5px currentColor; }
+[data-lite-toggle] i::after { display: none; }
+[data-lite-toggle][aria-pressed="true"] i::before { background: currentColor; }
 .motion-paused .nav-logo img, .motion-paused .ticker-track, .motion-paused .phero-sun, .motion-paused .live .pulse::after, .motion-paused .scroll-cue i::after, .motion-paused .day-scene .flow { animation-play-state: paused; }
 .ticker:hover .ticker-track { animation-play-state: paused; }
 .hero-foot .motion-tog { flex: none; }
