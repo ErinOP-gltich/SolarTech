@@ -31,10 +31,10 @@ html[data-theme="light"] .cta-band .btn-glass { color: var(--text); background: 
 
 /* ------------------------------------------------------------------ projects: the radar */
 .wk-radar { --rd-bg: radial-gradient(circle at 50% 50%, #0F1E14 0%, #06090A 62%, #040506 100%); --rd-line: rgba(198, 255, 61, .09); --rd-dot: #C6FF3D; --rd-ping: rgba(198, 255, 61, .55); --rd-sweep: rgba(198, 255, 61, .3); --rd-ink: #F3EFE6; --rd-home: #FFC400;
-  position: relative; aspect-ratio: 16 / 8; min-height: 360px; overflow: hidden; isolation: isolate; border-radius: var(--r-2xl); background: var(--rd-bg); color: var(--rd-ink); box-shadow: var(--e5); }
+  position: relative; aspect-ratio: 16 / 6; min-height: 280px; max-height: 440px; overflow: hidden; isolation: isolate; border-radius: var(--r-2xl); background: var(--rd-bg); color: var(--rd-ink); box-shadow: var(--e5); }
 html[data-theme="light"] .wk-radar { --rd-bg: radial-gradient(circle at 50% 55%, #FFFFFF 0%, #FFF6EC 45%, #FCE7DA 100%); --rd-line: rgba(217, 72, 15, .1); --rd-dot: #E8360F; --rd-ping: rgba(232, 54, 15, .45); --rd-sweep: rgba(255, 140, 60, .32); --rd-ink: #141110; --rd-home: #7C5CFF; }
 .wk-radar::before { content: ''; position: absolute; inset: 0; z-index: -1; background-image: linear-gradient(var(--rd-line) 1px, transparent 1px), linear-gradient(90deg, var(--rd-line) 1px, transparent 1px), repeating-radial-gradient(circle at 50% 50%, transparent 0 79px, var(--rd-line) 80px 81px); background-size: 56px 56px, 56px 56px, auto; }
-.wk-sweep { position: absolute; left: 50%; top: 50%; z-index: -1; width: 170%; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(from 0deg, var(--rd-sweep), transparent 16%); transform: translate(-50%, -50%); animation: wk-spin 7s linear infinite; }
+.wk-sweep { position: absolute; left: 50%; top: 50%; z-index: -1; width: 170%; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(from 0deg, var(--rd-sweep), transparent 10%); -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 60%); mask-image: radial-gradient(circle, #000 0%, transparent 60%); transform: translate(-50%, -50%); animation: wk-spin 7s linear infinite; }
 .wk-radar-hud { position: absolute; inset: var(--s5); display: flex; flex-direction: column; justify-content: space-between; pointer-events: none; }
 .wk-radar-hud .label { color: var(--rd-ink); opacity: .75; }
 .wk-radar-hud .label b { color: var(--rd-dot); font-weight: 600; }
@@ -56,6 +56,10 @@ html[data-theme="light"] .wk-radar { --rd-bg: radial-gradient(circle at 50% 55%,
 .wk-ph { position: absolute; inset: 0; z-index: -2; background: radial-gradient(circle at 50% 40%, #2A2230, #0B0B10); }
 .wk-ph img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.4s var(--ease-expo); }
 .wk-open:hover .wk-ph img { transform: scale(1.08); }
+.wk-ph.is-cut { background: radial-gradient(60% 55% at 50% 42%, rgba(255, 170, 0, .38), transparent 70%), radial-gradient(circle at 50% 40%, #2A2230, #0B0B10); }
+.wk-ph.is-cut img { object-fit: contain; padding: 14% 18% 34%; filter: drop-shadow(0 24px 30px rgba(0, 0, 0, .55)); }
+.wk-dlg-ph img.is-cut { object-fit: contain; padding: 8%; }
+.wk-dot.no-label b { display: none; }
 .wk-top { position: absolute; top: 14px; left: 14px; right: 80px; display: flex; flex-wrap: wrap; gap: 6px; }
 .wk-no { position: absolute; top: 18px; right: 18px; color: rgba(255, 255, 255, .75); }
 .wk-body { position: absolute; left: 20px; right: 84px; bottom: 20px; display: flex; flex-direction: column; gap: 9px; }
@@ -112,63 +116,41 @@ html[data-theme="light"] .wk-radar { --rd-bg: radial-gradient(circle at 50% 55%,
 html[data-theme="light"] .fx-visit { background: rgb(255 255 255 / .7); border-color: rgb(20 17 16 / .08); }
 .fx-visit address { font-style: normal; line-height: 1.5; }
 
-/* factory: a street light that builds itself beside the steps (the drawing is the loading screen's lamp) */
-@keyframes fx-rot { to { transform: rotate(360deg); } }
+/* factory: seven stacked cards, each sliding up over the last (the ones beneath shrink back in work.js) */
 .fx-build { padding: clamp(64px, 8vw, 128px) 0 clamp(32px, 4vw, 64px); }
-.fx-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 72px); align-items: start; }
-.fx-vis { --lit: #FFC400; position: sticky; top: calc(var(--nav-h) + 40px); display: grid; place-items: center; height: calc(100vh - var(--nav-h) - 80px); height: calc(100svh - var(--nav-h) - 80px); min-height: 420px; padding: var(--s6); overflow: hidden; isolation: isolate; border-radius: var(--r-2xl); background: radial-gradient(120% 80% at 50% 0%, #1A1530 0%, #0A0B14 60%, #050507 100%); color: #F3EFE6; color-scheme: dark; box-shadow: var(--e5); }
-.fx-vis::after { content: ''; position: absolute; inset: 0; z-index: -1; background: radial-gradient(60% 45% at 68% 100%, rgba(255, 170, 40, .42), transparent 70%); opacity: 0; transition: opacity 1.4s var(--ease); }
-.fx-vis.s6::after { opacity: 1; }
-.fx-vis-cap { position: absolute; left: var(--s5); right: var(--s5); bottom: var(--s5); margin: 0; color: rgba(243, 239, 230, .78); }
-.fxl { width: 100%; height: 100%; max-height: 640px; overflow: visible; }
-.fxl * { transition: stroke .7s var(--ease), fill .7s var(--ease), opacity .9s var(--ease), fill-opacity .9s var(--ease); }
-.fxl .fxl-d, .fxl .fxl-fin, .fxl .fxl-brk, .fxl .fxl-lead { fill: none; stroke: rgba(243, 239, 230, .22); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
-.fxl .fxl-f { fill: #0B0B14; }
-.fxl .fxl-c { stroke: rgba(243, 239, 230, .14); stroke-width: 1; fill-opacity: 0; }
-.fxl .fxl-pin { fill: rgba(243, 239, 230, .4); }
-.fxl .fxl-lens { fill: none; stroke: #2C2925; stroke-width: 3.2; stroke-linecap: round; }
-.fxl-beam { fill: url(#fxl-beam-g); opacity: 0; }
-.fxl-pool { fill: #FFC400; opacity: 0; filter: blur(10px); }
-.fxl-ground { stroke: rgba(243, 239, 230, .2); stroke-width: 2; }
-.fxl-road { opacity: 0; } .fxl-road path { stroke: rgba(243, 239, 230, .55); stroke-width: 3; }
-.fxl-seal { fill: none; stroke: #3DD6FF; stroke-width: 2.4; stroke-dasharray: 5 8; opacity: 0; transform-box: fill-box; transform-origin: center; }
-.fxl-dim { opacity: 0; } .fxl-dim path { fill: none; stroke: var(--lit); stroke-width: 1.5; stroke-dasharray: 6 6; } .fxl-dim text { fill: var(--lit); font: 500 12px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; }
-/* 01 sized: the outline and its measurements */
-.s1 .fxl .fxl-d { stroke: rgba(243, 239, 230, .6); } .s1 .fxl-dim { opacity: 1; }
-.s2 .fxl-dim { opacity: .22; }
-/* 02 the LED engine */
-.s2 .fxl .fxl-head, .s2 .fxl .fxl-fin { stroke: var(--lit); } .s2 .fxl .fxl-head.fxl-f { fill: #2A1F08; } .s2 .fxl .fxl-lens { stroke: #FFE7A0; }
-/* 03 the battery */
-.s3 .fxl .fxl-bat { stroke: #C6FF3D; } .s3 .fxl .fxl-bat.fxl-f { fill: rgba(198, 255, 61, .22); }
-/* 04 panel + controller */
-.s4 .fxl .fxl-pv { stroke: var(--lit); } .s4 .fxl .fxl-c { fill-opacity: .92; } .s4 .fxl .fxl-lead { stroke: var(--lit); }
-/* 05 sealed */
-.s5 .fxl-seal { opacity: 1; animation: fx-rot 14s linear infinite; } .s6 .fxl-seal { opacity: .3; }
-/* 06 tested: switched on */
-.s6 .fxl-beam { opacity: 1; } .s6 .fxl .fxl-lens { stroke: #FFF6D0; filter: drop-shadow(0 0 6px #FFC400); }
-/* 07 out to the road */
-.s7 .fxl-pool { opacity: .5; } .s7 .fxl-road { opacity: 1; } .s7 .fxl .fxl-pole, .s7 .fxl .fxl-arm, .s7 .fxl .fxl-col, .s7 .fxl .fxl-stub { stroke: rgba(255, 214, 120, .8); }
-.fx-list { margin: 0; padding: 8vh 0 26vh; list-style: none; }
-.fx-step { position: relative; display: flex; flex-direction: column; justify-content: center; min-height: 60vh; min-height: 60svh; padding: var(--s5) 0; opacity: .28; transition: opacity .6s var(--ease); }
-.fx-step.is-done { opacity: .5; }
-.fx-step.is-on { opacity: 1; }
-.fx-top { display: flex; align-items: center; gap: var(--s4); margin-bottom: var(--s4); }
-.fx-no { font: 900 60px/1 var(--f-display); font-stretch: 125%; letter-spacing: -.04em; color: transparent; -webkit-text-stroke: 1.5px var(--line-2); }
-.fx-step.is-on .fx-no { -webkit-text-stroke: 0; background: var(--plasma); -webkit-background-clip: text; background-clip: text; }
-.fx-ic { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 18px; background: var(--inset-2); color: var(--muted); transition: background var(--d-m), color var(--d-m), box-shadow var(--d-m); }
-.fx-ic svg { width: 28px; height: 28px; }
-.fx-step.is-on .fx-ic { background: var(--plasma); color: #160800; box-shadow: 0 14px 34px -12px rgba(255, 120, 0, .7); }
-.fx-step .h3 { margin-bottom: var(--s3); }
-.fx-step p { max-width: 46ch; margin: 0; color: var(--text-2); line-height: 1.6; }
-html.lite .fx-step { opacity: 1; }
-@media (prefers-reduced-motion: reduce) { .fx-step { opacity: 1; } .s5 .fxl-seal { animation: none; } }
+.fx-stack { margin: var(--s6) 0 0; padding: 0; list-style: none; }
+.fx-card { position: sticky; top: calc(var(--nav-h) + 36px + var(--i) * 12px); height: min(620px, calc(100vh - var(--nav-h) - 90px)); height: min(620px, calc(100svh - var(--nav-h) - 90px)); margin-bottom: 14vh; }
+.fx-card:last-child { margin-bottom: 0; }
+.fx-card-in { --a1: #FF7A00; --a2: #FFC400; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); height: 100%; overflow: hidden; isolation: isolate; border: 1px solid rgb(255 255 255 / .09); border-radius: clamp(26px, 3vw, 44px);
+  background: radial-gradient(70% 90% at 82% 50%, color-mix(in srgb, var(--a1) 34%, transparent), transparent 62%), linear-gradient(160deg, #17171F 0%, #0C0C12 100%); color: #F3EFE6; color-scheme: dark;
+  box-shadow: 0 -24px 60px -30px rgba(0, 0, 0, .85), 0 30px 80px -40px rgba(0, 0, 0, .7); transform-origin: 50% 0; will-change: transform; }
+.fx-acc1 { --a1: #3DD6FF; --a2: #C6FF3D; }
+.fx-acc2 { --a1: #B26BFF; --a2: #FF6FB5; }
+html[data-theme="light"] .fx-card-in { border-color: rgb(20 17 16 / .07); background: radial-gradient(70% 90% at 82% 50%, color-mix(in srgb, var(--a1) 26%, transparent), transparent 62%), radial-gradient(60% 70% at 0% 100%, color-mix(in srgb, var(--a2) 14%, transparent), transparent 70%), #FFFFFF; color: var(--text); color-scheme: light; box-shadow: 0 -18px 50px -30px rgb(40 28 10 / .3), 0 30px 70px -40px rgb(40 28 10 / .35); }
+.fx-tx { position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(28px, 4vw, 64px); }
+.fx-big { position: absolute; left: clamp(20px, 3vw, 48px); top: clamp(4px, 1vw, 16px); font: 900 clamp(110px, 15vw, 240px)/1 var(--f-display); font-stretch: 125%; letter-spacing: -.05em; color: transparent; -webkit-text-stroke: 1.5px color-mix(in srgb, var(--a1) 55%, transparent); opacity: .9; pointer-events: none; }
+.fx-kick { display: flex; align-items: center; gap: 10px; margin: 0 0 var(--s4); color: inherit; opacity: .8; }
+.fx-ic { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 13px; background: linear-gradient(135deg, var(--a1), var(--a2)); color: #160800; box-shadow: 0 10px 26px -10px var(--a1); }
+.fx-ic svg { width: 21px; height: 21px; }
+.fx-h { margin: 0 0 var(--s4); font: 900 clamp(30px, 3.8vw, 62px)/.92 var(--f-display); font-stretch: 125%; text-transform: uppercase; letter-spacing: -.03em; text-wrap: balance; }
+.fx-p { max-width: 44ch; margin: 0; font-size: clamp(15px, 1.15vw, 17.5px); line-height: 1.6; opacity: .82; }
+.fx-facts { display: flex; flex-wrap: wrap; gap: 8px; margin: var(--s5) 0 0; padding: 0; list-style: none; }
+.fx-facts li { padding: 8px 13px; border: 1px solid color-mix(in srgb, var(--a1) 45%, transparent); border-radius: var(--r-full); background: color-mix(in srgb, var(--a1) 12%, transparent); font: 500 11.5px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; }
+.fx-ph { position: relative; display: grid; place-items: center; overflow: hidden; }
+.fx-ph::before { content: ''; position: absolute; width: 74%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--a2) 55%, transparent) 0%, color-mix(in srgb, var(--a1) 30%, transparent) 40%, transparent 70%); filter: blur(10px); }
+.fx-ph img { position: relative; max-width: 78%; max-height: 82%; object-fit: contain; filter: drop-shadow(0 34px 40px rgb(0 0 0 / .45)); transition: transform 1.2s var(--ease-expo); }
+.fx-card:hover .fx-ph img { transform: translateY(-8px) rotate(-2deg) scale(1.03); }
+.fx-ph.is-photo { margin: 14px; border-radius: clamp(18px, 2.4vw, 32px); }
+.fx-ph.is-photo::before { display: none; }
+.fx-ph.is-photo img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; filter: none; }
 @media (max-width: 1020px) {
-  .fx-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  .fx-vis { top: 10px; z-index: 2; height: 40vh; height: 40svh; min-height: 260px; padding: var(--s4); }
-  .fx-list { padding: 4vh 0 20vh; }
-  .fx-step { min-height: 52vh; min-height: 52svh; }
-  .fx-no { font-size: 44px; }
-  .fx-ic { width: 46px; height: 46px; border-radius: 15px; }
+  .fx-card { top: calc(14px + var(--i) * 8px); height: min(640px, calc(100svh - 40px)); margin-bottom: 10vh; }
+  .fx-card-in { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .fx-ph { order: -1; }
+  .fx-tx { padding: var(--s5) var(--s5) var(--s6); }
+  .fx-big { top: auto; bottom: 46%; font-size: 120px; opacity: .5; }
+  .fx-h { font-size: clamp(26px, 7.4vw, 40px); }
+  .fx-p { font-size: 14.5px; }
 }
 
 /* ------------------------------------------------------------------ road planner */
@@ -274,7 +256,7 @@ html[data-theme="light"] .pl-nums > div { background: #FFFFFF; }
   .wk-grid { grid-template-columns: minmax(0, 1fr); grid-auto-rows: minmax(300px, auto); }
   .wk-card.is-big { grid-column: auto; grid-row: span 1; }
   .wk-card.is-big .wk-open { min-height: 420px; }
-  .wk-radar { aspect-ratio: 4 / 5; min-height: 0; }
+  .wk-radar { aspect-ratio: 1; min-height: 0; max-height: none; }
   .wk-dlg { width: 100vw; max-width: 100vw; max-height: 92dvh; margin: auto 0 0; border-radius: 28px 28px 0 0; }
   .wk-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pl-form, .pl-out { padding: var(--s5); }

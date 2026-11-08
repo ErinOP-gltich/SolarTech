@@ -40,6 +40,8 @@
   if (grid) {
     const P = window.GS_PROJECTS || [];
     const byId = {}; P.forEach(function (p) { byId[p.id] = p; });
+    // a catalogue cut-out (transparent product shot) sits whole on a glowing stage; a real photo fills the card
+    const cut = function (src) { return GS.products.some(function (x) { return x.img === src && !x.photo; }); };
     const where = function (p) { return [p.place, p.district !== p.place ? p.district : '', p.state].filter(Boolean).join(', '); };
 
     // headline numbers
@@ -72,7 +74,8 @@
       radar.querySelector('[data-dots]').innerHTML =
         '<span class="wk-dot is-home" style="' + xy(home.lat, home.lng) + '"><i></i><b class="label">Green Sun · Guwahati</b></span>' +
         P.map(function (p, i) {
-          return '<button type="button" class="wk-dot" style="' + xy(p.lat, p.lng) + ';--d:' + (i * .15).toFixed(2) + 's" data-id="' + esc(p.id) + '" aria-label="' + esc(p.title + ', ' + where(p)) + '"><i></i><b class="label">' + esc(p.place) + '</b></button>';
+          const near = [home].concat(P.slice(0, i)).some(function (o) { return Math.abs(o.lat - p.lat) / (la1 - la0) < .07 && Math.abs(o.lng - p.lng) / (lo1 - lo0) < .09; });
+          return '<button type="button" class="wk-dot' + (near ? ' no-label' : '') + '" style="' + xy(p.lat, p.lng) + ';--d:' + (i * .15).toFixed(2) + 's" data-id="' + esc(p.id) + '" aria-label="' + esc(p.title + ', ' + where(p)) + '"><i></i><b class="label">' + esc(p.place) + '</b></button>';
         }).join('');
       radar.querySelector('[data-coords]').textContent = la0.toFixed(1) + '°N – ' + la1.toFixed(1) + '°N · ' + lo0.toFixed(1) + '°E – ' + lo1.toFixed(1) + '°E';
     }
@@ -85,7 +88,7 @@
       const big = i === 0 ? ' is-big' : '';
       return '<li class="wk-card rv' + big + '" style="--d:' + (i % 3 * .07).toFixed(2) + 's">' +
         '<button type="button" class="wk-open" data-id="' + esc(p.id) + '">' +
-        '<span class="wk-ph"><img src="' + esc(p.photos[0]) + '" alt="" loading="lazy" decoding="async"></span>' +
+        '<span class="wk-ph' + (cut(p.photos[0]) ? ' is-cut' : '') + '"><img src="' + esc(p.photos[0]) + '" alt="" loading="lazy" decoding="async"></span>' +
         '<span class="wk-top"><span class="wk-chip">' + esc(p.type) + '</span><span class="wk-chip">' + esc(p.year) + '</span>' + (p.sample ? '<span class="wk-chip wk-sample">Sample</span>' : '') + '</span>' +
         '<span class="wk-no label">№ ' + String(i + 1).padStart(2, '0') + '</span>' +
         '<span class="wk-body"><b class="wk-title">' + esc(p.title) + '</b><span class="wk-loc">' + PIN + esc(where(p)) + '</span>' +
@@ -119,7 +122,7 @@
       const names = (p.products || []).map(function (x) { return GS.byId[x]; }).filter(Boolean);
       const map = 'https://www.google.com/maps/search/?api=1&query=' + p.lat + ',' + p.lng;
       dlg.querySelector('[data-body]').innerHTML =
-        '<div class="wk-dlg-ph">' + p.photos.map(function (src) { return '<img src="' + esc(src) + '" alt="' + esc(p.title) + '">'; }).join('') + '</div>' +
+        '<div class="wk-dlg-ph">' + p.photos.map(function (src) { return '<img' + (cut(src) ? ' class="is-cut"' : '') + ' src="' + esc(src) + '" alt="' + esc(p.title) + '">'; }).join('') + '</div>' +
         '<div class="wk-dlg-tx"><p class="label">' + esc(p.type) + ' · ' + esc(p.year) + (p.sample ? ' · <span class="wk-sample-tx">Sample entry</span>' : '') + '</p>' +
         '<h2 class="h3" id="wk-dlg-h">' + esc(p.title) + '</h2>' +
         '<p class="wk-loc">' + PIN + esc(where(p)) + '</p>' +
@@ -149,25 +152,25 @@
       truck: '<path d="M2 6h11v10H2zM13 10h5l3 3v3h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>'
     };
     stepsEl.innerHTML = F.steps.map(function (s, i) {
-      return '<li class="fx-step" data-n="' + (i + 1) + '"><div class="fx-top"><span class="fx-no">' + String(i + 1).padStart(2, '0') + '</span>' +
-        '<span class="fx-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[s.icon] || ICONS.check) + '</svg></span></div>' +
-        '<h3 class="h3">' + esc(s.title) + '</h3><p>' + esc(s.text) + '</p></li>';
+      return '<li class="fx-card" style="--i:' + i + '"><div class="fx-card-in fx-acc' + (i % 3) + '">' +
+        '<div class="fx-tx"><span class="fx-big" aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<p class="label fx-kick"><span class="fx-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[s.icon] || ICONS.check) + '</svg></span>Step ' + (i + 1) + ' of ' + F.steps.length + '</p>' +
+        '<h3 class="fx-h">' + esc(s.title) + '</h3><p class="fx-p">' + esc(s.text) + '</p>' +
+        (s.facts ? '<ul class="fx-facts">' + s.facts.map(function (f) { return '<li>' + esc(f) + '</li>'; }).join('') + '</ul>' : '') + '</div>' +
+        '<div class="fx-ph' + (s.photo ? ' is-photo' : '') + '">' + (s.img ? '<img src="' + esc(s.img) + '" alt="" loading="lazy" decoding="async">' : '') + '</div>' +
+        '</div></li>';
     }).join('');
 
-    // the light beside the steps builds up as each step crosses the middle of the screen: s1 … s7 stay on once reached
-    const vis = document.querySelector('[data-vis]'), cap = document.querySelector('[data-vis-cap]');
-    const items = stepsEl.querySelectorAll('.fx-step');
-    const show = function (n) {
-      for (let k = 0; k <= items.length; k++) vis.classList.toggle('s' + k, k <= n);
-      items.forEach(function (li, i) { li.classList.toggle('is-on', i + 1 === n); li.classList.toggle('is-done', i + 1 < n); });
-      if (cap) cap.textContent = n ? String(n).padStart(2, '0') + ' / ' + String(items.length).padStart(2, '0') + ' · ' + F.steps[n - 1].title : 'Scroll to build a light';
-    };
-    if (!('IntersectionObserver' in window) || lite()) show(items.length);
-    else {
-      const io = new IntersectionObserver(function (es) {
-        es.forEach(function (e) { if (e.isIntersecting) show(+e.target.dataset.n); });
-      }, { rootMargin: '-48% 0px -48% 0px' });
-      items.forEach(function (li) { io.observe(li); });
+    // as each card slides up over the one before, that one shrinks back and dims a little
+    const cards = stepsEl.querySelectorAll('.fx-card');
+    if (window.gsap && window.ScrollTrigger && !lite()) {
+      cards.forEach(function (c, i) {
+        const next = cards[i + 1]; if (!next) return;
+        gsap.to(c.querySelector('.fx-card-in'), {
+          scale: .94, opacity: .55, ease: 'none',
+          scrollTrigger: { trigger: next, start: 'top 70%', end: 'top 15%', scrub: true }
+        });
+      });
     }
 
     // photos and videos

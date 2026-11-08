@@ -54,18 +54,18 @@ window.GS_PROJECTS = [
   }
 ];
 
-// The factory: how a light is made (the steps are written from the catalogue; check them with the owner), then photos and
-// videos. A video is { type: 'video', src: 'assets/img/work/line.mp4', poster: 'assets/img/work/line.webp' }; keep it short
+// The factory: how a light is made (the steps are written from the catalogue; check them with the owner). Each step shows a
+// picture: img (a cut-out product shot) or, with photo: true, a full photo. Then the photos and videos. A video is { type: 'video', src: 'assets/img/work/line.mp4', poster: 'assets/img/work/line.webp' }; keep it short
 // (under 20 MB) and muted.
 window.GS_FACTORY = {
   steps: [
-    { icon: 'ruler', title: 'Sized to the site', text: 'Every order starts with the road: its width, the pole spacing and how many nights it must run without sun. That sets the light, the battery and the panel.' },
-    { icon: 'chip', title: 'The LED engine', text: 'OSRAM LED chips on aluminium boards: 155 lumens a watt, 50,000 hours, 5500–6500 K daylight white.' },
-    { icon: 'battery', title: 'LiFePO₄ battery packs', text: 'Lithium iron phosphate cells, matched and packed with a battery management system, rated for 5,000 cycles.' },
-    { icon: 'sun', title: 'Panel and controller', text: 'The solar panel is matched to the battery; the controller switches the light on at dusk, off at dawn, and stretches the charge on cloudy days.' },
-    { icon: 'shield', title: 'Sealed to IP66', text: 'The housing is sealed against rain, dust and hosing: built for the North-East monsoon.' },
-    { icon: 'check', title: 'Tested before it leaves', text: 'Lights are charged, switched on and checked before they are packed.' },
-    { icon: 'truck', title: 'Out to the road', text: 'Our crew installs across the North-East; we ship and support PAN India.' }
+    { icon: 'ruler', img: 'assets/img/products/pole-gi-octagonal.webp', facts: ['Road width', 'Pole spacing', 'Nights of backup'], title: 'Sized to the site', text: 'Every order starts with the road: its width, the pole spacing and how many nights it must run without sun. That sets the light, the battery and the panel.' },
+    { icon: 'chip', img: 'assets/img/products/si-50w.webp', facts: ['OSRAM LEDs', '155 lm/W', '50,000 h'], title: 'The LED engine', text: 'OSRAM LED chips on aluminium boards: 155 lumens a watt, 50,000 hours, 5500–6500 K daylight white.' },
+    { icon: 'battery', img: 'assets/img/products/battery-100ah.webp', facts: ['LiFePO₄', '5,000 cycles', 'BMS'], title: 'LiFePO₄ battery packs', text: 'Lithium iron phosphate cells, matched and packed with a battery management system, rated for 5,000 cycles.' },
+    { icon: 'sun', img: 'assets/img/products/panel-400w.webp', facts: ['Matched panel', 'Dusk to dawn', 'Charge controller'], title: 'Panel and controller', text: 'The solar panel is matched to the battery; the controller switches the light on at dusk, off at dawn, and stretches the charge on cloudy days.' },
+    { icon: 'shield', img: 'assets/img/products/aio-20w.webp', facts: ['IP66', 'Rain', 'Dust'], title: 'Sealed to IP66', text: 'The housing is sealed against rain, dust and hosing: built for the North-East monsoon.' },
+    { icon: 'check', img: 'assets/img/products/si-30w.webp', facts: ['Charged', 'Switched on', 'Checked'], title: 'Tested before it leaves', text: 'Lights are charged, switched on and checked before they are packed.' },
+    { icon: 'truck', img: 'assets/img/products/mast-30m-150w.webp', facts: ['North-East install', 'PAN India supply'], photo: true, title: 'Out to the road', text: 'Our crew installs across the North-East; we ship and support PAN India.' }
   ],
   media: [
     { type: 'photo', src: 'assets/img/products/battery-100ah.webp', caption: 'Battery packs', sample: true },
