@@ -265,5 +265,4 @@ html[data-theme="light"] .pl-nums > div { background: #FFFFFF; }
   .pl-lux-badge { padding: 9px 12px 8px; border-radius: 16px; }
   .pl-hud .pl-tag:last-child { display: none; }
 }
-html.lite .wk-sweep, html.lite .wk-tick-track { animation: none; }
 @media (prefers-reduced-motion: reduce) { .wk-sweep, .wk-tick-track, .wk-dot i, .pl-live { animation: none; } }

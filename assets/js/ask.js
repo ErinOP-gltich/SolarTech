@@ -3,7 +3,7 @@
    Other scripts open it with window.GSAsk.open('a question'). */
 (function () {
   const GS = window.GS, esc = GS.esc, CFG = GS.config, KEY = 'gs-ask', MAX = 24;
-  const lite = function () { return document.documentElement.classList.contains('lite') || GS.reduceMotion; };
+  const lite = function () { return GS.reduceMotion; };   // the typed-out answer is cheap: only "reduce motion" skips it
   let msgs = [];
   try { msgs = JSON.parse(sessionStorage.getItem(KEY)) || []; if (!Array.isArray(msgs)) msgs = []; } catch (e) { msgs = []; }
   const save = function () { try { sessionStorage.setItem(KEY, JSON.stringify(msgs.slice(-MAX))); } catch (e) { /* private mode */ } };

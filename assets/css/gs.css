@@ -1238,5 +1238,5 @@ html[data-theme="light"] { --ask-bg: #FFFDFB; --ask-ring: conic-gradient(from va
   html.ask-up .ask-fab { opacity: 0; visibility: hidden; }
   html.ask-up, html.ask-up body { overflow: hidden; }
 }
-html.lite .ask-fab, html.lite .ask, html.lite .btn-ai, html.lite .ask-aura i { animation: none; }
+html.lite .ask-aura i { animation: none; }   /* big blurred layers: the costly part */
 @media (prefers-reduced-motion: reduce) { .ask-fab, .ask, .btn-ai, .ai-spark, .ask-orb i, .ask-aura i, .ask-think { animation: none; } }

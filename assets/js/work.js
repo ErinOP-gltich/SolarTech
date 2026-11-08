@@ -2,7 +2,10 @@
 (function () {
   const GS = window.GS, esc = GS.esc, CFG = GS.config;
   const root = document.documentElement;
+  // lite mode (a slow device) drops the costly effects (video autoplay); cheap transform motion keeps running,
+  // and only the visitor's "reduce motion" setting stops it
   const lite = function () { return root.classList.contains('lite') || GS.reduceMotion; };
+  const calm = function () { return GS.reduceMotion; };
   const PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22c5-4 8-8 8-12a8 8 0 0 0-16 0c0 4 3 8 8 12z"/><circle cx="12" cy="10" r="3"/></svg>';
   const ARROW = '<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   const uniq = function (a) { return a.filter(function (x, i) { return x && a.indexOf(x) === i; }); };
@@ -16,7 +19,7 @@
   function countUp(scope) {
     const els = scope.querySelectorAll('[data-to]');
     const run = function (el) {
-      const to = +el.dataset.to, t0 = performance.now(), dur = lite() ? 0 : 1400;
+      const to = +el.dataset.to, t0 = performance.now(), dur = calm() ? 0 : 1400;
       (function tick(t) {
         const k = dur ? Math.min(1, (t - t0) / dur) : 1;
         el.textContent = Math.round(to * (1 - Math.pow(1 - k, 4))).toLocaleString('en-IN');
@@ -163,7 +166,7 @@
 
     // as each card slides up over the one before, that one shrinks back and dims a little
     const cards = stepsEl.querySelectorAll('.fx-card');
-    if (window.gsap && window.ScrollTrigger && !lite()) {
+    if (window.gsap && window.ScrollTrigger && !calm()) {
       cards.forEach(function (c, i) {
         const next = cards[i + 1]; if (!next) return;
         gsap.to(c.querySelector('.fx-card-in'), {
