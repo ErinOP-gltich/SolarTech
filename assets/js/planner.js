@@ -11,6 +11,11 @@ const hud = document.querySelector('[data-hud]');
 const lite = root.classList.contains('lite') || GS.reduceMotion;
 let plan = null, rebuild = 0;
 
+// page intro: the headline words rise in once the loading screen lifts, as on the other pages
+GS.ready(function () {
+  document.querySelectorAll('[data-hero-line]').forEach(function (l, i) { GS.splitIn(l, .1 + i * .12); });
+});
+
 /* ---------------------------------------------------------------- form + result */
 function read() {
   const f = new FormData(form);

@@ -7,6 +7,11 @@
   const ARROW = '<svg class="arr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   const uniq = function (a) { return a.filter(function (x, i) { return x && a.indexOf(x) === i; }); };
 
+  // page intro: the headline words rise in once the loading screen lifts, as on the other pages
+  GS.ready(function () {
+    document.querySelectorAll('[data-hero-line]').forEach(function (l, i) { GS.splitIn(l, .1 + i * .12); });
+  });
+
   // numbers that count up the first time they scroll into view
   function countUp(scope) {
     const els = scope.querySelectorAll('[data-to]');
