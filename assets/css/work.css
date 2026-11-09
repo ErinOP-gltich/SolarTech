@@ -231,7 +231,8 @@ html[data-theme="light"] .fx-visit { background: rgb(255 255 255 / .7); border-c
 .pl-kicker { display: flex; align-items: center; gap: 8px; margin: 0; }
 .pl-pick { display: flex; align-items: center; gap: var(--s4); margin: var(--s4) 0 var(--s5); }
 .pl-pick-ph { flex: none; display: grid; place-items: center; width: 96px; height: 96px; border-radius: 24px; background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--sun) 35%, transparent), transparent 70%), var(--inset-2); }
-.pl-pick-ph img { max-width: 84%; max-height: 84%; object-fit: contain; }
+.pl-pick-ph { overflow: hidden; }
+.pl-pick-ph img { width: 82%; height: 82%; object-fit: contain; }   /* fixed size: Safari ignores % max-height on a grid item, and a tall photo spilled out */
 .pl-pick .h3 { margin-bottom: 4px; }
 .pl-pick-sub { margin: 6px 0 0; color: var(--text-2); font-size: 13.5px; }
 .pl-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: var(--line); }

@@ -40,7 +40,6 @@ writeFileSync('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 ${photos.map(img).join('\n')}
   </url>
   <url><loc>${SITE}planner</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>${SITE}projects</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>${SITE}factory</loc><lastmod>${today}</lastmod><changefreq>yearly</changefreq><priority>0.6</priority></url>
   <url><loc>${SITE}contact</loc><lastmod>${today}</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
 </urlset>
@@ -57,7 +56,7 @@ FACTS (state only these; if asked something not covered, say the team will confi
 ${contactLine}
 - We install across ${areas.join(', ')}, and supply PAN India.
 - ISO 9001 and ISO 14001 certified.
-- Website pages: /products (the catalogue), /planner (3D road planner: enter a road, get lights, poles and spacing), /projects (our work), /factory (how we make lights; visits by appointment), /contact (send an enquiry; quotes usually the same working day).
+- Website pages: /products (the catalogue), /planner (3D road planner: enter a road, get lights, poles and spacing), /factory (how we make lights; visits by appointment), /contact (send an enquiry; quotes usually the same working day).
 
 CATALOGUE (recommend only these; prices are never published, they are quoted):
 ${catalogue}
