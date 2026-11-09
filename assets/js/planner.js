@@ -98,7 +98,8 @@ function make3d() {
   const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: !lite, alpha: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, lite ? 1 : (matchMedia('(pointer: coarse)').matches ? 1.5 : 1.75)));
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(48, 1, .1, 900);
+  // near at .5 m (not .1): depth precision far down the road is ~5x better, so nothing on the ground flickers when zoomed out
+  const camera = new THREE.PerspectiveCamera(48, 1, .5, 900);
   scene.fog = new THREE.Fog(0x000000, 50, 330);
   const hemi = new THREE.HemisphereLight(0xffffff, 0x222233, .6);
   scene.add(hemi);
@@ -117,6 +118,7 @@ function make3d() {
   })();
   const add = function (o) { scene.add(o); return o; };
   const basic = function (o) { return new THREE.MeshBasicMaterial(o); };
+  const lift = function (n) { return { polygonOffset: true, polygonOffsetFactor: -n, polygonOffsetUnits: -n * 2 }; };
   const glow = function (o) { return new THREE.MeshBasicMaterial(Object.assign({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }, o)); };
 
   // the palettes: night (dark theme) and dusk (light theme)
@@ -149,9 +151,11 @@ function make3d() {
   // the parts that follow the plan live in one group, rebuilt each time
   let group = null, lamps = [], cars = [], born = 0, span = 100;
   const mats = {
-    road: new THREE.MeshLambertMaterial(), mark: basic({}), pole: new THREE.MeshLambertMaterial(), panel: new THREE.MeshLambertMaterial({ color: 0x1d3160 }),
-    head: basic({}), pool: glow({ map: glowTex }), cone: glow({ alphaMap: fadeTex, side: THREE.DoubleSide }),
-    hl: basic({ color: 0xfff7e0 }), tl: basic({ color: 0xff2a1a }), beam: glow({ map: glowTex, color: 0x8a7a5a })
+    // the flat layers on the ground are a hair apart: a depth offset fixes their order (ground < road < markings < light),
+    // or the graphics card flips between them as the camera moves ("z-fighting": the light pools blinked when zoomed out)
+    road: new THREE.MeshLambertMaterial(lift(1)), mark: basic(lift(2)), pole: new THREE.MeshLambertMaterial(), panel: new THREE.MeshLambertMaterial({ color: 0x1d3160 }),
+    head: basic({}), pool: glow(Object.assign({ map: glowTex }, lift(4))), cone: glow({ alphaMap: fadeTex, side: THREE.DoubleSide }),
+    hl: basic({ color: 0xfff7e0 }), tl: basic({ color: 0xff2a1a }), beam: glow(Object.assign({ map: glowTex, color: 0x8a7a5a }, lift(4)))
   };
 
   function build(p) {
@@ -192,7 +196,7 @@ function make3d() {
       m4.compose(v3.set(x, H + .45, z), new THREE.Quaternion().setFromAxisAngle(s3.set(1, 0, 0), -side * .45), one); panelM.setMatrixAt(i, m4);
       m4.compose(v3.set(x, 2.6, z - side * .16), id, one); boxM.setMatrixAt(i, m4);
       m4.compose(v3.set(x, H - .2, lz), id, one); headM.setMatrixAt(i, m4);
-      const r = H * 3.6; m4.compose(v3.set(x, .03 + i * .0004, lz), rx, new THREE.Vector3(r, r * 1.08, 1)); poolM.setMatrixAt(i, m4);
+      const r = H * 3.6; m4.compose(v3.set(x, .03, lz), rx, new THREE.Vector3(r, r * 1.08, 1)); poolM.setMatrixAt(i, m4);
       m4.compose(v3.set(x, (H - .25) / 2, lz), id, one); coneM.setMatrixAt(i, m4);
       lamps.push(x);
     });
