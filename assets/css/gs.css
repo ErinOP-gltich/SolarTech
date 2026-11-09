@@ -99,9 +99,9 @@ html[data-theme="light"].nav-dark .nav {
 
   /* size: deploy.sh (scale.mjs) writes every length in the stylesheets as N × --px, so the live site shows at 90% on
      every screen, like a browser zoomed out. In the source files lengths are plain px (100%). Past 1600 px wide (a big
-     monitor, or a browser zoomed out) the whole page grows with the screen instead of shrinking into the middle of it,
-     up to twice the size at 3200 px. */
-  --px: clamp(.9px, .05625vw, 1.8px);   /* scale.mjs leaves this one line as it is */
+     monitor, or a browser zoomed out however far) the whole page grows with the screen, so it keeps the 1600 px layout's
+     proportions instead of shrinking into the middle (the client's choice). */
+  --px: max(.9px, .05625vw);   /* scale.mjs leaves this one line as it is */
 }
 
 /* ------------------------------------------------------------------ base */
