@@ -152,7 +152,7 @@
       '<article class="card glass glass-edge' + (opts.feature ? ' is-feature' : '') + '" data-id="' + esc(p.id) + '" data-flip-id="' + esc(p.id) + '">' +
         '<div class="card-top"><span class="label">№ ' + (n < 10 ? '0' : '') + n + ' · ' + esc(cat ? cat.short || cat.name : '') + '</span>' +
           (p.badge ? '<span class="card-badge">' + esc(p.badge) + '</span>' : '') + '</div>' +
-        '<a class="card-stage' + (p.blueprint ? ' blueprint' : '') + (p.photo ? ' photo' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true">' +
+        '<a class="card-stage' + (p.blueprint ? ' blueprint' : '') + '" href="' + href + '" tabindex="-1" aria-hidden="true">' +
           (big ? '<span class="card-watt cond">' + esc(big) + '</span>' : '') +
           '<img src="' + esc(p.img) + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async">' + // its link is aria-hidden, so this is for image search only
         '</a>' +

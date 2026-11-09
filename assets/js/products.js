@@ -180,7 +180,7 @@
       ]
     },
     {
-      id: 'mast-20m-100w', cat: 'mast', photo: true,
+      id: 'mast-20m-100w', cat: 'mast',
       name: '20 m LED High Mast, 4 × 100 W', short: '20 m High Mast · 4 × 100 W',
       part: 'Multi-arm · 4 heads', watt: null, img: IMG + 'mast-20m-100w.webp',
       big: '20m', key: [['Height', '20 m'], ['Lights', '4 × 100 W'], ['Colour', 'Pure white']],
@@ -195,7 +195,7 @@
       ]
     },
     {
-      id: 'mast-30m-150w', cat: 'mast', photo: true,
+      id: 'mast-30m-150w', cat: 'mast',
       name: '30 m LED High Mast, 6 × 150 W', short: '30 m High Mast · 6 × 150 W',
       part: 'Multi-arm · 6 heads', watt: null, img: IMG + 'mast-30m-150w.webp',
       big: '30m', key: [['Height', '30 m'], ['Lights', '6 × 150 W'], ['Colour', 'Pure white']],
@@ -210,7 +210,7 @@
       ]
     },
     {
-      id: 'mast-20m-200w', cat: 'mast', photo: true,
+      id: 'mast-20m-200w', cat: 'mast',
       name: '20 m LED High Mast, 6 × 200 W', short: '20 m High Mast · 6 × 200 W',
       part: 'Multi-arm · 6 heads', watt: null, img: IMG + 'mast-20m-200w.webp',
       big: '20m', key: [['Height', '20 m'], ['Lights', '6 × 200 W'], ['Colour', 'Cool white']],
