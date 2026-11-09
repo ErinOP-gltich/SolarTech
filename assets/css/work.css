@@ -185,6 +185,10 @@ html[data-theme="light"] .fx-visit { background: rgb(255 255 255 / .7); border-c
 .pl-views, .pl-zoom { display: flex; gap: 4px; padding: 4px; border-radius: var(--r-full); background: rgba(8, 8, 16, .58); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 .pl-views button, .pl-zoom button { min-width: 40px; height: 40px; padding: 0 14px; border: 0; border-radius: var(--r-full); background: none; color: #F3EFE6; font: 500 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; cursor: pointer; }
 .pl-zoom button { padding: 0; font-size: 18px; }
+.pl-sky button { display: inline-flex; align-items: center; gap: 8px; padding: 0 14px 0 12px; }
+.pl-sky svg { width: 16px; height: 16px; }
+.pl-sky button .i-sun, .pl-sky button[aria-pressed="true"] .i-moon { display: none; }
+.pl-sky button[aria-pressed="true"] .i-sun { display: inline; }
 .pl-views button[aria-pressed="true"] { background: #F3EFE6; color: #0B0B12; }
 .pl-hint { position: absolute; left: 50%; top: 58px; transform: translateX(-50%); color: rgba(243, 239, 230, .75); pointer-events: none; transition: opacity var(--d-l); }
 .pl-stage[data-viewed] .pl-hint { animation: pl-fade 0s 6s forwards; }

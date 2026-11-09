@@ -238,12 +238,18 @@ function make3d() {
 
   // colours for the current theme
   let T = null;
+  // the sky follows the site theme (dusk in light, night in dark) unless the visitor picked one with the Night / Dusk switch
+  let skyPref = null; try { skyPref = localStorage.getItem('gs-sky'); } catch (e) { /* storage blocked */ }
+  const sky = function () { return skyPref === 'night' || skyPref === 'dusk' ? skyPref : root.dataset.theme === 'light' ? 'dusk' : 'night'; };
+  const skyBtn = stage.querySelector('[data-sky-toggle]');
   function paint() {
-    T = THEMES[root.dataset.theme === 'light' ? 'light' : 'dark'];
+    const s = sky();
+    T = THEMES[s === 'dusk' ? 'light' : 'dark'];
+    if (skyBtn) { skyBtn.setAttribute('aria-pressed', s === 'night'); skyBtn.querySelector('[data-sky-label]').textContent = s === 'night' ? 'Dusk' : 'Night'; skyBtn.setAttribute('aria-label', s === 'night' ? 'Switch the scene to dusk' : 'Switch the scene to night'); }
     scene.fog.color.setHex(T.fog); ground.material.color.setHex(T.ground); hills.material.color.setHex(T.hill); trees.material.color.setHex(T.tree);
     mats.road.color.setHex(T.road); mats.mark.color.setHex(T.mark); mats.pole.color.setHex(T.pole);
     stars.visible = !!T.stars; hemi.intensity = T.hemi;
-    stage.dataset.sky = root.dataset.theme === 'light' ? 'dusk' : 'night';
+    stage.dataset.sky = s;
     lightUp(1e9);
   }
   // each lamp comes on in turn along the road, the way a real row does at dusk
@@ -276,6 +282,11 @@ function make3d() {
   }
   stage.addEventListener('click', function (e) {
     const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view);
+    if (e.target.closest('[data-sky-toggle]')) {
+      skyPref = sky() === 'night' ? 'dusk' : 'night';
+      try { localStorage.setItem('gs-sky', skyPref); } catch (err) { /* just not remembered */ }
+      paint(); go();
+    }
     const z = e.target.closest('[data-zoom]'); if (z) { aim.r = Math.min(400, Math.max(8, aim.r * (z.dataset.zoom === 'in' ? .75 : 1.33))); idle = performance.now(); go(); }
   });
   const pts = new Map(); let pinch = 0;
