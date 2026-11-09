@@ -238,9 +238,9 @@ function make3d() {
 
   // colours for the current theme
   let T = null;
-  // the sky follows the site theme (dusk in light, night in dark) unless the visitor picked one with the Night / Dusk switch
+  // night by default (the lights show best), in both site themes; the Night / Dusk switch changes it and is remembered
   let skyPref = null; try { skyPref = localStorage.getItem('gs-sky'); } catch (e) { /* storage blocked */ }
-  const sky = function () { return skyPref === 'night' || skyPref === 'dusk' ? skyPref : root.dataset.theme === 'light' ? 'dusk' : 'night'; };
+  const sky = function () { return skyPref === 'dusk' ? 'dusk' : 'night'; };
   const skyBtn = stage.querySelector('[data-sky-toggle]');
   function paint() {
     const s = sky();
