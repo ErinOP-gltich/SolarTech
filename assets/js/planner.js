@@ -33,7 +33,8 @@ function show() {
   const E = form.elements, std = E.std.checked;
   E.spacing.disabled = E.spacingR.disabled = std;
   if (std) E.spacing.value = E.spacingR.value = plan.spacing;
-  form.querySelector('[data-sp-out]').textContent = std ? 'Standard for a ' + plan.watt + ' W light: ' + plan.spacing + ' m.' : 'Your spacing: ' + plan.spacing + ' m.';
+  const own = !std && +E.spacing.value > 0;
+  form.querySelector('[data-sp-out]').textContent = own ? 'Your spacing: ' + plan.spacing + ' m.' : 'Standard for a ' + plan.watt + ' W light: ' + plan.spacing + ' m' + (std ? '.' : ' (type a spacing to use your own).');
 
   const L = plan.light, pct = Math.min(100, plan.lux / (plan.target * 2) * 100), ok = plan.bright && plan.reach;
   out.innerHTML =

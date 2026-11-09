@@ -1,6 +1,6 @@
 // Ask AI: answers visitors' questions with Cloudflare Workers AI, briefed by _brief.js (written by seo.mjs from the
 // catalogue, the contact details and the road planner's rules). Limits: 20 questions an hour per visitor, 600 a day in all.
-import { BRIEF } from './_brief.js';
+import { BRIEF, CATALOGUE, CONTACT_LINE } from './_brief.js';
 const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const reply = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 
@@ -21,17 +21,24 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const hash = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(ip + (env.STATS_SALT || ''))))].slice(0, 8).map(x => x.toString(16).padStart(2, '0')).join('');
   const hour = new Date().toISOString().slice(0, 13), day = hour.slice(0, 10);
   const bump = k => env.DB.prepare('INSERT INTO asks (k, n) VALUES (?1, 1) ON CONFLICT(k) DO UPDATE SET n = n + 1 RETURNING n').bind(k);
-  const [mine, all] = await env.DB.batch([bump(hour + ':' + hash), bump('day:' + day)]);
+  const [mine, all, prods, contact] = await env.DB.batch([bump(hour + ':' + hash), bump('day:' + day),
+    env.DB.prepare('SELECT data FROM products WHERE hidden = 0 ORDER BY sort, id'), env.DB.prepare("SELECT data FROM settings WHERE key = 'contact'")]);
   if (mine.results[0].n > 20 || all.results[0].n > 600) return reply(429, { error: 'Lots of questions right now. Please try again later, or WhatsApp us.' });
   if (Math.random() < .03) waitUntil(env.DB.prepare("DELETE FROM asks WHERE (k NOT LIKE 'day:%' AND k < ?1) OR (k LIKE 'day:%' AND k < ?2)")
     .bind(new Date(Date.now() - 864e5).toISOString().slice(0, 13), 'day:' + new Date(Date.now() - 3 * 864e5).toISOString().slice(0, 10)).run());
 
   try {
-    const r = await env.AI.run(MODEL, { messages: [{ role: 'system', content: BRIEF }].concat(msgs), max_tokens: 700, temperature: .3 });
+    // what the console holds now (products edited or imported, phone changed) beats what was true at the last deploy
+    let brief = BRIEF;
+    if (prods.results.length) brief = brief.replace(CATALOGUE, () => prods.results.map(r => JSON.parse(r.data)).map(p => '- ' + p.name + (p.part ? ' [' + p.part + ']' : '') + ': ' + (p.specs || []).slice(0, 7).map(x => x[0] + ' ' + x[1]).join('; ')).join('\n'));
+    if (contact.results[0]) { const c = JSON.parse(contact.results[0].data); brief = brief.replace(CONTACT_LINE, () => '- Phone and WhatsApp: ' + c.phone + '. Email: ' + c.email + '. Address: ' + (c.address || []).join(', ') + '.'); }
+    const r = await env.AI.run(MODEL, { messages: [{ role: 'system', content: brief }].concat(msgs), max_tokens: 700, temperature: .3 });
     const text = String((r && (r.response || (r.choices && r.choices[0] && r.choices[0].message && r.choices[0].message.content))) || '').trim();
     if (!text) throw new Error('empty');
     return reply(200, { reply: text.slice(0, 4000) });
   } catch (e) {
+    // the question didn't get an answer: give it back to the visitor's and the day's count
+    waitUntil(env.DB.batch(['hour', 'day'].map((w, i) => env.DB.prepare('UPDATE asks SET n = n - 1 WHERE k = ?1 AND n > 0').bind(i ? 'day:' + day : hour + ':' + hash))));
     return reply(502, { error: 'The assistant is busy. Please try again, or WhatsApp us.' });
   }
 }

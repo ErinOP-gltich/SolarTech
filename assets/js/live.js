@@ -20,7 +20,7 @@
     }).map(function (p) {
       p.specs = Array.isArray(p.specs) ? p.specs : [];
       p.tags = Array.isArray(p.tags) ? p.tags : [];
-      p.img = typeof p.img === 'string' ? p.img : '';
+      p.img = typeof p.img === 'string' && p.img ? p.img : 'assets/brand/favicon.svg?v=1';   // no photo yet (e.g. just imported): the sun, not a broken image
       p.part = p.part || '';
       return p;
     });

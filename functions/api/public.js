@@ -1,6 +1,10 @@
 // What the website shows: visible products in order, the contact details, projects and factory photos the console saved.
 // Read-only. Hidden products never leave the database.
-export async function onRequestGet({ env }) {
+export async function onRequestGet({ request, env, waitUntil }) {
+  // one copy per minute at the edge, not a D1 query and two R2 reads per page view; console changes show within a minute
+  const key = new Request(new URL('/api/public', request.url).toString());
+  const hit = await caches.default.match(key);
+  if (hit) return hit;
   const [p, s] = await env.DB.batch([
     env.DB.prepare('SELECT id, data FROM products WHERE hidden = 0 ORDER BY sort, id'),
     env.DB.prepare("SELECT key, data FROM settings WHERE key = 'contact'")
@@ -14,5 +18,7 @@ export async function onRequestGet({ env }) {
     projects: set.projects && set.projects.list && set.projects.list.length ? set.projects.list : null,
     factory: set.factory && set.factory.media && set.factory.media.length ? set.factory.media : null
   };
-  return new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=10' } });
+  const res = new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=10, s-maxage=60' } });
+  waitUntil(caches.default.put(key, res.clone()));
+  return res;
 }
