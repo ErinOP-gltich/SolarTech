@@ -98,8 +98,10 @@ html[data-theme="light"].nav-dark .nav {
   --nav-h: 64px;
 
   /* size: deploy.sh (scale.mjs) writes every length in the stylesheets as N × --px, so the live site shows at 90% on
-     every screen, like a browser zoomed out. In the source files lengths are plain px (100%). */
-  --px: .9px;
+     every screen, like a browser zoomed out. In the source files lengths are plain px (100%). Past 1600 px wide (a big
+     monitor, or a browser zoomed out) the whole page grows with the screen instead of shrinking into the middle of it,
+     up to twice the size at 3200 px. */
+  --px: clamp(.9px, .05625vw, 1.8px);   /* scale.mjs leaves this one line as it is */
 }
 
 /* ------------------------------------------------------------------ base */
@@ -556,9 +558,19 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .peek img { width: auto; height: auto; max-width: 100%; max-height: 100%; filter: drop-shadow(0 20px 26px rgba(0, 0, 0, .55)); }
 
 /* ---------- light finder */
-.finder-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 96px); align-items: start; }
-.finder-grid > :first-child { position: sticky; top: calc(var(--nav-h) + 40px); }
+/* the question and its lede share one row; under them the places (pinned while the picks scroll past: the shorter column)
+   and the picks */
+.finder-top { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--s5) clamp(32px, 5vw, 96px); align-items: end; margin-bottom: var(--s7); }
+.finder-top .h2 { margin: 0; }
+.finder-top .lede { padding-bottom: .6em; }
+.finder-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(28px, 4vw, 64px); align-items: start; }
+.finder-grid > :first-child { position: sticky; top: calc(var(--nav-h) + 24px); }
 .finder-opts { display: grid; gap: var(--s2); margin-top: var(--s6); }
+.finder-grid .finder-opts { margin-top: 0; }
+/* compact picks, three abreast: each spec on its own label / value row, so "12.8 V · 15 Ah" never breaks in two */
+.finder-grid .card-specs { grid-template-columns: 1fr; padding-top: var(--s2); }
+.finder-grid .card-specs div, .finder-grid .card-specs div + div { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 6px 0 0; border-left: 0; }
+.finder-grid .card-specs dd { min-height: 0; margin: 0; text-align: right; white-space: nowrap; }
 .finder-grid .cards { grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); }
 .finder-grid .card-stage { height: 220px; }
 .finder-grid .card [data-more], .finder-grid .card-more { display: none; } /* compact picks: Enquire + add only */
@@ -829,6 +841,11 @@ a.reach-card:hover { transform: translateX(6px); }
   .cmd { position: relative; top: auto; }
   .ftr-grid { grid-template-columns: 1fr 1fr; }
   .nav-clock { display: none; }
+  /* light finder: too narrow for places and picks side by side, so the places become tiles and the three picks one row */
+  .finder-grid { grid-template-columns: 1fr; }
+  .finder-grid > :first-child { position: static; }
+  .finder-grid .finder-opts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .finder-grid .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (min-width: 1021px) {
   .menu { display: none; }
@@ -844,6 +861,7 @@ a.reach-card:hover { transform: translateX(6px); }
   .facts { grid-template-columns: 1fr 1fr; }
   .facts div:nth-child(3) { padding-left: 0; border-left: 0; }
   .finder-grid { grid-template-columns: 1fr; }
+  .finder-top { grid-template-columns: 1fr; align-items: start; margin-bottom: var(--s6); } .finder-top .lede { padding-bottom: 0; }
   .finder-grid > :first-child { position: static; }
   .contact-grid { grid-template-columns: 1fr; }
   .day-hud { grid-template-columns: 1fr; align-items: end; padding-top: 0; padding-bottom: 56px; }

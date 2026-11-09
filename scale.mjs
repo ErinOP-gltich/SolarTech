@@ -14,6 +14,10 @@ function scale(css) {
     if (c === '/' && css[i + 1] === '*') { const j = css.indexOf('*/', i + 2); const e = j < 0 ? n : j + 2; out += css.slice(i, e); i = e; continue; }
     if (c === '"' || c === "'") { let j = i + 1; while (j < n && css[j] !== c) j += css[j] === '\\' ? 2 : 1; out += css.slice(i, j + 1); i = j + 1; continue; }
     if (css.startsWith('url(', i) && css[i + 4] !== '"' && css[i + 4] !== "'") { const j = css.indexOf(')', i); out += css.slice(i, j + 1); i = j + 1; continue; }
+    if (css.startsWith('--px:', i)) { // the unit itself: its clamp bounds would otherwise become multiples of --px
+      let j = i; while (j < n && css[j] !== ';' && css[j] !== '}') j++;
+      out += css.slice(i, j); i = j; continue;
+    }
     if (c === '@') { // at-rule preludes (@media widths, @supports) keep real pixels
       let j = i; while (j < n && css[j] !== '{' && css[j] !== ';') j++;
       out += css.slice(i, j); i = j; continue;

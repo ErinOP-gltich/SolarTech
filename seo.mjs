@@ -7,6 +7,7 @@ const SITE = 'https://greensuntechnologies.com/';
 const ctx = { window: {} }; vm.createContext(ctx);
 for (const f of ['config.js', 'products.js', 'plan.js']) vm.runInContext(readFileSync('assets/js/' + f, 'utf8'), ctx);
 const { GS_PRODUCTS: P, GS_CATEGORIES: C, GS_CONFIG: CFG, GSPlan: PLAN } = ctx.window;
+P.forEach(p => { p.img = p.img.split('?')[0]; });   // search engines get the picture's plain address, not the deploy's ?v=
 const cat = id => (C.find(c => c.id === id) || {}).name || '';
 const spec = (p, k) => (p.specs || []).find(s => s[0] === k);
 const describe = p => [p.name + ' by Green Sun Technologies, Guwahati.', p.battery && 'Battery ' + p.battery + (p.chem ? ' ' + p.chem : '') + '.', p.panel && 'Solar panel ' + p.panel + '.', p.ip && p.ip + '.', p.autonomy && p.autonomy + ' backup.'].filter(Boolean).join(' ');

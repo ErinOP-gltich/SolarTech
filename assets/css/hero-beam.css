@@ -98,9 +98,9 @@ html:not(.js) .hb-lit::after { content: none; }
 
 /* lede + CTAs: one column under the headline, the buttons right under the words they belong to;
    side by side on shorter windows, the buttons still next to the lede rather than across the screen */
-.hb .hero-row { grid-template-columns: minmax(0, 36rem); justify-content: start; align-items: start; gap: var(--s5); margin-top: var(--s6); }
+.hb .hero-row { grid-template-columns: minmax(0, 640px); justify-content: start; align-items: start; gap: var(--s5); margin-top: var(--s6); }
 @media (max-height: 720px) and (min-aspect-ratio: 4/5) {
-  .hb .hero-row { grid-template-columns: minmax(0, 34rem) auto; align-items: center; column-gap: var(--s6); }
+  .hb .hero-row { grid-template-columns: minmax(0, 604px) auto; align-items: center; column-gap: var(--s6); }
 }
 .hb .lede { text-shadow: 0 0 2px rgba(5, 5, 7, .9), 0 0 12px rgba(5, 5, 7, .85), 0 0 32px rgba(5, 5, 7, .7); }
 

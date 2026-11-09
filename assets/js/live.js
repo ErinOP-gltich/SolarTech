@@ -21,6 +21,7 @@
       p.specs = Array.isArray(p.specs) ? p.specs : [];
       p.tags = Array.isArray(p.tags) ? p.tags : [];
       p.img = typeof p.img === 'string' && p.img ? p.img : 'assets/brand/favicon.svg?v=1';   // no photo yet (e.g. just imported): the sun, not a broken image
+      if (/^assets\/img\/products\/[^?]+$/.test(p.img)) p.img += window.GS_IMGV || '';   // this deploy's copy (products.js)
       p.part = p.part || '';
       return p;
     });

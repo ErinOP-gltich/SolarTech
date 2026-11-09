@@ -45,7 +45,8 @@
     const byId = {}; P.forEach(function (p) { byId[p.id] = p; });
     // a catalogue cut-out (transparent product shot) sits whole on a glowing stage; a real photo fills the card
     const NOPHOTO = 'assets/brand/favicon.svg?v=1';   // a project saved before its photos are added
-    const cut = function (src) { return src === NOPHOTO || GS.products.some(function (x) { return x.img === src; }); };
+    const bare = function (u) { return String(u).split('?')[0]; };   // product pictures carry the deploy's ?v=
+    const cut = function (src) { return src === NOPHOTO || GS.products.some(function (x) { return bare(x.img) === bare(src); }); };
     P.forEach(function (p) { if (!p.photos || !p.photos.length) p.photos = [NOPHOTO]; });
     const where = function (p) { return [p.place, p.district !== p.place ? p.district : '', p.state].filter(Boolean).join(', '); };
 

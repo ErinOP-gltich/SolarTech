@@ -2,6 +2,9 @@
    Every card on the Products page and the home page is built from this list. */
 (function () {
   const IMG = 'assets/img/products/';
+  // Product pictures keep their names, and /assets/img is cached for a week (browsers and Cloudflare's edge). deploy.sh
+  // stamps this ?v= with the deploy time, so a replaced picture shows after the next deploy without purging any cache.
+  const V = window.GS_IMGV = '?v=1';
 
   // shared by every semi-integrated street light in the catalogue
   const SI_COMMON = [
@@ -384,5 +387,6 @@
   ];
 
   // sort order inside each category on the Products page
-  window.GS_PRODUCTS.forEach(function (p, i) { p.order = i; });
+  window.GS_PRODUCTS.forEach(function (p, i) { p.order = i; p.img += V; });
+  window.GS_CATEGORIES.forEach(function (c) { c.img += V; });
 })();

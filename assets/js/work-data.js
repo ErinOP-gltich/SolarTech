@@ -10,7 +10,7 @@ window.GS_PROJECTS = window.GS_PROJECTS || [   // the console's projects (live.j
     title: 'High mast for a market square', type: 'High mast', year: 2025,
     place: 'Guwahati', district: 'Kamrup Metropolitan', state: 'Assam', lat: 26.14, lng: 91.74,
     lights: 4, products: ['mast-20m-100w'],
-    photos: ['assets/img/products/mast-20m-100w.webp'],
+    photos: ['assets/img/work/site-mast-20m-100w.webp'],
     text: 'Sample entry. Describe the site, what was installed and anything the client said.'
   },
   {
@@ -26,7 +26,7 @@ window.GS_PROJECTS = window.GS_PROJECTS || [   // the console's projects (live.j
     title: 'Six-head mast for a playground', type: 'High mast', year: 2025,
     place: 'Shillong', district: 'East Khasi Hills', state: 'Meghalaya', lat: 25.58, lng: 91.89,
     lights: 6, products: ['mast-30m-150w'],
-    photos: ['assets/img/products/mast-30m-150w.webp'],
+    photos: ['assets/img/work/site-mast-30m-150w.webp'],
     text: 'Sample entry.'
   },
   {
@@ -50,7 +50,7 @@ window.GS_PROJECTS = window.GS_PROJECTS || [   // the console's projects (live.j
     title: 'Highway junction, 20 m mast', type: 'High mast', year: 2026,
     place: 'Itanagar', district: 'Papum Pare', state: 'Arunachal Pradesh', lat: 27.08, lng: 93.6,
     lights: 4, products: ['mast-20m-200w'],
-    photos: ['assets/img/products/mast-20m-200w.webp'],
+    photos: ['assets/img/work/site-mast-20m-200w.webp'],
     text: 'Sample entry.'
   }
 ];
@@ -66,7 +66,7 @@ window.GS_FACTORY = {   // the steps live here; the photos and videos come from 
     { icon: 'sun', img: 'assets/img/products/panel-400w.webp', facts: ['Matched panel', 'Dusk to dawn', 'Charge controller'], title: 'Panel and controller', text: 'The solar panel is matched to the battery; the controller switches the light on at dusk, off at dawn, and stretches the charge on cloudy days.' },
     { icon: 'shield', img: 'assets/img/products/aio-20w.webp', facts: ['IP66', 'Rain', 'Dust'], title: 'Sealed to IP66', text: 'The housing is sealed against rain, dust and hosing: built for the North-East monsoon.' },
     { icon: 'check', img: 'assets/img/products/si-30w.webp', facts: ['Charged', 'Switched on', 'Checked'], title: 'Tested before it leaves', text: 'Lights are charged, switched on and checked before they are packed.' },
-    { icon: 'truck', img: 'assets/img/products/mast-30m-150w.webp', facts: ['North-East install', 'PAN India supply'], photo: true, title: 'Out to the road', text: 'Our crew installs across the North-East; we ship and support PAN India.' }
+    { icon: 'truck', img: 'assets/img/work/site-mast-20m-100w.webp', facts: ['North-East install', 'PAN India supply'], photo: true, title: 'Out to the road', text: 'Our crew installs across the North-East; we ship and support PAN India.' }
   ],
   media: window.GS_FACTORY_MEDIA || [
     { type: 'photo', src: 'assets/img/products/battery-100ah.webp', caption: 'Battery packs', sample: true },
