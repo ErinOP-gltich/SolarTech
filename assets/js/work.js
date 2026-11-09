@@ -72,7 +72,7 @@
     // the radar: every project as a dot at its latitude / longitude, Guwahati (us) at the centre of the sweep
     const radar = document.querySelector('[data-radar]');
     if (radar && P.length) {
-      const home = CFG.geo || { lat: 26.12, lng: 91.68 };
+      const home = CFG.geo || { lat: 26.115662, lng: 91.695 };
       const lats = P.map(function (p) { return p.lat; }).concat(home.lat), lngs = P.map(function (p) { return p.lng; }).concat(home.lng);
       const pad = 0.8, la0 = Math.min.apply(0, lats) - pad, la1 = Math.max.apply(0, lats) + pad, lo0 = Math.min.apply(0, lngs) - pad, lo1 = Math.max.apply(0, lngs) + pad;
       const xy = function (lat, lng) { return 'left:' + ((lng - lo0) / (lo1 - lo0) * 100).toFixed(2) + '%;top:' + ((la1 - lat) / (la1 - la0) * 100).toFixed(2) + '%'; };

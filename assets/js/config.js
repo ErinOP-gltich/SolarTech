@@ -13,8 +13,8 @@ window.GS_CONFIG = {
     'Ward No. 10, Guwahati',
     'Kamrup Metropolitan, Assam 781035'
   ],
-  // what Google Maps searches for on the Contact page (a place name, an address or "lat,lng")
-  mapQuery: 'Pub Boragaon, Belwali Road, Guwahati, Assam 781035',
+  // what Google Maps searches for on the Contact page (a place name, an address or "lat,lng"): the factory's pin
+  mapQuery: '26.115662,91.695000',
 
   // the Contact page shows the list up to 'PAN India'; 'PAN India' and everything after it appear when the visitor taps More
   serviceAreas: [
@@ -47,5 +47,5 @@ window.GS_CONFIG = {
   founded: '2024-10-23',
 
   // used for the live "is the sun up in Guwahati?" status on the home page
-  geo: { lat: 26.12, lng: 91.68 }
+  geo: { lat: 26.115662, lng: 91.695 }
 };
