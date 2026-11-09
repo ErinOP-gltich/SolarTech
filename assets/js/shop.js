@@ -20,7 +20,7 @@
     { id: 'aio', label: 'All-in-one', test: function (p) { return (p.tags || []).indexOf('All-in-one') >= 0; } },
     { id: 'lifepo4', label: 'LiFePO₄', test: function (p) { return /LiFePO/.test(p.chem || ''); } }
   ];
-  const state = { cat: 'all', q: '', power: new Set(), feat: new Set(), sort: 'featured', view: 'grid' };
+  const state = { cat: 'all', q: '', power: new Set(), feat: new Set(), sort: 'popular', view: 'grid' };
 
   const $ = function (s) { return document.querySelector(s); };
   const grid = $('[data-grid]'), table = $('[data-table]'), empty = $('[data-empty]'), count = $('[data-count]');
@@ -65,12 +65,18 @@
     }
     return true;
   }
+  // "Most popular": the order Green Sun's IndiaMART storefront shows its products in (its top-products strip, then the
+  // full range); products not on IndiaMART follow, featured first, in the console's order.
+  // ponytail: IndiaMART's display order, not measured demand; rank by enquiries per product once IndiaMART leads reach the console.
+  const POPULAR = ['pole-gi-tubular-6m', 'battery-100ah', 'pole-gi-octagonal-6m', 'aio-9w', 'flood-60w', 'mast-20m-100w', 'deco-pole-heritage', 'deco-pole-5m',
+    'dc-20w', 'si-25w', 'si-30w', 'si-15w', 'mast-20m-200w', 'mast-30m-150w', 'panel-400w', 'blinker-20w'];
+  const rank = function (p) { const i = POPULAR.indexOf(p.id); return i < 0 ? POPULAR.length : i; };
   function sorted(list) {
     const out = list.slice();
     if (state.sort === 'watt-asc') out.sort(function (a, b) { return (a.watt || 999) - (b.watt || 999) || a.order - b.order; });
     else if (state.sort === 'watt-desc') out.sort(function (a, b) { return (b.watt || 0) - (a.watt || 0) || a.order - b.order; });
     else if (state.sort === 'name') out.sort(function (a, b) { return a.name.localeCompare(b.name); });
-    else out.sort(function (a, b) { return (b.featured ? 1 : 0) - (a.featured ? 1 : 0) || a.order - b.order; });
+    else out.sort(function (a, b) { return rank(a) - rank(b) || (b.featured ? 1 : 0) - (a.featured ? 1 : 0) || a.order - b.order; });
     return out;
   }
 
