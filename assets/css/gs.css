@@ -376,9 +376,11 @@ html.js:not(.gs-up) .rv, html.js:not(.gs-up) [data-hero-line] { animation: gs-sh
 .nw { white-space: nowrap; }
 .split .ch { display: inline-block; }
 .line-mask { display: block; overflow: hidden; padding-bottom: .04em; margin-bottom: -.04em; }
-/* page headings break after their first line from the start: the split wraps it in a block .line-mask, and the
-   heading would otherwise grow a line as the page appears and push everything below it down */
-#ph > [data-hero-line]:not(.grad) { display: block; }
+/* page headings run on one line where they fit ("Light your road."), wrapping naturally on narrow screens: both parts
+   are inline blocks, and so are the masks the letter animation wraps the first part's lines in, so the heading never
+   changes shape as it appears */
+#ph > [data-hero-line] { display: inline-block; }
+#ph .line-mask { display: inline-block; vertical-align: top; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
