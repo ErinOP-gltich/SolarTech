@@ -23,7 +23,11 @@
   <link rel="preload" href="assets/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="icon" href="assets/brand/favicon.svg?v=1" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png?v=1">
+  <link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png?v=2">
+  <link rel="manifest" href="manifest.webmanifest?v=1">
+  <meta name="apple-mobile-web-app-title" content="Green Sun">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="assets/css/loader.css?v=1794033911">
   <link rel="stylesheet" href="assets/css/gs.css?v=1794033911">
   <link rel="stylesheet" href="assets/css/work.css?v=1794033911">
@@ -107,6 +111,7 @@
   <nav class="nav-links" aria-label="Main">
     <a href="products">Marketplace</a>
     <a href="planner" aria-current="page">Road planner</a>
+    <a href="projects">Projects</a>
     <a href="factory">Factory</a>
     <a href="/#about">About</a>
     <a href="contact">Contact</a>
@@ -120,9 +125,10 @@
 <nav class="menu" id="menu" aria-label="Mobile">
   <a href="products"><span class="label">01</span>Marketplace</a>
   <a href="planner"><span class="label">02</span>Road planner</a>
-  <a href="factory"><span class="label">03</span>Factory</a>
-  <a href="/#about"><span class="label">04</span>About</a>
-  <a href="contact"><span class="label">05</span>Contact</a>
+  <a href="projects"><span class="label">03</span>Projects</a>
+  <a href="factory"><span class="label">04</span>Factory</a>
+  <a href="/#about"><span class="label">05</span>About</a>
+  <a href="contact"><span class="label">06</span>Contact</a>
   <button class="menu-theme label sl" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light mode"><span class="state" aria-hidden="true"></span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2"/></svg><span data-theme-label>Light mode</span></button>
   <div class="menu-foot label"><span>Guwahati, Assam</span><a data-cfg="phone" href="tel:+919678456055" style="font:inherit;opacity:1;transform:none">+91 96784 56055</a></div>
 </nav>
@@ -152,11 +158,13 @@
       </div>
       <form class="pl-form glass glass-strong rv" data-plan-form novalidate>
         <fieldset><legend class="label">01 · What kind of road?</legend><div class="pl-seg"><label class="pl-opt"><input class="sr-only" type="radio" name="road" value="village"><span><b>Village lane</b><small>5 lux average</small></span></label><label class="pl-opt"><input class="sr-only" type="radio" name="road" value="street" checked><span><b>Town street</b><small>8 lux average</small></span></label><label class="pl-opt"><input class="sr-only" type="radio" name="road" value="main"><span><b>Main road</b><small>15 lux average</small></span></label><label class="pl-opt"><input class="sr-only" type="radio" name="road" value="highway"><span><b>Highway</b><small>22 lux average</small></span></label></div></fieldset>
+        <div class="pl-row pl-own"><p class="label"><label for="pl-lux">Target light <em>(optional)</em></label><span class="pl-num"><input type="number" id="pl-lux" name="lux" min="1" max="75" step="0.5" placeholder="8" inputmode="decimal"><span>lux</span></span></p><p class="pl-fine">Leave empty to use the road type’s standard. Type a figure from your tender or spec to plan for it instead.</p></div>
         <div class="pl-row"><p class="label"><label for="pl-len">02 · How long is it?</label><span class="pl-num"><input type="number" id="pl-len" name="length" min="10" max="50000" step="1" value="500" inputmode="numeric"><span>m</span></span></p><input type="range" name="lengthR" min="50" max="5000" step="50" value="500" aria-label="Road length slider"></div>
         <div class="pl-row pl-two">
           <div><p class="label"><span>03 · Lanes</span></p><div class="pl-step"><button type="button" data-step="-1" aria-label="One lane fewer">−</button><input name="lanes" type="number" min="1" max="8" value="2" inputmode="numeric" aria-label="Number of lanes"><button type="button" data-step="1" aria-label="One lane more">+</button></div></div>
           <div><p class="label"><label for="pl-lw">Lane width</label><output data-width-out></output></p><select id="pl-lw" name="laneWidth"><option value="3">3 m · narrow</option><option value="3.5" selected>3.5 m · standard</option><option value="3.75">3.75 m · highway</option></select></div>
         </div>
+        <div class="pl-row pl-own"><p class="label"><label for="pl-w">Road width <em>(optional)</em></label><span class="pl-num"><input type="number" id="pl-w" name="width" min="2" max="60" step="0.1" placeholder="7" inputmode="decimal"><span>m</span></span></p><p class="pl-fine">Leave empty to use lanes × lane width. Type the measured width, kerb to kerb, to use that.</p></div>
         <fieldset><legend class="label">04 · How should the poles stand?</legend><div class="pl-seg"><label class="pl-opt"><input class="sr-only" type="radio" name="arrangement" value="auto" checked><svg viewBox="0 0 42 26" aria-hidden="true"><rect class="rd" x="0" y="8" width="42" height="10" rx="2"/><circle class="pt" cx="21" cy="13" r="5"/><circle class="pt" cx="6" cy="5" r="2"/><circle class="pt" cx="36" cy="21" r="2"/></svg><span><b>Best for the road</b><small>We choose</small></span></label><label class="pl-opt"><input class="sr-only" type="radio" name="arrangement" value="one"><svg viewBox="0 0 42 26" aria-hidden="true"><rect class="rd" x="0" y="8" width="42" height="10" rx="2"/><circle class="pt" cx="6" cy="4" r="2.4"/><circle class="pt" cx="18" cy="4" r="2.4"/><circle class="pt" cx="30" cy="4" r="2.4"/></svg><span><b>One side</b><small>A single row</small></span></label><label class="pl-opt"><input class="sr-only" type="radio" name="arrangement" value="parallel"><svg viewBox="0 0 42 26" aria-hidden="true"><rect class="rd" x="0" y="8" width="42" height="10" rx="2"/><circle class="pt" cx="6" cy="4" r="2.4"/><circle class="pt" cx="6" cy="22" r="2.4"/><circle class="pt" cx="18" cy="4" r="2.4"/><circle class="pt" cx="18" cy="22" r="2.4"/><circle class="pt" cx="30" cy="4" r="2.4"/><circle class="pt" cx="30" cy="22" r="2.4"/></svg><span><b>Parallel</b><small>Both sides, facing</small></span></label><label class="pl-opt"><input class="sr-only" type="radio" name="arrangement" value="zigzag"><svg viewBox="0 0 42 26" aria-hidden="true"><rect class="rd" x="0" y="8" width="42" height="10" rx="2"/><circle class="pt" cx="6" cy="4" r="2.4"/><circle class="pt" cx="22" cy="4" r="2.4"/><circle class="pt" cx="38" cy="4" r="2.4"/><circle class="pt" cx="14" cy="22" r="2.4"/><circle class="pt" cx="30" cy="22" r="2.4"/></svg><span><b>Zigzag</b><small>Both sides, staggered</small></span></label></div></fieldset>
         <div class="pl-row" style="margin:0"><p class="label"><label for="pl-sp">05 · Pole spacing</label><span class="pl-num"><input type="number" id="pl-sp" name="spacing" min="4" max="60" step=".5" value="10" inputmode="decimal"><span>m</span></span></p>
           <label class="pl-check"><input type="checkbox" name="std" checked> Use the standard spacing for the light (10 m for small lights). Untick to type your own.</label>
@@ -189,6 +197,7 @@
         <ul>
           <li><a href="/#about">About us</a></li>
           <li><a href="planner">Road planner</a></li>
+          <li><a href="projects">Projects</a></li>
           <li><a href="factory">Visit the factory</a></li>
           <li><a href="/#day">How it works</a></li>
           <li><a href="/#certified">Certifications</a></li>

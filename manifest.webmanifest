@@ -1,0 +1,21 @@
+{
+  "id": "/",
+  "name": "Green Sun Technologies",
+  "short_name": "Green Sun",
+  "description": "Solar street lights, high masts and LiFePO₄ batteries made in Guwahati: browse the catalogue, plan a road in 3D and ask for a quote.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#06070d",
+  "theme_color": "#06070d",
+  "icons": [
+    { "src": "assets/brand/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/brand/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/brand/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Marketplace", "url": "/products", "icons": [{ "src": "assets/brand/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Road planner", "url": "/planner", "icons": [{ "src": "assets/brand/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Get a quote", "url": "/contact", "icons": [{ "src": "assets/brand/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

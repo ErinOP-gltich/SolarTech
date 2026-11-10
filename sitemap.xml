@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-  <url><loc>https://greensuntechnologies.com/</loc><lastmod>2026-11-09</lastmod><changefreq>monthly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://greensuntechnologies.com/products</loc><lastmod>2026-11-09</lastmod><changefreq>weekly</changefreq><priority>0.9</priority>
+  <url><loc>https://greensuntechnologies.com/</loc><lastmod>2026-11-10</lastmod><changefreq>monthly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://greensuntechnologies.com/products</loc><lastmod>2026-11-10</lastmod><changefreq>weekly</changefreq><priority>0.9</priority>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/si-9w.webp</image:loc><image:title>9W Semi-Integrated Solar Street Light</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/si-15w.webp</image:loc><image:title>15W Semi-Integrated Solar Street Light</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/si-20w.webp</image:loc><image:title>20W Semi-Integrated Solar Street Light</image:title></image:image>
@@ -13,7 +13,6 @@
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/aio-20w.webp</image:loc><image:title>20W All-in-One Solar Street Light</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/aio-9w.webp</image:loc><image:title>9W All-in-One Solar Street Light</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/aio-hybrid.webp</image:loc><image:title>Hybrid All-in-One Solar Street Light</image:title></image:image>
-    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/high-mast.webp</image:loc><image:title>12 m Solar High Mast</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/mast-20m-100w.webp</image:loc><image:title>20 m LED High Mast, 4 × 100 W</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/mast-30m-150w.webp</image:loc><image:title>30 m LED High Mast, 6 × 150 W</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/mast-20m-200w.webp</image:loc><image:title>20 m LED High Mast, 6 × 200 W</image:title></image:image>
@@ -22,12 +21,19 @@
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/ped-button.webp</image:loc><image:title>Pedestrian Push-Button Road Crossing System</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/battery-100ah.webp</image:loc><image:title>Lithium Battery Pack 12.8 V 100 Ah</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/panel-400w.webp</image:loc><image:title>400 Wp Monocrystalline Solar Panel</image:title></image:image>
-    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/deco-pole.webp</image:loc><image:title>5 m Decorative Pole with Drop-Down LED Lanterns</image:title></image:image>
     <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/deco-pole-heritage.webp</image:loc><image:title>5 m Heritage Decorative Pole, Double Arm</image:title></image:image>
-    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/pole-gi-octagonal.webp</image:loc><image:title>6 m GI Octagonal Pole, Single Arm</image:title></image:image>
-    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/pole-gi-tubular.webp</image:loc><image:title>6 m GI Tubular Pole</image:title></image:image>
+    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/dc-12w.webp</image:loc><image:title>12W DC Solar Street Light</image:title></image:image>
+    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/pole-gi-tubular-9m.webp</image:loc><image:title>9 m GI Tubular Pole</image:title></image:image>
+    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/pole-gi-octagonal-9m.webp</image:loc><image:title>9 m GI Octagonal Pole, Single Arm</image:title></image:image>
+    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/aviation-20w.webp</image:loc><image:title>20W Solar LED Aviation Obstruction Light</image:title></image:image>
+    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/aviation-6w.webp</image:loc><image:title>6W Solar LED Aviation Obstruction Light</image:title></image:image>
+    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/panel-300w.webp</image:loc><image:title>300 Wp Monocrystalline Solar Panel</image:title></image:image>
+    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/highbay-20w.webp</image:loc><image:title>20W LED High Bay Light</image:title></image:image>
+    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/lawn-5w.webp</image:loc><image:title>5W LED Solar Lawn Light</image:title></image:image>
+    <image:image><image:loc>https://greensuntechnologies.com/assets/img/products/mount-structure.webp</image:loc><image:title>Solar Panel Mounting Structure</image:title></image:image>
   </url>
-  <url><loc>https://greensuntechnologies.com/planner</loc><lastmod>2026-11-09</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://greensuntechnologies.com/factory</loc><lastmod>2026-11-09</lastmod><changefreq>yearly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://greensuntechnologies.com/contact</loc><lastmod>2026-11-09</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://greensuntechnologies.com/planner</loc><lastmod>2026-11-10</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://greensuntechnologies.com/projects</loc><lastmod>2026-11-10</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://greensuntechnologies.com/factory</loc><lastmod>2026-11-10</lastmod><changefreq>yearly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://greensuntechnologies.com/contact</loc><lastmod>2026-11-10</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
 </urlset>

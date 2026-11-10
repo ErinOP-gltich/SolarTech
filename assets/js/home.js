@@ -349,7 +349,7 @@
     const sec = document.querySelector('[data-show]');
     const track = document.querySelector('[data-show-track]');
     if (!sec || !track) return;
-    const picks = ['si-60w', 'si-40w-rms', 'aio-20w', 'high-mast-12m', 'flood-60w', 'blinker-20w', 'battery-100ah', 'deco-pole-5m'];
+    const picks = ['si-60w', 'si-40w-rms', 'aio-20w', 'mast-20m-100w', 'flood-60w', 'blinker-20w', 'battery-100ah', 'deco-pole-heritage'];
     const items = picks.map(function (id) { return GS.byId[id]; }).filter(Boolean);
     track.innerHTML = items.map(function (p, i) {
       const href = 'contact.html?p=' + encodeURIComponent(p.id);
@@ -447,8 +447,8 @@
     { id: 'highway', label: 'Highway or NH stretch', sub: 'Fast traffic, long runs', picks: ['si-60w', 'si-80w', 'si-40w-rms'],
       why: 'Highways need high output and uniformity: <b>60–80 W</b> per pole, with remote monitoring for long stretches.',
       icon: '<path d="M3 30 h10 M6 22 h14 M3 14 h10 M22 30 h13 M26 14 h9 M24 8 l10 14 l-10 14"/>' },
-    { id: 'open', label: 'Junction, ground or yard', sub: 'Big open area', picks: ['high-mast-12m', 'flood-60w', 'battery-100ah'],
-      why: 'Open areas are lit best from height: a <b>12 m high mast</b>, or <b>60 W flood lights</b> on existing structures.',
+    { id: 'open', label: 'Junction, ground or yard', sub: 'Big open area', picks: ['mast-20m-100w', 'flood-60w', 'battery-100ah'],
+      why: 'Open areas are lit best from height: a <b>20 m high mast</b>, or <b>60 W flood lights</b> on existing structures.',
       icon: '<path d="M19 36 V12 M10 8 h18 M12 8 l-4 8 M26 8 l4 8 M19 8 l0 6 M8 36 h22"/>' },
     { id: 'safety', label: 'School zone or crossing', sub: 'Pedestrian safety', picks: ['ped-crossing', 'blinker-20w'],
       why: 'Slow drivers down and get people across safely with <b>solar blinkers</b> and <b>push-button crossings</b>.',

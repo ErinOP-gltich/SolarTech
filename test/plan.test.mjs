@@ -19,4 +19,11 @@ assert.equal(r.arrangement, 'one'); assert.equal(r.reach, false); assert.match(r
 r = go({ length: 100, lanes: 2, road: 'street', arrangement: 'zigzag', spacing: 20 });
 assert.equal(r.spacing, 20); assert.equal(r.sideA, 6); assert.equal(r.sideB, 5); assert.equal(r.poles, 11);
 assert.equal(go({ length: 'x', lanes: 99, road: 'nope' }).lanes, 8); // junk input is clamped, not thrown
+// a typed road width and lux target beat lanes × lane width and the road type's standard; empty boxes don't
+r = go({ length: 500, lanes: 2, laneWidth: 3.5, road: 'street', width: 12 });
+assert.equal(r.width, 12); assert.equal(r.laneWidth, 6); assert.equal(r.ownWidth, true);
+r = go({ length: 500, lanes: 2, road: 'street', lux: 20 });
+assert.equal(r.target, 20); assert.equal(r.ownLux, true); assert.ok(r.lux >= 20);
+r = go({ length: 500, lanes: 2, road: 'street', width: '', lux: '' });
+assert.equal(r.width, 7); assert.equal(r.target, 8);
 console.log('plan: ok —', summary(go({ length: 500, lanes: 2, road: 'main' })));

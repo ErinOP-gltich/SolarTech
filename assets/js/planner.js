@@ -21,7 +21,7 @@ function read() {
   const f = new FormData(form);
   return {
     road: f.get('road'), length: f.get('length'), lanes: f.get('lanes'), laneWidth: f.get('laneWidth'),
-    arrangement: f.get('arrangement'), spacing: f.get('std') ? 0 : f.get('spacing')
+    arrangement: f.get('arrangement'), spacing: f.get('std') ? 0 : f.get('spacing'), width: f.get('width'), lux: f.get('lux')
   };
 }
 const fmt = function (n) { return Number(n).toLocaleString('en-IN'); };
@@ -30,6 +30,9 @@ function show() {
   plan = P.plan(read(), LIGHTS);
   if (!plan) return;
   form.querySelector('[data-width-out]').textContent = plan.width + ' m wide';
+  // the boxes show what the planner uses when they're empty
+  form.elements.width.placeholder = String(+(plan.lanes * +form.elements.laneWidth.value).toFixed(1));
+  form.elements.lux.placeholder = String(P.ROADS[plan.road].lux);
   const E = form.elements, std = E.std.checked;
   E.spacing.disabled = E.spacingR.disabled = std;
   if (std) E.spacing.value = E.spacingR.value = plan.spacing;
@@ -52,7 +55,7 @@ function show() {
     '</dl>' +
     '<div class="pl-lux' + (ok ? '' : ' is-low') + '"><div class="pl-lux-row"><span class="label">Light on the road</span><b>' + plan.lux + ' lux</b></div>' +
     '<div class="pl-lux-bar"><i style="width:' + pct.toFixed(1) + '%"></i><em style="left:50%" title="Target"></em></div>' +
-    '<p class="label">Target for a ' + GS.esc(plan.roadName.toLowerCase()) + ': ' + plan.target + ' lux average</p></div>' +
+    '<p class="label">' + (plan.ownLux ? 'Your target: ' : 'Target for a ' + GS.esc(plan.roadName.toLowerCase()) + ': ') + plan.target + ' lux average</p></div>' +
     (plan.notes.length ? '<ul class="pl-notes">' + plan.notes.map(function (n) { return '<li>' + GS.esc(n) + '</li>'; }).join('') + '</ul>' : '') +
     '<div class="pl-act">' +
     '<button type="button" class="btn btn-plasma sl" data-add><span class="state" aria-hidden="true"></span>Add ' + fmt(plan.poles) + ' to my quote</button>' +

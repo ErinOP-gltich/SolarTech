@@ -1258,3 +1258,14 @@ html[data-theme="light"] { --ask-bg: #FFFDFB; --ask-ring: conic-gradient(from va
 }
 html.lite .ask-aura i { animation: none; }   /* big blurred layers: the costly part */
 @media (prefers-reduced-motion: reduce) { .ask-fab, .ask, .btn-ai, .ai-spark, .ask-orb i, .ask-aura i, .ask-think { animation: none; } }
+
+/* ---------- "Get the app" (main.js appInstall): beside every Lite mode switch, in the phone menu, and the iPhone steps */
+.app-tog svg, .menu-app svg { width: 14px; height: 14px; flex: none; }
+.menu-app { margin-top: var(--s2); }
+.app-help { width: min(92vw, 420px); padding: var(--s6); border: 1px solid var(--line-2); border-radius: var(--r-xl); color: var(--text); background: var(--surface, rgba(14, 14, 20, .92)); }
+.app-help::backdrop { background: rgba(5, 5, 7, .6); backdrop-filter: blur(6px); }
+.app-help .h3 { margin: var(--s2) 0 var(--s4); }
+.app-help ol { margin: 0 0 var(--s5); padding-left: 1.2em; display: grid; gap: var(--s3); color: var(--text-2); line-height: 1.5; }
+.app-help b { color: var(--text); }
+.app-help .btn { width: 100%; }
+html[data-theme="light"] .app-help { background: #FFFDF8; }

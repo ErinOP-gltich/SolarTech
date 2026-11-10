@@ -21,10 +21,12 @@
   function mount(w) { for (let i = 0; i < MOUNT.length; i++) if (w <= MOUNT[i][0]) return MOUNT[i]; return MOUNT[MOUNT.length - 1]; }
   function num(v, lo, hi, d) { v = parseFloat(v); return isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d; }
 
-  // lights: catalogue items with a .watt; input: { length, lanes, laneWidth, road, arrangement: auto|one|zigzag|parallel, spacing (0 = by wattage) }
+  // lights: catalogue items with a .watt; input: { length, lanes, laneWidth, road, arrangement: auto|one|zigzag|parallel, spacing (0 = by wattage),
+  //   width (m, optional: beats lanes × laneWidth), lux (optional: beats the road type's target) }
   function plan(input, lights) {
-    const L = num(input.length, 10, 50000, 500), lanes = Math.round(num(input.lanes, 1, 8, 2)), lw = num(input.laneWidth, 2.5, 5, 3.5);
-    const W = +(lanes * lw).toFixed(2), road = ROADS[input.road] ? input.road : 'street', target = ROADS[road].lux;
+    const L = num(input.length, 10, 50000, 500), lanes = Math.round(num(input.lanes, 1, 8, 2)), lw0 = num(input.laneWidth, 2.5, 5, 3.5);
+    const ownW = parseFloat(input.width) > 0 ? num(input.width, 2, 60, 0) : 0, ownLux = parseFloat(input.lux) > 0 ? num(input.lux, 1, 75, 0) : 0;
+    const W = +(ownW || lanes * lw0).toFixed(2), lw = +(W / lanes).toFixed(2), road = ROADS[input.road] ? input.road : 'street', target = ownLux || ROADS[road].lux;
     const fixed = num(input.spacing, 0, 60, 0);
     const arrs = ARR[input.arrangement] ? [input.arrangement] : ['one', 'zigzag', 'parallel'];
     const list = lights.filter(function (p) { return p.watt; }).slice().sort(function (a, b) { return a.watt - b.watt; });
@@ -51,7 +53,7 @@
       : 'This road is wider than the poles can light evenly from the edges. Add a central median row, or ask us about high masts.');
     if (!best.bright) notes.push('Even the brightest light here falls short of ' + target + ' lux at this spacing. Bring the poles closer, light both sides, or ask us about high masts.');
     if (fixed && fixed !== mount(best.watt)[2]) notes.push('You set ' + fixed + ' m spacing; our standard for a ' + best.watt + ' W light is ' + mount(best.watt)[2] + ' m.');
-    return Object.assign(best, { length: L, lanes: lanes, laneWidth: lw, width: W, road: road, roadName: ROADS[road].name, target: target, arrangementName: ARR[best.arrangement], notes: notes });
+    return Object.assign(best, { length: L, lanes: lanes, laneWidth: lw, width: W, road: road, roadName: ROADS[road].name, target: target, ownLux: !!ownLux, ownWidth: !!ownW, arrangementName: ARR[best.arrangement], notes: notes });
   }
 
   // one line for the assistant and the quote: what was asked and what we suggest

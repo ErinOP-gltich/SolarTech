@@ -285,3 +285,8 @@ html[data-theme="light"] .pl-nums > div { background: #FFFFFF; }
   .pl-hud .pl-tag:last-child { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .wk-sweep, .wk-tick-track, .wk-dot i, .pl-live { animation: none; } }
+
+/* planner: the optional own-lux and own-width boxes */
+.pl-own { margin-top: -6px; }
+.pl-own .label em { font-style: normal; color: var(--muted); text-transform: none; letter-spacing: 0; }
+.pl-own input::placeholder { color: var(--muted); opacity: .7; }

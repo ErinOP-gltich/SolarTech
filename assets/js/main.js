@@ -624,6 +624,38 @@
       });
     });
   }
+  /* ---------- the website as an app ("Get the app"): Android and desktop Chrome hand over their own install prompt;
+     iPhone and iPad need Share → Add to Home Screen, so the button shows those steps. Hidden once installed. */
+  function appInstall() {
+    if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(function () { /* the site works without it */ });
+    if (matchMedia('(display-mode: standalone)').matches || navigator.standalone === true) return;
+    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    let offer = null;
+    const ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>';
+    document.querySelectorAll('[data-lite-toggle]').forEach(function (t) {
+      t.insertAdjacentHTML('afterend', '<button class="motion-tog app-tog label sl" type="button" data-app-install hidden><span class="state" aria-hidden="true"></span>' + ICON + 'Get the app</button>');
+    });
+    const mt = document.querySelector('.menu-theme');
+    if (mt) mt.insertAdjacentHTML('afterend', '<button class="menu-theme menu-app label sl" type="button" data-app-install hidden><span class="state" aria-hidden="true"></span>' + ICON + '<span>Get the app</span></button>');
+    const show = function () { document.querySelectorAll('[data-app-install]').forEach(function (b) { b.hidden = !(offer || ios); }); };
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); offer = e; show(); });
+    window.addEventListener('appinstalled', function () { offer = null; show(); });
+    show();
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('[data-app-install]')) return;
+      if (offer) { const o = offer; offer = null; o.prompt(); o.userChoice.then(show, show); return; }   // an offer can be used once
+      let d = document.getElementById('app-help');
+      if (!d) {
+        document.body.insertAdjacentHTML('beforeend', '<dialog class="app-help glass" id="app-help" aria-labelledby="app-help-h"><p class="label">Green Sun on your phone</p>' +
+          '<h2 class="h3" id="app-help-h">Get the app</h2><ol><li>Open this page in <b>Safari</b> and tap the <b>Share</b> button (the square with an arrow).</li>' +
+          '<li>Choose <b>Add to Home Screen</b>, then <b>Add</b>.</li><li>Open <b>Green Sun</b> from your Home Screen: it opens full-screen, like any other app.</li></ol>' +
+          '<button class="btn btn-plasma sl" type="button" data-app-close>Got it</button></dialog>');
+        d = document.getElementById('app-help');
+        d.addEventListener('click', function (ev) { if (ev.target === d || ev.target.closest('[data-app-close]')) d.close(); });
+      }
+      d.showModal();
+    });
+  }
   function motionToggle() {
     const read = function () { try { motionPaused = localStorage.getItem('gs-motion') === 'paused'; } catch (e) { /* storage blocked */ } };
     read();
@@ -662,6 +694,7 @@
   tickers();
   motionToggle();
   liteToggle();
+  appInstall();
 
   root.classList.add('gs-up'); // the CSS fail-safe stands down: reveals and headlines are in the runtime's hands
 

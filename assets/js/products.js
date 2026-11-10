@@ -51,10 +51,10 @@
 
   window.GS_CATEGORIES = [
     { id: 'street', short: 'Street', name: 'Solar Street Lights', blurb: '9 W lanes to 80 W highways. OSRAM LEDs, LiFePO₄ packs, IP66.', img: IMG + 'si-50w.webp' },
-    { id: 'mast', short: 'Mast & flood', name: 'High Masts & Floods', blurb: 'High masts from 12 m to 30 m, and solar floods for yards and grounds.', img: IMG + 'flood-60w.webp' },
-    { id: 'traffic', short: 'Traffic', name: 'Traffic & Road Safety', blurb: 'Solar blinkers and push-button pedestrian crossings.', img: IMG + 'blinker-20w.webp' },
-    { id: 'storage', short: 'Energy', name: 'Batteries & Solar Panels', blurb: 'LiFePO₄ packs rated for 5,000 cycles, and monocrystalline panels.', img: IMG + 'battery-100ah.webp' },
-    { id: 'poles', short: 'Poles', name: 'Poles & Decorative', blurb: 'GI street-light poles, and decorative and heritage poles for parks and campuses.', img: IMG + 'deco-pole.webp' }
+    { id: 'mast', short: 'Mast & flood', name: 'High Masts & Floods', blurb: '20 m and 30 m high masts, solar floods for yards and grounds, and LED high bays for sheds.', img: IMG + 'flood-60w.webp' },
+    { id: 'traffic', short: 'Traffic', name: 'Traffic & Road Safety', blurb: 'Solar blinkers, push-button pedestrian crossings and aviation obstruction lights.', img: IMG + 'blinker-20w.webp' },
+    { id: 'storage', short: 'Energy', name: 'Batteries & Solar Panels', blurb: 'LiFePO₄ packs rated for 5,000 cycles, monocrystalline panels and mounting structures.', img: IMG + 'battery-100ah.webp' },
+    { id: 'poles', short: 'Poles', name: 'Poles & Decorative', blurb: 'GI street-light poles, heritage poles and solar lawn lights for parks and campuses.', img: IMG + 'deco-pole.webp' }
   ];
 
   window.GS_PRODUCTS = [
@@ -161,25 +161,6 @@
         ['Operation', 'Hybrid; dusk to dawn, automatic ON/OFF and dimming'],
         ['Autonomy', '1 day'],
         ['Operating temperature', '−20 °C to 50 °C']
-      ]
-    },
-    {
-      id: 'high-mast-12m', cat: 'mast', featured: true,
-      name: '12 m Solar High Mast', short: '12 m Solar High Mast',
-      part: 'Made to site', watt: null, img: IMG + 'high-mast.webp',
-      big: '12m', key: [['Height', '12 m'], ['Optics', 'Flood heads'], ['Backup', '2 days']],
-      battery: 'Sized to site', chem: 'LiFePO₄', panel: 'Sized to site', optic: 'Flood optics', ip: 'IP66', autonomy: '2 days',
-      tags: ['12 m', 'Junctions', 'Grounds'],
-      badge: 'Project',
-      specs: [
-        ['Mast height', '12 m'],
-        ['Luminaires', 'OSRAM LED flood heads, 155 lm/W'],
-        ['Battery', 'LiFePO₄, sized to the site'],
-        ['Solar array', 'Polycrystalline, sized to the site'],
-        ['Operation', 'Dusk to dawn, automatic ON/OFF'],
-        ['Dimming', '6 h at 100% + 6 h at 50%'],
-        ['Ingress protection', 'IP66'],
-        ['Autonomy', '2 days']
       ]
     },
     {
@@ -317,27 +298,6 @@
       ]
     },
     {
-      id: 'deco-pole-5m', cat: 'poles',
-      name: '5 m Decorative Pole with Drop-Down LED Lanterns', short: '5 m Decorative Pole',
-      part: '60 W lantern', watt: 60, img: IMG + 'deco-pole.webp', blueprint: true,
-      big: '5m', key: [['Height', '5 m'], ['Lantern', '60 W LED'], ['Finish', 'Matte black']],
-      battery: '220 V supply', chem: '', panel: '—', optic: 'Cool white', ip: 'IP65', autonomy: '',
-      tags: ['Matte black', 'Die-cast', 'IP65'],
-      specs: [
-        ['Pole height', '5 m, two sections'],
-        ['Bottom section', '1000 mm · 114 mm OD · 2.5 mm'],
-        ['Top section', '4000 mm · 76 mm OD · 2 mm'],
-        ['Arms', '32 mm OD · 1000 mm'],
-        ['Base plate', '250 × 250 × 10 mm, PCD 200 mm'],
-        ['Covers', 'Die-cast aluminium top, joint & base covers'],
-        ['Finish', 'PU paint, matte black'],
-        ['Foundation bolts', 'GI M16 × 600 mm'],
-        ['Lantern', '60 W OSRAM LED, cool white, CRI > 80'],
-        ['Lantern housing', 'Aluminium, matte black, IP65'],
-        ['Input', '220 V, inbuilt driver']
-      ]
-    },
-    {
       id: 'deco-pole-heritage', cat: 'poles',
       name: '5 m Heritage Decorative Pole, Double Arm', short: '5 m Heritage Pole',
       part: 'Mild steel · black', watt: null, img: IMG + 'deco-pole-heritage.webp',
@@ -354,35 +314,222 @@
       ]
     },
     {
-      id: 'pole-gi-octagonal-6m', cat: 'poles',
-      name: '6 m GI Octagonal Pole, Single Arm', short: '6 m Octagonal Pole',
-      part: 'Single arm · galvanised', watt: null, img: IMG + 'pole-gi-octagonal.webp',
-      big: '6m', key: [['Height', '6 m'], ['Arm', 'Single'], ['Material', 'GI']],
-      battery: '—', chem: '', panel: '—', optic: '', ip: '', autonomy: '',
-      tags: ['GI', 'Octagonal', 'Street lights'],
+      id: 'dc-12w', cat: 'street',   // from the IndiaMART shop, 2026-11
+      name: "12W DC Solar Street Light",
+      short: "12W DC Street Light",
+      part: "DC · 12 V",
+      watt: 12,
+      big: "12W",
+      key: [["Power", "12 W"], ["System", "12 V DC"], ["Light", "Warm"]],
+      battery: "12 V",
+      chem: "",
+      panel: "",
+      optic: "",
+      ip: "",
+      autonomy: "",
+      tags: ["DC", "12 V", "Warm light"],
       specs: [
-        ['Height', '6 m'],
-        ['Section', 'Octagonal'],
-        ['Arm', 'Single bracket'],
-        ['Material', 'Galvanised iron (GI)'],
-        ['Finish', 'Galvanised'],
-        ['Use', 'Residential streets, pathways, parks and public lighting']
-      ]
+        ["Power", "12 W"],
+        ["System voltage", "12 V DC"],
+        ["Light colour", "Warm light"],
+        ["Body", "Polycarbonate"],
+        ["Use", "Streets, gardens, pathways; residential and commercial"]
+      ],
+      img: IMG + 'dc-12w.webp'
     },
     {
-      id: 'pole-gi-tubular-6m', cat: 'poles',
-      name: '6 m GI Tubular Pole', short: '6 m Tubular Pole',
-      part: 'Round · galvanised', watt: null, img: IMG + 'pole-gi-tubular.webp',
-      big: '6m', key: [['Height', '6 m'], ['Section', 'Round'], ['Material', 'GI']],
-      battery: '—', chem: '', panel: '—', optic: '', ip: '', autonomy: '',
-      tags: ['GI', 'Round', 'Street lights'],
+      id: 'pole-gi-tubular-9m', cat: 'poles',   // from the IndiaMART shop, 2026-11
+      name: "9 m GI Tubular Pole",
+      short: "9 m GI Tubular Pole",
+      part: "Round · galvanised",
+      watt: null,
+      big: "9m",
+      key: [["Height", "9 m"], ["Section", "Round"], ["Material", "GI"]],
+      battery: "—",
+      chem: "",
+      panel: "",
+      optic: "",
+      ip: "",
+      autonomy: "",
+      tags: ["GI", "Round", "Street lights"],
       specs: [
-        ['Height', '6 m'],
-        ['Section', 'Round tubular'],
-        ['Material', 'Galvanised iron (GI)'],
-        ['Finish', 'Galvanised, silver'],
-        ['Use', 'Street lights on residential and commercial roads']
-      ]
+        ["Height", "9 m"],
+        ["Section", "Round tubular"],
+        ["Material", "Galvanised iron (GI)"],
+        ["Finish", "Galvanised, silver"],
+        ["Use", "Street lights mounted high for wide coverage"]
+      ],
+      img: IMG + 'pole-gi-tubular-9m.webp'
+    },
+    {
+      id: 'pole-gi-octagonal-9m', cat: 'poles',   // from the IndiaMART shop, 2026-11
+      name: "9 m GI Octagonal Pole, Single Arm",
+      short: "9 m GI Octagonal Pole",
+      part: "Single arm · galvanised",
+      watt: null,
+      big: "9m",
+      key: [["Height", "9 m"], ["Arm", "Single"], ["Material", "GI"]],
+      battery: "—",
+      chem: "",
+      panel: "",
+      optic: "",
+      ip: "",
+      autonomy: "",
+      tags: ["GI", "Octagonal", "Street lights"],
+      specs: [
+        ["Height", "9 m"],
+        ["Section", "Octagonal"],
+        ["Arm", "Single-arm bracket"],
+        ["Material", "Galvanised iron (GI)"],
+        ["Finish", "Polished galvanised"],
+        ["Use", "Street and public-area lighting"]
+      ],
+      img: IMG + 'pole-gi-octagonal-9m.webp'
+    },
+    {
+      id: 'aviation-20w', cat: 'traffic',   // from the IndiaMART shop, 2026-11
+      name: "20W Solar LED Aviation Obstruction Light",
+      short: "20W Aviation Light",
+      part: "Red LED · 12 V solar",
+      watt: 20,
+      big: "20W",
+      key: [["Power", "20 W"], ["Light", "Red LED"], ["System", "12 V solar"]],
+      battery: "12 V",
+      chem: "",
+      panel: "Solar",
+      optic: "",
+      ip: "",
+      autonomy: "",
+      tags: ["Aviation", "Red LED", "Solar"],
+      specs: [
+        ["Power", "20 W"],
+        ["Light colour", "Red"],
+        ["Housing", "ABS, impact resistant"],
+        ["System voltage", "12 V, solar powered"],
+        ["Use", "Marking towers and tall structures for aircraft"]
+      ],
+      img: IMG + 'aviation-20w.webp'
+    },
+    {
+      id: 'aviation-6w', cat: 'traffic',   // from the IndiaMART shop, 2026-11
+      name: "6W Solar LED Aviation Obstruction Light",
+      short: "6W Aviation Light",
+      part: "Twin red · 12 V solar",
+      watt: 6,
+      big: "6W",
+      key: [["Power", "6 W"], ["Heads", "Twin red"], ["System", "12 V solar"]],
+      battery: "12 V",
+      chem: "",
+      panel: "Solar",
+      optic: "",
+      ip: "",
+      autonomy: "",
+      tags: ["Aviation", "Red LED", "Twin head"],
+      specs: [
+        ["Power", "6 W"],
+        ["Light colour", "Red"],
+        ["Heads", "Twin"],
+        ["Housing", "ABS"],
+        ["System voltage", "12 V, solar powered"],
+        ["Use", "Marking low and mid-height structures"]
+      ],
+      img: IMG + 'aviation-6w.webp'
+    },
+    {
+      id: 'panel-300w', cat: 'storage',   // from the IndiaMART shop, 2026-11
+      name: "300 Wp Monocrystalline Solar Panel",
+      short: "300 Wp Mono Panel",
+      part: "Monocrystalline",
+      watt: null,
+      big: "300W",
+      key: [["Power", "300 Wp"], ["Cells", "Monocrystalline"], ["Shape", "Rectangular"]],
+      battery: "—",
+      chem: "",
+      panel: "300 Wp",
+      optic: "",
+      ip: "",
+      autonomy: "",
+      tags: ["Monocrystalline", "Rooftop"],
+      specs: [
+        ["Rated power", "300 Wp"],
+        ["Cell type", "Monocrystalline"],
+        ["Shape", "Rectangular"],
+        ["Use", "Residential and commercial solar systems"]
+      ],
+      img: IMG + 'panel-300w.webp'
+    },
+    {
+      id: 'highbay-20w', cat: 'mast',   // from the IndiaMART shop, 2026-11
+      name: "20W LED High Bay Light",
+      short: "20W High Bay",
+      part: "LED · 220 V AC",
+      watt: 20,
+      big: "20W",
+      key: [["Power", "20 W"], ["Supply", "220 V AC"], ["Light", "Warm"]],
+      battery: "—",
+      chem: "",
+      panel: "",
+      optic: "",
+      ip: "",
+      autonomy: "",
+      tags: ["Warehouses", "LED", "220 V"],
+      specs: [
+        ["Power", "20 W"],
+        ["Supply", "220 V AC"],
+        ["Light colour", "Warm light"],
+        ["Body", "Polycarbonate"],
+        ["Use", "Warehouses, factories and halls"]
+      ],
+      img: IMG + 'highbay-20w.webp'
+    },
+    {
+      id: 'lawn-5w', cat: 'poles',   // from the IndiaMART shop, 2026-11
+      name: "5W LED Solar Lawn Light",
+      short: "5W Solar Lawn Light",
+      part: "Aluminium · solar",
+      watt: 5,
+      big: "5W",
+      key: [["Power", "5 W"], ["Light", "Pure white"], ["Body", "Aluminium"]],
+      battery: "",
+      chem: "",
+      panel: "Solar",
+      optic: "",
+      ip: "",
+      autonomy: "",
+      tags: ["Gardens", "Solar", "Aluminium"],
+      specs: [
+        ["Power", "5 W"],
+        ["Light colour", "Pure white"],
+        ["Body", "Aluminium, weather resistant"],
+        ["Power source", "Solar"],
+        ["Use", "Gardens, lawns and campus walkways"]
+      ],
+      img: IMG + 'lawn-5w.webp'
+    },
+    {
+      id: 'mount-structure', cat: 'storage',   // from the IndiaMART shop, 2026-11
+      name: "Solar Panel Mounting Structure",
+      short: "Panel Mounting Structure",
+      part: "Aluminium · modular",
+      watt: null,
+      big: "RACK",
+      key: [["Material", "Aluminium"], ["Design", "Modular"], ["Load", "150 kg"]],
+      battery: "—",
+      chem: "",
+      panel: "",
+      optic: "",
+      ip: "",
+      autonomy: "",
+      tags: ["Aluminium", "Modular", "Roof or ground"],
+      specs: [
+        ["Material", "Aluminium"],
+        ["Design", "Modular"],
+        ["Section", "50 mm"],
+        ["Finish", "Polished"],
+        ["Load capacity", "150 kg"],
+        ["Use", "Rooftop or ground-mounted panels"]
+      ],
+      img: IMG + 'mount-structure.webp'
     }
   ];
 

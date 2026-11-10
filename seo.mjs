@@ -30,6 +30,14 @@ const ld = {
 let html = readFileSync('products.html', 'utf8');
 const block = '<!--LD:catalogue-->\n  <script type="application/ld+json">\n' + JSON.stringify(ld, null, 1) + '\n  </script>\n  <!--/LD:catalogue-->';
 html = /<!--LD:catalogue-->[\s\S]*?<!--\/LD:catalogue-->/.test(html) ? html.replace(/<!--LD:catalogue-->[\s\S]*?<!--\/LD:catalogue-->/, block) : html.replace('</head>', '  ' + block + '\n</head>');
+// the plain-HTML product list (search engines, no-JavaScript visitors; shop.js swaps in the cards), grouped by category
+const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const list = '<div class="cards-static">\n          <p class="label">All <span data-n="all">' + P.length + '</span> products</p>\n' +
+  C.filter(c => P.some(p => p.cat === c.id)).map(c => '          <h2 class="h3">' + esc(c.name) + '</h2>\n          <ul>\n' +
+    P.filter(p => p.cat === c.id).map(p => '            <li><a href="contact?p=' + p.id + '">' + esc(p.name) + '</a></li>').join('\n') + '\n          </ul>').join('\n') +
+  '\n        </div>';
+if (!/<div class="cards-static">[\s\S]*?<\/ul>\s*<\/div>/.test(html)) throw new Error('products.html: cards-static list not found');
+html = html.replace(/<div class="cards-static">[\s\S]*?<\/ul>\s*<\/div>/, list);
 writeFileSync('products.html', html);
 const today = new Date().toISOString().slice(0, 10);
 const img = p => `    <image:image><image:loc>${SITE + p.img}</image:loc><image:title>${p.name.replace(/&/g, '&amp;')}</image:title></image:image>`;
@@ -41,6 +49,7 @@ writeFileSync('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 ${photos.map(img).join('\n')}
   </url>
   <url><loc>${SITE}planner</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>${SITE}projects</loc><lastmod>${today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>${SITE}factory</loc><lastmod>${today}</lastmod><changefreq>yearly</changefreq><priority>0.6</priority></url>
   <url><loc>${SITE}contact</loc><lastmod>${today}</lastmod><changefreq>yearly</changefreq><priority>0.7</priority></url>
 </urlset>
@@ -57,7 +66,7 @@ FACTS (state only these; if asked something not covered, say the team will confi
 ${contactLine}
 - We install across ${areas.join(', ')}, and supply PAN India.
 - ISO 9001 and ISO 14001 certified.
-- Website pages: /products (the catalogue), /planner (3D road planner: enter a road, get lights, poles and spacing), /factory (how we make lights; visits by appointment), /contact (send an enquiry; quotes usually the same working day).
+- Website pages: /products (the catalogue), /planner (3D road planner: enter a road, get lights, poles and spacing), /projects (our work), /factory (how we make lights; visits by appointment), /contact (send an enquiry; quotes usually the same working day).
 
 CATALOGUE (recommend only these; prices are never published, they are quoted):
 ${catalogue}
