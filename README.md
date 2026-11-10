@@ -1,10 +1,10 @@
 # Green Sun Technologies — website
 
-A three-page website for **Green Sun Technologies** (Guwahati, Assam): solar street lights, high masts, flood lights, traffic and pedestrian systems, lithium battery packs and decorative poles.
+The website of **Green Sun Technologies** (Guwahati, Assam): solar street lights, high masts, flood lights, traffic and pedestrian systems, lithium battery packs and decorative poles.
 
-**Live:** https://erinop-gltich.github.io/SolarTech/
+**Live:** https://greensuntechnologies.com/
 
-Plain HTML, CSS and JavaScript. There is nothing to install or build. It is served by GitHub Pages from the `gh-pages` branch of this repository, so every push to `gh-pages` updates the live site within a minute or two.
+Plain HTML, CSS and JavaScript, with a few small Cloudflare Pages Functions in `functions/` for the live catalogue, enquiries and visit counts. It runs on Cloudflare Pages and is published with `./deploy.sh` (see Deploying); pushing to GitHub does not change the live site.
 
 | Page | What's on it |
 |---|---|
@@ -110,7 +110,6 @@ The sun is the company's registered (™) logo, traced to vector from the logo a
 ## Before going live
 
 - Confirm the **areas served** in `config.js` (currently a placeholder list).
-- If the site moves to its own domain, search and replace `https://erinop-gltich.github.io/SolarTech/` with the new address in `index.html`, `products.html`, `contact.html`, `404.html`, `sitemap.xml` and `robots.txt` (canonical links, `og:url`, `og:image`, the JSON-LD `@id`, `url`, `logo` and `image`, and the 404 page's links), and add the new domain as a property in Google Search Console.
 - Check the catalogue points noted below with the client.
 
 ### Catalogue points to confirm
