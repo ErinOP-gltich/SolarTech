@@ -1,4 +1,5 @@
-/* Live content: the products and contact details saved in the admin console (the solartech-admin project).
+/* Live content: the products, contact details, projects, factory photos and page words saved in the admin console
+   (the solartech-admin project).
    Loads after config.js and products.js and before main.js, so everything downstream just sees the edited lists.
 
    1. A copy kept in localStorage ('gs-live') from the last visit replaces the built-in lists straight away.
@@ -33,12 +34,44 @@
     // projects and factory photos saved in the console replace the examples in work-data.js (which only fills what's unset)
     if (d && Array.isArray(d.projects) && d.projects.length) window.GS_PROJECTS = d.projects.map(function (x) { x.photos = Array.isArray(x.photos) ? x.photos : []; return x; });
     if (d && Array.isArray(d.factory) && d.factory.length) window.GS_FACTORY_MEDIA = d.factory;
+    if (d && d.text) retext(d.text);
+  }
+
+  // Words and photos changed in the console's Pages editor: { pages: { '*' | page: { 'original words': 'new words' } },
+  // img: { page: { 'assets/img/…': 'media/…' } } }. A text node whose words (whitespace collapsed) match a key is swapped,
+  // now for the page as written and later for anything the page's scripts add (the factory steps). Photos are swapped in
+  // the page as written and in the factory steps (work.js asks GS_PAGEIMG), never in product cards, which keep their own.
+  function retext(t) {
+    var pg = location.pathname.replace(/^\/+|\.html$|\/+$/g, '') || 'index';
+    var own = Object.prototype.hasOwnProperty, words = {}, imgs = window.GS_PAGEIMG = (t.img || {})[pg] || {}, n = 0;
+    [(t.pages || {})['*'], (t.pages || {})[pg]].forEach(function (m) { for (var k in m) if (own.call(m, k) && typeof m[k] === 'string') { words[k] = m[k]; n++; } });
+    for (var k in imgs) if (own.call(imgs, k)) n++;
+    if (!n || !document.body) return;
+    function one(x) {
+      var k = x.data.replace(/\s+/g, ' ').trim();
+      if (k && own.call(words, k)) x.data = x.data.match(/^\s*/)[0] + words[k] + x.data.match(/\s*$/)[0];
+    }
+    function fix(root) {
+      if (root.nodeType === 3) return one(root);
+      if (root.nodeType !== 1 || /^(SCRIPT|STYLE|TEXTAREA)$/.test(root.nodeName)) return;
+      var w = document.createTreeWalker(root, 4), x;
+      while ((x = w.nextNode())) one(x);
+    }
+    fix(document.body);
+    var im = document.querySelectorAll('img[src]');
+    for (var i = 0; i < im.length; i++) {
+      var s = (im[i].getAttribute('src') || '').split('?')[0];
+      if (own.call(imgs, s) && /^(media|assets)\//.test(imgs[s])) im[i].setAttribute('src', imgs[s]);
+    }
+    if (window.MutationObserver) new MutationObserver(function (ms) {
+      ms.forEach(function (m) { for (var i = 0; i < m.addedNodes.length; i++) fix(m.addedNodes[i]); });
+    }).observe(document.body, { childList: true, subtree: true });
   }
 
   var cached = null;
   try { cached = JSON.parse(localStorage.getItem(KEY)); } catch (e) { /* private mode, or damaged: ignore */ }
   var built = '';   // what this page is built from, measured before apply() adds defaults to the objects
-  if (cached) { built = JSON.stringify({ products: cached.products || [], config: cached.config || null, projects: cached.projects || null, factory: cached.factory || null }); apply(cached); }
+  if (cached) { built = JSON.stringify({ products: cached.products || [], config: cached.config || null, projects: cached.projects || null, factory: cached.factory || null, text: cached.text || null }); apply(cached); }
 
   if (!C.liveApi || !window.fetch) return;
 
@@ -50,11 +83,11 @@
     return r.json();
   }).then(function (d) {
     clearTimeout(give);
-    var products = d.products || [], config = d.config || null, projects = d.projects || null, factory = d.factory || null;
-    if (!products.length && !config && !projects && !factory) return;   // the console hasn't published anything yet
-    var str = JSON.stringify({ products: products, config: config, projects: projects, factory: factory });
+    var products = d.products || [], config = d.config || null, projects = d.projects || null, factory = d.factory || null, text = d.text || null;
+    if (!products.length && !config && !projects && !factory && !text) return;   // the console hasn't published anything yet
+    var str = JSON.stringify({ products: products, config: config, projects: projects, factory: factory, text: text });
     if (str === built) return;
-    try { localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), products: products, config: config, projects: projects, factory: factory })); } catch (e) { return; }
+    try { localStorage.setItem(KEY, JSON.stringify({ at: Date.now(), products: products, config: config, projects: projects, factory: factory, text: text })); } catch (e) { return; }
     // reload once to show it, never in a loop (a fresh value is already stored, so the next load matches)
     try {
       if (Date.now() - (+sessionStorage.getItem(FLAG) || 0) < 20000) return;

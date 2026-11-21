@@ -159,7 +159,7 @@
     };
     stepsEl.innerHTML = F.steps.map(function (s, i) {
       return '<li class="fx-row' + (i % 2 ? ' is-flip' : '') + '">' +
-        '<div class="fx-pic rv"><div class="fx-stage' + (s.photo ? ' is-photo' : '') + '">' + (s.img ? '<img src="' + esc(s.img) + '" alt="" loading="lazy" decoding="async">' : '') + '</div></div>' +
+        '<div class="fx-pic rv"><div class="fx-stage' + (s.photo ? ' is-photo' : '') + '">' + (s.img ? '<img src="' + esc((window.GS_PAGEIMG || {})[s.img.split('?')[0]] || s.img) + '" alt="" loading="lazy" decoding="async">' : '') + '</div></div>' +
         '<span class="fx-node" aria-hidden="true">' + String(i + 1).padStart(2, '0') + '</span>' +
         '<div class="fx-copy rv" style="--d:.08s"><p class="label fx-kick"><span class="fx-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + (ICONS[s.icon] || ICONS.check) + '</svg></span>Step ' + (i + 1) + ' of ' + F.steps.length + '</p>' +
         '<h3 class="h3 fx-h">' + esc(s.title) + '</h3><p class="fx-p">' + esc(s.text) + '</p>' +

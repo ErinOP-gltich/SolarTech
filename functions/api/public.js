@@ -1,4 +1,4 @@
-// What the website shows: visible products in order, the contact details, projects and factory photos the console saved.
+// What the website shows: visible products in order, the contact details, projects, factory photos and page words the console saved.
 // Read-only. Hidden products never leave the database.
 export async function onRequestGet({ request, env, waitUntil }) {
   // one copy per minute at the edge, not a D1 query and two R2 reads per page view; console changes show within a minute
@@ -10,13 +10,14 @@ export async function onRequestGet({ request, env, waitUntil }) {
     env.DB.prepare("SELECT key, data FROM settings WHERE key = 'contact'")
   ]);
   const set = {}; s.results.forEach(r => { set[r.key] = JSON.parse(r.data); });
-  // projects and factory photos: JSON files the console keeps in R2 (data/projects.json, data/factory.json)
-  if (env.MEDIA) await Promise.all(['projects', 'factory'].map(async k => { const o = await env.MEDIA.get('data/' + k + '.json'); if (o) set[k] = await o.json(); }));
+  // projects, factory photos and page words: JSON files the console keeps in R2 (data/projects.json, data/factory.json, data/text.json)
+  if (env.MEDIA) await Promise.all(['projects', 'factory', 'text'].map(async k => { const o = await env.MEDIA.get('data/' + k + '.json'); if (o) set[k] = await o.json(); }));
   const body = {
     products: p.results.map(r => Object.assign(JSON.parse(r.data), { id: r.id })),
     config: set.contact || null,
     projects: set.projects && set.projects.list && set.projects.list.length ? set.projects.list : null,
-    factory: set.factory && set.factory.media && set.factory.media.length ? set.factory.media : null
+    factory: set.factory && set.factory.media && set.factory.media.length ? set.factory.media : null,
+    text: set.text && (Object.keys(set.text.pages || {}).length || Object.keys(set.text.img || {}).length) ? set.text : null
   };
   const res = new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=10, s-maxage=60' } });
   waitUntil(caches.default.put(key, res.clone()));
