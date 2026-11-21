@@ -54,7 +54,8 @@
     const stats = document.querySelector('[data-wk-stats]');
     // counted from real projects only: the sample entries are never totted up as if they were work done
     const real = P.filter(function (p) { return !p.sample; });
-    if (stats && !real.length) stats.outerHTML = '<p class="wk-note rv">Our project gallery is being filled in. Until then, the projects below are <b>examples</b> of how each one will be shown.</p>';
+    if (stats && !P.length) stats.outerHTML = '<p class="wk-note rv">Our project gallery is being filled in. Ask us for sites near you that you can visit.</p>';
+    else if (stats && !real.length) stats.outerHTML = '<p class="wk-note rv">Our project gallery is being filled in. Until then, the projects below are <b>examples</b> of how each one will be shown.</p>';
     else if (stats) {
       const lights = real.reduce(function (s, p) { return s + (p.lights || 0); }, 0);
       stats.innerHTML = [[real.length, 'Projects'], [lights, 'Lights up'], [uniq(real.map(function (p) { return p.district; })).length, 'Districts'], [uniq(real.map(function (p) { return p.state; })).length, 'States']]
@@ -186,7 +187,8 @@
 
     // photos and videos
     const media = document.querySelector('[data-media]');
-    if (media) {
+    if (media && !F.media.length) media.closest('section').hidden = true;   // no photos saved: no empty gallery
+    else if (media) {
       media.innerHTML = F.media.map(function (m, i) {
         const inner = m.type === 'video'
           ? '<video src="' + esc(m.src) + '"' + (m.poster ? ' poster="' + esc(m.poster) + '"' : '') + ' muted loop playsinline preload="none"></video><span class="fx-play" aria-hidden="true"></span>'

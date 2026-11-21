@@ -32,8 +32,8 @@
     if (ps.length) window.GS_PRODUCTS = ps.map(function (p, i) { p.order = i; return p; });
     if (d && d.config) CONTACT.forEach(function (k) { if (d.config[k] != null && d.config[k] !== '') C[k] = d.config[k]; });
     // projects and factory photos saved in the console replace the examples in work-data.js (which only fills what's unset)
-    if (d && Array.isArray(d.projects) && d.projects.length) window.GS_PROJECTS = d.projects.map(function (x) { x.photos = Array.isArray(x.photos) ? x.photos : []; return x; });
-    if (d && Array.isArray(d.factory) && d.factory.length) window.GS_FACTORY_MEDIA = d.factory;
+    if (d && Array.isArray(d.projects)) window.GS_PROJECTS = d.projects.map(function (x) { x.photos = Array.isArray(x.photos) ? x.photos : []; return x; });
+    if (d && Array.isArray(d.factory)) window.GS_FACTORY_MEDIA = d.factory;
     if (d && d.text) retext(d.text);
   }
 

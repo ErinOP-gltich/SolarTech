@@ -15,8 +15,8 @@ export async function onRequestGet({ request, env, waitUntil }) {
   const body = {
     products: p.results.map(r => Object.assign(JSON.parse(r.data), { id: r.id })),
     config: set.contact || null,
-    projects: set.projects && set.projects.list && set.projects.list.length ? set.projects.list : null,
-    factory: set.factory && set.factory.media && set.factory.media.length ? set.factory.media : null,
+    projects: set.projects && Array.isArray(set.projects.list) ? set.projects.list : null,   // [] once the owner removes them all
+    factory: set.factory && Array.isArray(set.factory.media) ? set.factory.media : null,
     text: set.text && (Object.keys(set.text.pages || {}).length || Object.keys(set.text.img || {}).length) ? set.text : null
   };
   const res = new Response(JSON.stringify(body), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=10, s-maxage=60' } });
